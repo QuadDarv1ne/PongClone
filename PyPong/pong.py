@@ -2,68 +2,52 @@ import pygame, sys, time
 from pygame.locals import *
 from random import randint
 
-pygame.init()
+pygame.init() # Инициализация модуля -- PyGame --
 
-WINDOW_WIDTH = 1024
-WINDOW_HEIGHT = 600
+WINDOW_WIDTH = 1024 # Ширина окна
+WINDOW_HEIGHT = 720 # Высота окна
 
-clock = pygame.time.Clock()
+clock = pygame.time.Clock() # создание таймера
 
 player1_win = False
 player2_win = False
 
-
 ### Paddle Stuff ###
 
-PADDLE_SPEED = 10
+PADDLE_SPEED = 10 # Скорость мячика
 
+# Первый игрок
 UP1 = False
 DOWN1 = False
 NO_MOVEMENT1 = True
 
+# Второй игрок
 UP2 = False
 DOWN2 = False
 NO_MOVEMENT2 = True
 
-
-
-### Ball Stuff ###
-
+### Ball Stuff : Горячие клавиши ###
 UPLEFT = 0
 DOWNLEFT = 1
 UPRIGHT = 2
 DOWNRIGHT = 3
 
-
-### Music ###
-
+### Music : Музыка ###
 pygame.mixer.music.load("endofline.ogg")
 sound_effect = pygame.mixer.Sound("beep.wav")
 
-
-
-
-### colors ###
+### Colors : Цвета ###
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-
-
+BLACK = (80, 80, 80)
 
 ### Creating the main surface ###
-
 main_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), 0, 32)
 surface_rect = main_surface.get_rect()
-
-
-
-
-
 
 class Paddle(pygame.sprite.Sprite):
     def __init__(self, player_number):
 
         ### Creating the paddle ###
-        
         pygame.sprite.Sprite.__init__(self)
 
         self.player_number = player_number
@@ -72,9 +56,7 @@ class Paddle(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.speed = 8
 
-
         ### Establishing the location of each paddle ##
-        
         if self.player_number == 1:
             self.rect.centerx = main_surface.get_rect().left
             self.rect.centerx += 50
@@ -83,10 +65,7 @@ class Paddle(pygame.sprite.Sprite):
             self.rect.centerx -= 50
         self.rect.centery = main_surface.get_rect().centery
 
-
-
     def move(self):
-
         if self.player_number == 1:
             if (UP1 == True) and (self.rect.y > 5):
                 self.rect.y -= self.speed
@@ -102,9 +81,6 @@ class Paddle(pygame.sprite.Sprite):
                 self.rect.y += self.speed
             elif (NO_MOVEMENT2 == True):
                 pass
-
-
-
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
@@ -142,19 +118,10 @@ class Ball(pygame.sprite.Sprite):
         if self.rect.y > surface_rect.bottom and self.direction == DOWNRIGHT:
             self.direction = UPRIGHT
 
-
-    
-        
-        
+# TODO: Подключение шрифтов для текста
 basic_font = pygame.font.SysFont("Helvetica", 120)
 game_over_font_big = pygame.font.SysFont("Helvetica", 72)
 game_over_font_small = pygame.font.SysFont("Helvetica", 50)
-
-
-
-
-
-    
 
 paddle1 = Paddle(1)
 paddle2 = Paddle(2)
@@ -163,9 +130,8 @@ ball = Ball()
 
 all_sprites = pygame.sprite.RenderPlain(paddle1, paddle2, ball) 
 
-
-player1_score = 0
-player2_score = 0
+player1_score = 0 # Стартовое кол-во очков первого игрока
+player2_score = 0 # Стартовое кол-во очков второго игрока
 
 def paddle_hit():
     if pygame.sprite.collide_rect(ball, paddle2):
@@ -183,7 +149,6 @@ def paddle_hit():
         ball.speed +=1
         sound_effect.play()
 
-    
 counter = 0
 
 while True:
@@ -200,7 +165,6 @@ while True:
         ball.rect.centery = surface_rect.centery
         ball.direction = randint(2, 3)
         ball.speed = 4
-
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -229,8 +193,7 @@ while True:
                 UP2 = False
                 DOWN2 = True
                 NO_MOVEMENT2 = False
-                
-            
+
         elif event.type == KEYUP:
             if event.key == ord('a') or event.key == ord('z'):
                 NO_MOVEMENT1 = True
@@ -241,35 +204,32 @@ while True:
                 DOWN2 = False
                 UP2 = False
 
-
     score_board = basic_font.render(str(player1_score) + "           " + str(player2_score), True, WHITE, BLACK) 
     score_board_rect = score_board.get_rect()
     score_board_rect.centerx = surface_rect.centerx 
     score_board_rect.y = 10
 
-    
-    
-
-    main_surface.fill(BLACK)
+    main_surface.fill(BLACK) # TODO: какого цвета будет backdround данной игры
 
     main_surface.blit(score_board, score_board_rect)
 
-    netx = surface_rect.centerx
+    netx = surface_rect.centerx # Центрирование сетки
 
-    net_rect0 = pygame.Rect(netx, 0, 5, 5)
-    net_rect1 = pygame.Rect(netx, 60, 5, 5)
-    net_rect2 = pygame.Rect(netx, 120, 5, 5)
-    net_rect3 = pygame.Rect(netx, 180, 5, 5)
-    net_rect4 = pygame.Rect(netx, 240, 5, 5)
-    net_rect5 = pygame.Rect(netx, 300, 5, 5)
-    net_rect6 = pygame.Rect(netx, 360, 5, 5)
-    net_rect7 = pygame.Rect(netx, 420, 5, 5)
-    net_rect8 = pygame.Rect(netx, 480, 5, 5)
-    net_rect9 = pygame.Rect(netx, 540, 5, 5)
-    net_rect10 = pygame.Rect(netx, 595, 5, 5)
-    
-    
+    net_rect0 = pygame.Rect(netx, 0, 5, 5)    # 1-ый белый прямоугольник ( rectangle )
+    net_rect1 = pygame.Rect(netx, 60, 5, 5)   # 2-ой белый прямоугольник ( rectangle )
+    net_rect2 = pygame.Rect(netx, 120, 5, 5)  # 3-ий белый прямоугольник ( rectangle )
+    net_rect3 = pygame.Rect(netx, 180, 5, 5)  # 4-ый белый прямоугольник ( rectangle )
+    net_rect4 = pygame.Rect(netx, 240, 5, 5)  # 5-ый белый прямоугольник ( rectangle )
+    net_rect5 = pygame.Rect(netx, 300, 5, 5)  # 6-ой белый прямоугольник ( rectangle )
+    net_rect6 = pygame.Rect(netx, 360, 5, 5)  # 7-ой белый прямоугольник ( rectangle )
+    net_rect7 = pygame.Rect(netx, 420, 5, 5)  # 8-ой белый прямоугольник ( rectangle )
+    net_rect8 = pygame.Rect(netx, 480, 5, 5)  # 9-ый белый прямоугольник ( rectangle )
+    net_rect9 = pygame.Rect(netx, 540, 5, 5)  # 10-ый белый прямоугольник ( rectangle )
+    net_rect10 = pygame.Rect(netx, 595, 5, 5) # 11-ый белый прямоугольник ( rectangle )
+    net_rect11 = pygame.Rect(netx, 650, 5, 5) # 12-ый белый прямоугольник ( rectangle )
+    net_rect12 = pygame.Rect(netx, 705, 5, 5) # 13-ый белый прямоугольник ( rectangle )
 
+    # TODO: Прорисовка каждого прямоугольника на поле
     pygame.draw.rect(main_surface, WHITE, (net_rect0.left, net_rect0.top, net_rect0.width, net_rect0.height))
     pygame.draw.rect(main_surface, WHITE, (net_rect1.left, net_rect1.top, net_rect1.width, net_rect1.height))
     pygame.draw.rect(main_surface, WHITE, (net_rect2.left, net_rect2.top, net_rect2.width, net_rect2.height))
@@ -281,9 +241,10 @@ while True:
     pygame.draw.rect(main_surface, WHITE, (net_rect8.left, net_rect8.top, net_rect8.width, net_rect8.height))
     pygame.draw.rect(main_surface, WHITE, (net_rect9.left, net_rect9.top, net_rect9.width, net_rect9.height))
     pygame.draw.rect(main_surface, WHITE, (net_rect10.left, net_rect10.top, net_rect10.width, net_rect10.height))
+    pygame.draw.rect(main_surface, WHITE, (net_rect11.left, net_rect11.top, net_rect11.width, net_rect11.height))
+    pygame.draw.rect(main_surface, WHITE, (net_rect12.left, net_rect12.top, net_rect12.width, net_rect12.height))
 
-
-    all_sprites.draw(main_surface)
+    all_sprites.draw(main_surface) # прорисовка всех спрайтов
 
     paddle1.move()
     paddle2.move()
@@ -296,8 +257,6 @@ while True:
         player1_score += 1
     elif ball.rect.x < 0:
         player2_score += 1
-
-    
 
     pygame.display.update()
 
@@ -315,7 +274,6 @@ while True:
     counter += 1
 
 while True:
-
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -347,11 +305,5 @@ while True:
 
     pygame.display.update()
 
-    
-
-
-
-
-
-
-
+''' Первая версия (V1.0): 24.01.2023 '''
+# Итоговый проект 8-Bit Ponge Game
