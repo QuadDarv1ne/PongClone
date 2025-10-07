@@ -2,6 +2,7 @@ PongClone
 =========
 
 [![DOI](https://zenodo.org/badge/592707498.svg)](https://doi.org/10.5281/zenodo.17264332)
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0007--7605--539X-green?logo=orcid&logoColor=white)](https://orcid.org/0009-0007-7605-539X)
 
 ![image](https://github.com/user-attachments/assets/d5811b5e-5f69-4ef3-a8bd-6deb3c9b703b)
 ![image](https://github.com/user-attachments/assets/19a99456-3950-4b1e-a7ff-e1cfd1d320bc)
