@@ -33,3 +33,6 @@ Pong Clone может быть разработан на различных пл
 **👨‍🏫 Преподаватель:** Dupley Maxim Igorevich
 
 **📅 Дата:** 18/07/2024
+
+
+[![Star History Chart](https://api.star-history.com/svg?repos=QuadDarv1ne/PongClone&type=Date)](https://star-history.com/#QuadDarv1ne/PongClone&Date)
