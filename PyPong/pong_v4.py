@@ -7,17 +7,27 @@ from config import *
 from entities import Paddle, Ball, PowerUp
 from game_state import GameState, GameStateManager
 from audio import AudioManager
+from effects import Particle, Trail, ScreenShake, GoalAnimation
+from stats import StatsManager
 
 class PongGame:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Enhanced Pong")
         self.clock = pygame.time.Clock()
         
         # Managers
-        self.state_manager = GameStateManager(self.screen)
+        self.state_manager = GameStateManager(self.game_surface)
         self.audio = AudioManager()
+        self.stats = StatsManager()
+        
+        # Effects
+        self.particles = pygame.sprite.Group()
+        self.trails = pygame.sprite.Group()
+        self.shake = ScreenShake()
+        self.goal_anim = GoalAnimation()
         
         # Game objects
         self.paddle1 = None
@@ -60,6 +70,8 @@ class PongGame:
                         self.state_manager.state = GameState.PAUSED
                     elif self.state_manager.state == GameState.PAUSED:
                         return False
+                    elif self.state_manager.state == GameState.STATS:
+                        self.state_manager.state = GameState.MENU
                     else:
                         return False
                 
@@ -72,6 +84,9 @@ class PongGame:
                     elif self.state_manager.state == GameState.GAME_OVER:
                         self.reset_game()
                         self.state_manager.state = GameState.MENU
+                
+                elif event.key == K_s and self.state_manager.state == GameState.MENU:
+                    self.state_manager.state = GameState.STATS
                 
                 elif event.key == K_1:
                     self.state_manager.set_difficulty("Easy")
@@ -101,32 +116,56 @@ class PongGame:
         self.paddle1.move(self.input_state["up1"], self.input_state["down1"])
         self.paddle2.move(False, False, self.ball.rect.centery)
         
-        # Move ball
+        # Move ball and create trail
         self.ball.move()
+        if randint(1, 2) == 1:
+            trail = Trail(self.ball.rect.centerx, self.ball.rect.centery)
+            self.trails.add(trail)
+        
         self.ball.bounce_wall()
         
         # Check paddle collisions
         if pygame.sprite.collide_rect(self.ball, self.paddle1):
-            if self.ball.velocity_x < 0:  # Ball moving left
+            if self.ball.velocity_x < 0:
                 self.ball.bounce_paddle(self.paddle1)
                 self.audio.play_sound("beep")
+                self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, GREEN)
+                self.shake.start(5, 5)
         
         if pygame.sprite.collide_rect(self.ball, self.paddle2):
-            if self.ball.velocity_x > 0:  # Ball moving right
+            if self.ball.velocity_x > 0:
                 self.ball.bounce_paddle(self.paddle2)
                 self.audio.play_sound("beep")
+                self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, YELLOW)
+                self.shake.start(5, 5)
         
         # Check scoring
         if self.ball.is_out_left():
             self.state_manager.add_score(2)
             self.audio.play_sound("score")
+            self.goal_anim.start(2)
+            self.shake.start(15, 15)
             if self.state_manager.state == GameState.PLAYING:
                 self.ball.reset_ball()
+            elif self.state_manager.state == GameState.GAME_OVER:
+                self.stats.record_game(
+                    self.state_manager.winner,
+                    self.state_manager.player1_score,
+                    self.state_manager.player2_score
+                )
         elif self.ball.is_out_right():
             self.state_manager.add_score(1)
             self.audio.play_sound("score")
+            self.goal_anim.start(1)
+            self.shake.start(15, 15)
             if self.state_manager.state == GameState.PLAYING:
                 self.ball.reset_ball()
+            elif self.state_manager.state == GameState.GAME_OVER:
+                self.stats.record_game(
+                    self.state_manager.winner,
+                    self.state_manager.player1_score,
+                    self.state_manager.player2_score
+                )
         
         # Spawn powerups
         if randint(1, POWERUP_SPAWN_CHANCE) == 1 and len(self.powerups) == 0:
@@ -139,35 +178,56 @@ class PongGame:
                 if pygame.sprite.collide_rect(powerup, self.paddle1):
                     powerup.activate(self.paddle1)
                     self.audio.play_sound("powerup")
+                    self.create_particles(powerup.rect.centerx, powerup.rect.centery, LIGHT_BLUE)
                 elif pygame.sprite.collide_rect(powerup, self.paddle2):
                     powerup.activate(self.paddle2)
                     self.audio.play_sound("powerup")
+                    self.create_particles(powerup.rect.centerx, powerup.rect.centery, LIGHT_BLUE)
         
-        # Update powerups
+        # Update effects
         self.powerups.update()
+        self.particles.update()
+        self.trails.update()
+        self.shake.update()
+        self.goal_anim.update()
+
+    def create_particles(self, x, y, color):
+        for _ in range(10):
+            particle = Particle(x, y, color)
+            self.particles.add(particle)
 
     def draw(self):
-        self.screen.fill(GRAY)
+        self.game_surface.fill(GRAY)
         
         if self.state_manager.state == GameState.MENU:
             self.state_manager.draw_menu()
         
+        elif self.state_manager.state == GameState.STATS:
+            self.state_manager.draw_stats(self.stats)
+        
         elif self.state_manager.state == GameState.PLAYING:
             self.state_manager.draw_net()
             self.state_manager.draw_score()
-            self.all_sprites.draw(self.screen)
-            self.powerups.draw(self.screen)
+            self.trails.draw(self.game_surface)
+            self.all_sprites.draw(self.game_surface)
+            self.powerups.draw(self.game_surface)
+            self.particles.draw(self.game_surface)
+            self.goal_anim.draw(self.game_surface)
         
         elif self.state_manager.state == GameState.PAUSED:
             self.state_manager.draw_net()
             self.state_manager.draw_score()
-            self.all_sprites.draw(self.screen)
-            self.powerups.draw(self.screen)
+            self.trails.draw(self.game_surface)
+            self.all_sprites.draw(self.game_surface)
+            self.powerups.draw(self.game_surface)
+            self.particles.draw(self.game_surface)
             self.state_manager.draw_pause()
         
         elif self.state_manager.state == GameState.GAME_OVER:
             self.state_manager.draw_game_over()
         
+        # Apply screen shake
+        self.shake.apply(self.game_surface, self.screen)
         pygame.display.flip()
 
     def run(self):

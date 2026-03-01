@@ -7,6 +7,7 @@ class GameState(Enum):
     PLAYING = 2
     PAUSED = 3
     GAME_OVER = 4
+    STATS = 5
 
 class GameStateManager:
     def __init__(self, screen):
@@ -21,6 +22,7 @@ class GameStateManager:
         self.title_font = pygame.font.SysFont(FONT_NAME, 72)
         self.menu_font = pygame.font.SysFont(FONT_NAME, 40)
         self.score_font = pygame.font.SysFont(FONT_NAME, 120)
+        self.small_font = pygame.font.SysFont(FONT_NAME, 30)
 
     def reset_scores(self):
         self.player1_score = 0
@@ -51,11 +53,13 @@ class GameStateManager:
         start = self.menu_font.render("Press ENTER to Start", True, WHITE)
         diff_text = self.menu_font.render(f"Difficulty: {self.difficulty} (1/2/3)", True, WHITE)
         controls = self.menu_font.render("Controls: A/Z - Player 1", True, WHITE)
+        stats_text = self.small_font.render("Press S for Stats", True, WHITE)
         
         self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 200)))
         self.screen.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 350)))
         self.screen.blit(diff_text, diff_text.get_rect(center=(WINDOW_WIDTH // 2, 450)))
         self.screen.blit(controls, controls.get_rect(center=(WINDOW_WIDTH // 2, 550)))
+        self.screen.blit(stats_text, stats_text.get_rect(center=(WINDOW_WIDTH // 2, 620)))
 
     def draw_pause(self):
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -92,3 +96,22 @@ class GameStateManager:
     def draw_net(self):
         for i in range(0, WINDOW_HEIGHT, 60):
             pygame.draw.rect(self.screen, WHITE, (WINDOW_WIDTH // 2 - 2, i, 4, 30))
+
+    def draw_stats(self, stats_manager):
+        self.screen.fill(GRAY)
+        
+        title = self.title_font.render("Statistics", True, WHITE)
+        games = self.menu_font.render(f"Games Played: {stats_manager.stats['games_played']}", True, WHITE)
+        p1_wins = self.menu_font.render(f"Player 1 Wins: {stats_manager.stats['player1_wins']}", True, WHITE)
+        p2_wins = self.menu_font.render(f"Player 2 Wins: {stats_manager.stats['player2_wins']}", True, WHITE)
+        high_score = self.menu_font.render(f"Highest Score: {stats_manager.stats['highest_score']}", True, WHITE)
+        total_goals = self.menu_font.render(f"Total Goals: {stats_manager.stats['total_goals']}", True, WHITE)
+        back = self.small_font.render("Press ESC to go back", True, WHITE)
+        
+        self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 100)))
+        self.screen.blit(games, games.get_rect(center=(WINDOW_WIDTH // 2, 220)))
+        self.screen.blit(p1_wins, p1_wins.get_rect(center=(WINDOW_WIDTH // 2, 300)))
+        self.screen.blit(p2_wins, p2_wins.get_rect(center=(WINDOW_WIDTH // 2, 380)))
+        self.screen.blit(high_score, high_score.get_rect(center=(WINDOW_WIDTH // 2, 460)))
+        self.screen.blit(total_goals, total_goals.get_rect(center=(WINDOW_WIDTH // 2, 540)))
+        self.screen.blit(back, back.get_rect(center=(WINDOW_WIDTH // 2, 640)))
