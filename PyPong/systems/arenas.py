@@ -120,20 +120,21 @@ class Arena:
     def _create_arena(self) -> None:
         """Create arena based on type"""
         if self.type == ArenaType.CLASSIC:
-            # No obstacles
+            # Classic arena - no obstacles
+
             pass
-        
+
         elif self.type == ArenaType.OBSTACLES:
             self._create_static_obstacles()
-        
+
         elif self.type == ArenaType.MOVING_WALLS:
             self._create_moving_obstacles()
-        
+
         elif self.type == ArenaType.PORTALS:
             self._create_portals()
-        
+
         elif self.type == ArenaType.SHRINKING:
-            # Arena will shrink over time
+            # Shrinking arena - boundaries reduce over time
             pass
     
     def _create_static_obstacles(self) -> None:

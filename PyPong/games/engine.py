@@ -9,6 +9,7 @@ from PyPong.core.config import *
 from PyPong.games.base import GameMode, GameModeType
 from PyPong.games.classic import ClassicMode
 from PyPong.games.arcade import ArcadeMode
+from PyPong.games.multiplayer import MultiplayerMode
 
 
 class GameEngine:
@@ -30,6 +31,10 @@ class GameEngine:
             'ai_enabled': True,
             'ai_difficulty': 'Medium',
             'show_fps': False,
+            # Multiplayer settings
+            'connection_type': 'local',  # local, host, client
+            'host': 'localhost',
+            'port': 9999,
         }
         
         # Game mode management
@@ -37,6 +42,7 @@ class GameEngine:
         self.available_modes: Dict[GameModeType, Type[GameMode]] = {
             GameModeType.CLASSIC: ClassicMode,
             GameModeType.ARCADE: ArcadeMode,
+            GameModeType.MULTIPLAYER: MultiplayerMode,
         }
         
         # Game state
@@ -49,6 +55,13 @@ class GameEngine:
             self.current_mode_type = mode_type
             mode_class = self.available_modes[mode_type]
             self.current_mode = mode_class(self.screen, self.settings)
+    
+    def set_multiplayer(self, connection_type: str, host: str = 'localhost', port: int = 9999) -> None:
+        """Configure multiplayer and switch to multiplayer mode"""
+        self.settings['connection_type'] = connection_type
+        self.settings['host'] = host
+        self.settings['port'] = port
+        self.set_mode(GameModeType.MULTIPLAYER)
     
     def update_settings(self, key: str, value: Any) -> None:
         """Update a setting and apply it"""
