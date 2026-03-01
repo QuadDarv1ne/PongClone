@@ -1,5 +1,5 @@
 import pygame
-from config import *
+from PyPong.core.config import *
 import os
 
 class AudioManager:
@@ -11,16 +11,17 @@ class AudioManager:
 
     def load_audio(self):
         try:
-            if os.path.exists(MUSIC_FILE):
-                pygame.mixer.music.load(MUSIC_FILE)
+            music_path = os.path.join("PyPong", "assets", "music", MUSIC_FILE)
+            if os.path.exists(music_path):
+                pygame.mixer.music.load(music_path)
                 self.music_loaded = True
         except:
-            print(f"Warning: Could not load music file {MUSIC_FILE}")
+            print(f"Warning: Could not load music file {music_path}")
 
         sound_files = {
-            "beep": BEEP_SOUND,
-            "score": SCORE_SOUND,
-            "powerup": POWERUP_SOUND
+            "beep": os.path.join("PyPong", "assets", "sounds", BEEP_SOUND),
+            "score": os.path.join("PyPong", "assets", "sounds", SCORE_SOUND),
+            "powerup": os.path.join("PyPong", "assets", "sounds", POWERUP_SOUND)
         }
 
         for name, file in sound_files.items():

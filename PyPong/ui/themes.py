@@ -1,4 +1,4 @@
-from config import *
+from PyPong.core.config import *
 
 class Theme:
     def __init__(self, name, colors):

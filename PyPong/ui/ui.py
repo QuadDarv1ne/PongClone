@@ -1,5 +1,5 @@
 import pygame
-from config import *
+from PyPong.core.config import *
 
 class PowerUpIndicator:
     def __init__(self):

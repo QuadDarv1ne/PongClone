@@ -1,5 +1,5 @@
 import pygame
-from config import *
+from PyPong.core.config import *
 
 class Tournament:
     def __init__(self):

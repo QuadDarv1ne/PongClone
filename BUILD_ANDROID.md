@@ -2,7 +2,7 @@
 
 ## Требования
 
-**ВАЖНО:** Buildozer работает только на Linux. На Windows используй WSL 2.
+**ВАЖНО:** Buildozer работает только на Linux. На Windows используйте WSL 2.
 
 ### Для Windows (WSL 2)
 

@@ -1,5 +1,5 @@
 import pygame
-from config import *
+from PyPong.core.config import *
 
 class TouchControls:
     def __init__(self, screen_width, screen_height):

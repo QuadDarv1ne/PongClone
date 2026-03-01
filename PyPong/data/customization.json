@@ -1,0 +1,28 @@
+{
+  "player1_paddle": "red",
+  "player2_paddle": "default",
+  "ball": "default",
+  "court": "classic",
+  "unlocked": {
+    "paddles": [
+      "default",
+      "red",
+      "green",
+      "blue",
+      "yellow",
+      "purple",
+      "cyan",
+      "orange"
+    ],
+    "balls": [
+      "default",
+      "red",
+      "green",
+      "blue"
+    ],
+    "courts": [
+      "classic",
+      "dark"
+    ]
+  }
+}

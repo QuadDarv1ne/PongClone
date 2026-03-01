@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 
 class StatsManager:
-    def __init__(self, filename="stats.json"):
+    def __init__(self, filename="PyPong/data/stats.json"):
         self.filename = filename
         self.stats = self.load_stats()
 
