@@ -13,6 +13,7 @@ from settings import Settings
 from ui import PowerUpIndicator, FPSCounter, SettingsMenu
 from tournament import Tournament
 from themes import get_theme
+from gamepad import GamepadManager
 
 class PongGame:
     def __init__(self):
@@ -34,6 +35,7 @@ class PongGame:
         self.audio = AudioManager()
         self.stats = StatsManager()
         self.tournament = Tournament()
+        self.gamepad = GamepadManager()
         
         # UI
         self.powerup_indicator = PowerUpIndicator()
@@ -205,6 +207,17 @@ class PongGame:
             return
         
         # Move paddles
+        # Gamepad input
+        if self.gamepad.has_gamepad(1):
+            gp_input = self.gamepad.get_input(1)
+            self.input_state["up1"] = self.input_state["up1"] or gp_input["up"]
+            self.input_state["down1"] = self.input_state["down1"] or gp_input["down"]
+        
+        if self.gamepad.has_gamepad(2) and self.state_manager.game_mode == "pvp":
+            gp_input = self.gamepad.get_input(2)
+            self.input_state["up2"] = self.input_state["up2"] or gp_input["up"]
+            self.input_state["down2"] = self.input_state["down2"] or gp_input["down"]
+        
         self.paddle1.move(self.input_state["up1"], self.input_state["down1"])
         
         if self.state_manager.game_mode == "ai":
@@ -275,10 +288,12 @@ class PongGame:
                     powerup.activate(self.paddle1)
                     self.audio.play_sound("powerup")
                     self.create_particles(powerup.rect.centerx, powerup.rect.centery, LIGHT_BLUE)
+                    self.handle_powerup_effect(powerup, self.paddle1, self.paddle2)
                 elif pygame.sprite.collide_rect(powerup, self.paddle2):
                     powerup.activate(self.paddle2)
                     self.audio.play_sound("powerup")
                     self.create_particles(powerup.rect.centerx, powerup.rect.centery, LIGHT_BLUE)
+                    self.handle_powerup_effect(powerup, self.paddle2, self.paddle1)
         
         # Update effects
         self.powerups.update()
@@ -291,6 +306,18 @@ class PongGame:
         for _ in range(10):
             particle = Particle(x, y, color)
             self.particles.add(particle)
+
+    def handle_powerup_effect(self, powerup, collector, opponent):
+        if powerup.type == "multi_ball":
+            # Create extra ball
+            new_ball = Ball()
+            new_ball.rect.center = self.ball.rect.center
+            new_ball.velocity_x = -self.ball.velocity_x
+            new_ball.velocity_y = self.ball.velocity_y
+            new_ball.image.fill(self.theme.ball_color)
+            self.all_sprites.add(new_ball)
+        elif powerup.type == "shrink_opponent":
+            opponent.resize(50)
 
     def draw(self):
         self.game_surface.fill(self.theme.bg_color)

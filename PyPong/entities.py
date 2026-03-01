@@ -129,6 +129,8 @@ class PowerUp(pygame.sprite.Sprite):
         "speed_boost": {"color": GREEN, "duration": POWERUP_DURATION},
         "large_paddle": {"color": YELLOW, "duration": POWERUP_DURATION},
         "slow_ball": {"color": LIGHT_BLUE, "duration": POWERUP_DURATION},
+        "multi_ball": {"color": RED, "duration": 0},
+        "shrink_opponent": {"color": (255, 165, 0), "duration": POWERUP_DURATION},
     }
 
     def __init__(self):
@@ -156,6 +158,10 @@ class PowerUp(pygame.sprite.Sprite):
             paddle.resize(150)
         elif self.type == "slow_ball":
             pass  # Handled in game logic
+        elif self.type == "multi_ball":
+            pass  # Handled in game logic
+        elif self.type == "shrink_opponent":
+            pass  # Handled in game logic
 
     def deactivate(self):
         if self.affected_paddle:
@@ -163,6 +169,8 @@ class PowerUp(pygame.sprite.Sprite):
                 self.affected_paddle.set_speed(PADDLE_SPEED)
             elif self.type == "large_paddle":
                 self.affected_paddle.reset_size()
+            elif self.type == "shrink_opponent":
+                pass  # Handled in game logic
         self.kill()
 
     def update(self):

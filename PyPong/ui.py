@@ -23,7 +23,9 @@ class PowerUpIndicator:
                 name_map = {
                     "speed_boost": "Speed Boost",
                     "large_paddle": "Large Paddle",
-                    "slow_ball": "Slow Ball"
+                    "slow_ball": "Slow Ball",
+                    "multi_ball": "Multi Ball",
+                    "shrink_opponent": "Shrink Opponent"
                 }
                 name = self.font.render(name_map.get(powerup.type, "Power-Up"), True, WHITE)
                 screen.blit(name, (x_pos + 10, y_offset + 5))
