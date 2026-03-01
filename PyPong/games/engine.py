@@ -85,6 +85,21 @@ class GameEngine:
                 elif event.key == pygame.K_2:
                     self.set_mode(GameModeType.ARCADE)
                     return True
+                elif event.key == pygame.K_3:
+                    # Local PVP
+                    self.settings['connection_type'] = 'local'
+                    self.set_mode(GameModeType.MULTIPLAYER)
+                    return True
+                elif event.key == pygame.K_4:
+                    # Host network game
+                    self.settings['connection_type'] = 'host'
+                    self.set_mode(GameModeType.MULTIPLAYER)
+                    return True
+                elif event.key == pygame.K_5:
+                    # Join network game (uses default host)
+                    self.settings['connection_type'] = 'client'
+                    self.set_mode(GameModeType.MULTIPLAYER)
+                    return True
                 
                 # Start game with Enter
                 elif event.key == pygame.K_RETURN:
