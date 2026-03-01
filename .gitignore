@@ -48,3 +48,8 @@ desktop.ini
 
 # Logs
 *.log
+
+# AI scripts (temporary)
+duckduckgo-ai.py
+gigachat-cli.py
+test_ai/
