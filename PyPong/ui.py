@@ -68,6 +68,7 @@ class SettingsMenu:
             "sfx_volume",
             "show_fps",
             "fullscreen",
+            "touch_controls",
             "theme",
             "back"
         ]
@@ -94,6 +95,9 @@ class SettingsMenu:
             elif option == "fullscreen":
                 val = "ON" if self.settings.get("fullscreen", False) else "OFF"
                 text = f"Fullscreen: {val}"
+            elif option == "touch_controls":
+                val = "ON" if self.settings.get("touch_controls", False) else "OFF"
+                text = f"Touch Controls: {val}"
             elif option == "theme":
                 theme = self.settings.get("theme", "classic").title()
                 text = f"Theme: {theme}"
@@ -145,6 +149,10 @@ class SettingsMenu:
         elif option == "fullscreen":
             current = self.settings.get("fullscreen", False)
             self.settings.set("fullscreen", not current)
+        
+        elif option == "touch_controls":
+            current = self.settings.get("touch_controls", False)
+            self.settings.set("touch_controls", not current)
         
         elif option == "theme":
             themes = ["classic", "neon", "retro", "ocean"]
