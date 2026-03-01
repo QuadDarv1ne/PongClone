@@ -45,7 +45,7 @@ class PongGame:
         self.theme = get_theme(self.settings.get("theme", "classic"))
         
         # Managers
-        self.state_manager = GameStateManager(self.game_surface)
+        self.state_manager = GameStateManager(self.screen, self.game_surface)
         self.audio = AudioManager()
         self.stats = StatsManager()
         self.tournament = Tournament()
@@ -144,11 +144,19 @@ class PongGame:
         self.ball.image.fill(self.theme.ball_color)
         self.all_sprites = pygame.sprite.Group(self.paddle1, self.paddle2, self.ball)
         self.powerups = pygame.sprite.Group()
-        
+
         # Set AI difficulty
         if is_ai:
             difficulty = self.state_manager.difficulty
             self.paddle2.set_speed(DIFFICULTY_LEVELS[difficulty]["ai_speed"])
+        
+        # Сброс input state при инициализации
+        self.input_state = {
+            "up1": False,
+            "down1": False,
+            "up2": False,
+            "down2": False,
+        }
 
     def reset_game(self):
         self.state_manager.reset_scores()
@@ -472,9 +480,10 @@ class PongGame:
         
         elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
             self.tournament.draw_winner_screen(self.game_surface)
-        
+
         # Apply screen shake and scale
         scaled_surface = self.adaptive_screen.get_scaled_surface(self.game_surface)
+        self.screen.fill(BLACK)  # Очистка экрана
         self.shake.apply(scaled_surface, self.screen)
         pygame.display.flip()
 
