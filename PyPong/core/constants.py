@@ -5,7 +5,7 @@ from enum import Enum, IntEnum
 from typing import NamedTuple
 
 # Existing config imports
-from PyPong.core.config import *
+from .config import *
 
 
 class PowerUpType(Enum):

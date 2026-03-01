@@ -4,21 +4,33 @@ Comprehensive test suite for all features
 import sys
 from pathlib import Path
 
+# Add parent directory (PyPong's parent) to path for PyPong imports
+current_dir = Path(__file__).parent.parent  # PyPong directory
+parent_dir = current_dir.parent  # Parent of PyPong
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
+# Fix Windows console encoding
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
 
 def test_logging():
     """Test logging system"""
     print("\n" + "="*60)
     print("Testing Logging System")
     print("="*60)
-    
+
     try:
-        from core.logger import logger
-        
+        from PyPong.core.logger import logger
+
         logger.debug("Debug message")
         logger.info("Info message")
         logger.warning("Warning message")
         logger.log_event("test_event", {"key": "value"})
-        
+
         print("✓ Logging system works")
         return True
     except Exception as e:
@@ -31,9 +43,9 @@ def test_constants():
     print("\n" + "="*60)
     print("Testing Constants and Enums")
     print("="*60)
-    
+
     try:
-        from core.constants import (
+        from PyPong.core.constants import (
             PowerUpType, Difficulty, GameMode,
             AchievementType, ArenaType, Colors
         )
@@ -56,23 +68,23 @@ def test_achievements():
     print("\n" + "="*60)
     print("Testing Achievement System")
     print("="*60)
-    
+
     try:
-        from systems.achievements import AchievementManager
-        from core.constants import EventType
-        
+        from PyPong.systems.achievements import AchievementManager
+        from PyPong.core.constants import EventType
+
         mgr = AchievementManager()
         print(f"✓ {len(mgr.achievements)} achievements loaded")
-        
+
         # Test unlock
         mgr.update_achievement('first_win')
         unlocked = mgr.get_unlocked_achievements()
         print(f"✓ {len(unlocked)} achievements unlocked")
-        
+
         # Test event
         mgr.check_event(EventType.GAME_END, won=True, perfect=True)
         print("✓ Event checking works")
-        
+
         return True
     except Exception as e:
         print(f"✗ Achievement test failed: {e}")
@@ -84,10 +96,10 @@ def test_enhanced_powerups():
     print("\n" + "="*60)
     print("Testing Enhanced Power-ups")
     print("="*60)
-    
+
     try:
-        from systems.enhanced_powerups import PowerUpRegistry, ComboSystem
-        from core.constants import PowerUpType
+        from PyPong.systems.enhanced_powerups import PowerUpRegistry, ComboSystem
+        from PyPong.core.constants import PowerUpType
         
         # Test registry
         config = PowerUpRegistry.get_config(PowerUpType.SPEED_BOOST)
@@ -109,10 +121,10 @@ def test_arenas():
     print("\n" + "="*60)
     print("Testing Arena System")
     print("="*60)
-    
+
     try:
-        from systems.arenas import Arena, ArenaManager
-        from core.constants import ArenaType
+        from PyPong.systems.arenas import Arena, ArenaManager
+        from PyPong.core.constants import ArenaType
         
         # Test arena creation
         arena = Arena(ArenaType.OBSTACLES)
@@ -134,10 +146,10 @@ def test_enhanced_ai():
     print("\n" + "="*60)
     print("Testing Enhanced AI")
     print("="*60)
-    
+
     try:
-        from systems.enhanced_ai import EnhancedAI, TrajectoryPredictor
-        from core.constants import Difficulty
+        from PyPong.systems.enhanced_ai import EnhancedAI, TrajectoryPredictor
+        from PyPong.core.constants import Difficulty
         
         # Test predictor
         predictor = TrajectoryPredictor()
@@ -159,9 +171,9 @@ def test_replay_system():
     print("\n" + "="*60)
     print("Testing Replay System")
     print("="*60)
-    
+
     try:
-        from systems.replay_system import ReplayManager
+        from PyPong.systems.replay_system import ReplayManager
         
         mgr = ReplayManager()
         print("✓ Replay manager initialized")
@@ -188,10 +200,10 @@ def test_sound_themes():
     print("\n" + "="*60)
     print("Testing Sound Theme System")
     print("="*60)
-    
+
     try:
-        from ui.sound_themes import SoundThemeManager
-        from core.constants import SoundTheme
+        from PyPong.ui.sound_themes import SoundThemeManager
+        from PyPong.core.constants import SoundTheme
         
         mgr = SoundThemeManager()
         themes = mgr.get_available_themes()
@@ -211,9 +223,9 @@ def test_localization():
     print("\n" + "="*60)
     print("Testing Localization System")
     print("="*60)
-    
+
     try:
-        from ui.localization import Localization, t
+        from PyPong.ui.localization import Localization, t
         
         loc = Localization()
         languages = loc.get_available_languages()
@@ -238,12 +250,12 @@ def test_tutorial():
     print("\n" + "="*60)
     print("Testing Tutorial System")
     print("="*60)
-    
+
     try:
         import pygame
         pygame.init()  # Initialize pygame for font
-        
-        from ui.tutorial import TutorialManager
+
+        from PyPong.ui.tutorial import TutorialManager
         
         mgr = TutorialManager()
         print(f"✓ {len(mgr.steps)} tutorial steps")
@@ -266,9 +278,9 @@ def test_customization():
     print("\n" + "="*60)
     print("Testing Customization System")
     print("="*60)
-    
+
     try:
-        from ui.customization import CustomizationManager
+        from PyPong.ui.customization import CustomizationManager
         
         mgr = CustomizationManager()
         print(f"✓ {len(mgr.paddle_skins)} paddle skins")
@@ -291,12 +303,12 @@ def test_enhanced_ui():
     print("\n" + "="*60)
     print("Testing Enhanced UI Components")
     print("="*60)
-    
+
     try:
         import pygame
         pygame.init()  # Initialize pygame for font
-        
-        from ui.enhanced_ui import (
+
+        from PyPong.ui.enhanced_ui import (
             Animation, ComboDisplay, ProgressBar,
             NotificationManager
         )
@@ -329,12 +341,12 @@ def test_content_systems():
     print("\n" + "="*60)
     print("Testing Content Systems (Campaign, Challenges, etc.)")
     print("="*60)
-    
+
     try:
-        from content.campaign import CampaignManager
-        from content.challenges import ChallengeManager
-        from content.minigames import MiniGameManager
-        from content.modifiers import ModifierManager
+        from PyPong.content.campaign import CampaignManager
+        from PyPong.content.challenges import ChallengeManager
+        from PyPong.content.minigames import MiniGameManager
+        from PyPong.content.modifiers import ModifierManager
         
         campaign = CampaignManager()
         print(f"✓ Campaign: {len(campaign.levels)} levels")

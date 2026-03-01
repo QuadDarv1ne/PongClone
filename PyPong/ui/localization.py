@@ -31,8 +31,9 @@ class Localization:
     @log_exception
     def _load_translations(self) -> None:
         """Load all translation files"""
-        locale_dir = Path('PyPong/locales')
-        
+        # Use absolute path relative to this file
+        locale_dir = Path(__file__).parent.parent / 'locales'
+
         if not locale_dir.exists():
             logger.warning("Locales directory not found, creating default translations")
             self._create_default_translations()
@@ -51,7 +52,7 @@ class Localization:
     
     def _create_default_translations(self) -> None:
         """Create default English translations"""
-        locale_dir = Path('PyPong/locales')
+        locale_dir = Path(__file__).parent.parent / 'locales'
         locale_dir.mkdir(exist_ok=True)
         
         # English translations
