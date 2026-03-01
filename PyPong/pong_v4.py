@@ -9,6 +9,8 @@ from game_state import GameState, GameStateManager
 from audio import AudioManager
 from effects import Particle, Trail, ScreenShake, GoalAnimation
 from stats import StatsManager
+from settings import Settings
+from ui import PowerUpIndicator, FPSCounter, SettingsMenu
 
 class PongGame:
     def __init__(self):
@@ -19,15 +21,24 @@ class PongGame:
         self.clock = pygame.time.Clock()
         
         # Managers
+        self.settings = Settings()
         self.state_manager = GameStateManager(self.game_surface)
         self.audio = AudioManager()
         self.stats = StatsManager()
+        
+        # UI
+        self.powerup_indicator = PowerUpIndicator()
+        self.fps_counter = FPSCounter()
+        self.settings_menu = SettingsMenu(self.game_surface, self.settings)
         
         # Effects
         self.particles = pygame.sprite.Group()
         self.trails = pygame.sprite.Group()
         self.shake = ScreenShake()
         self.goal_anim = GoalAnimation()
+        
+        # Apply settings
+        self.apply_settings()
         
         # Game objects
         self.paddle1 = None
@@ -43,6 +54,11 @@ class PongGame:
         }
         
         self.init_game_objects()
+
+    def apply_settings(self):
+        pygame.mixer.music.set_volume(self.settings.get("music_volume", 0.5))
+        for sound in self.audio.sounds.values():
+            sound.set_volume(self.settings.get("sfx_volume", 0.7))
 
     def init_game_objects(self):
         self.paddle1 = Paddle(1, is_ai=False, color=GREEN)
@@ -64,6 +80,13 @@ class PongGame:
             if event.type == QUIT:
                 return False
             
+            # Settings menu input
+            if self.state_manager.state == GameState.SETTINGS:
+                result = self.settings_menu.handle_input(event)
+                if result == "back":
+                    self.state_manager.state = GameState.MENU
+                continue
+            
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     if self.state_manager.state == GameState.PLAYING:
@@ -71,6 +94,8 @@ class PongGame:
                     elif self.state_manager.state == GameState.PAUSED:
                         return False
                     elif self.state_manager.state == GameState.STATS:
+                        self.state_manager.state = GameState.MENU
+                    elif self.state_manager.state == GameState.SETTINGS:
                         self.state_manager.state = GameState.MENU
                     else:
                         return False
@@ -87,6 +112,9 @@ class PongGame:
                 
                 elif event.key == K_s and self.state_manager.state == GameState.MENU:
                     self.state_manager.state = GameState.STATS
+                
+                elif event.key == K_o and self.state_manager.state == GameState.MENU:
+                    self.state_manager.state = GameState.SETTINGS
                 
                 elif event.key == K_1:
                     self.state_manager.set_difficulty("Easy")
@@ -205,6 +233,9 @@ class PongGame:
         elif self.state_manager.state == GameState.STATS:
             self.state_manager.draw_stats(self.stats)
         
+        elif self.state_manager.state == GameState.SETTINGS:
+            self.settings_menu.draw()
+        
         elif self.state_manager.state == GameState.PLAYING:
             self.state_manager.draw_net()
             self.state_manager.draw_score()
@@ -212,7 +243,11 @@ class PongGame:
             self.all_sprites.draw(self.game_surface)
             self.powerups.draw(self.game_surface)
             self.particles.draw(self.game_surface)
+            self.powerup_indicator.draw(self.game_surface, self.powerups, self.paddle1, self.paddle2)
             self.goal_anim.draw(self.game_surface)
+            
+            if self.settings.get("show_fps", False):
+                self.fps_counter.draw(self.game_surface, self.clock)
         
         elif self.state_manager.state == GameState.PAUSED:
             self.state_manager.draw_net()

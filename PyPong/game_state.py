@@ -8,6 +8,7 @@ class GameState(Enum):
     PAUSED = 3
     GAME_OVER = 4
     STATS = 5
+    SETTINGS = 6
 
 class GameStateManager:
     def __init__(self, screen):
@@ -53,7 +54,7 @@ class GameStateManager:
         start = self.menu_font.render("Press ENTER to Start", True, WHITE)
         diff_text = self.menu_font.render(f"Difficulty: {self.difficulty} (1/2/3)", True, WHITE)
         controls = self.menu_font.render("Controls: A/Z - Player 1", True, WHITE)
-        stats_text = self.small_font.render("Press S for Stats", True, WHITE)
+        stats_text = self.small_font.render("Press S for Stats | Press O for Settings", True, WHITE)
         
         self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 200)))
         self.screen.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 350)))
