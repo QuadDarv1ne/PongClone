@@ -74,32 +74,32 @@ class MultiplayerBase(ABC):
     @abstractmethod
     def connect(self, **kwargs) -> bool:
         """Establish connection"""
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def disconnect(self) -> None:
         """Close connection"""
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def send_game_state(self, state: GameState) -> None:
         """Send game state to other player"""
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def receive_game_state(self) -> Optional[GameState]:
         """Receive game state from other player"""
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def send_input(self, input_data: Dict[str, bool]) -> None:
         """Send input state"""
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def receive_input(self) -> Optional[Dict[str, bool]]:
         """Receive input state"""
-        pass
+        raise NotImplementedError
 
 
 class LocalPVP(MultiplayerBase):
@@ -120,19 +120,19 @@ class LocalPVP(MultiplayerBase):
         self.connected = False
     
     def send_game_state(self, state: GameState) -> None:
-        # Not needed for local
+        # Not needed for local PVP - both players on same machine
         pass
-    
+
     def receive_game_state(self) -> Optional[GameState]:
-        # Not needed for local
+        # Not needed for local PVP
         return None
-    
+
     def send_input(self, input_data: Dict[str, bool]) -> None:
-        # Not needed for local
+        # Not needed for local PVP - inputs handled directly
         pass
-    
+
     def receive_input(self) -> Optional[Dict[str, bool]]:
-        # Not needed for local
+        # Not needed for local PVP
         return None
     
     def set_player_number(self, num: int) -> None:
@@ -234,9 +234,9 @@ class NetworkHost(MultiplayerBase):
         return None
     
     def send_input(self, input_data: Dict[str, bool]) -> None:
-        """Host doesn't send input (runs the game)"""
+        """Host doesn't send input - it runs the authoritative game state"""
         pass
-    
+
     def receive_input(self) -> Optional[Dict[str, bool]]:
         """Receive input from client"""
         if not self.client_socket or not self.connected:
@@ -304,9 +304,9 @@ class NetworkClient(MultiplayerBase):
         logger.info("Client disconnected")
     
     def send_game_state(self, state: GameState) -> None:
-        """Client sends input, not game state"""
+        """Client receives game state from host, doesn't send it"""
         pass
-    
+
     def receive_game_state(self) -> Optional[GameState]:
         """Receive game state from host"""
         if not self.socket or not self.connected:

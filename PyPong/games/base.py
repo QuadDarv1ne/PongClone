@@ -17,6 +17,7 @@ class GameModeType(Enum):
     CAMPAIGN = "campaign"
     TOURNAMENT = "tournament"
     MINIGAME = "minigame"
+    MULTIPLAYER = "multiplayer"
 
 
 class GameMode(ABC):
@@ -56,30 +57,30 @@ class GameMode(ABC):
     @abstractmethod
     def mode_type(self) -> GameModeType:
         """Return the type of this game mode"""
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def init_game_objects(self) -> None:
         """Initialize game objects for this mode"""
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def handle_input(self, event: Event) -> bool:
         """
         Handle input events.
         Returns False if game should quit, True otherwise.
         """
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def update(self, dt: float) -> None:
         """Update game logic. dt is delta time in seconds."""
-        pass
-    
+        raise NotImplementedError
+
     @abstractmethod
     def draw(self) -> None:
         """Draw the game state"""
-        pass
+        raise NotImplementedError
     
     def reset(self) -> None:
         """Reset the game mode to initial state"""

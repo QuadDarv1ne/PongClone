@@ -67,20 +67,18 @@ class Paddle(pygame.sprite.Sprite):
 
     def move(self):
         if self.player_number == 1:
-            if (UP1 == True) and (self.rect.y > 5):
+            if UP1 and self.rect.y > 5:
                 self.rect.y -= self.speed
-            elif (DOWN1 == True) and (self.rect.bottom < WINDOW_HEIGHT-5):
+            elif DOWN1 and self.rect.bottom < WINDOW_HEIGHT - 5:
                 self.rect.y += self.speed
-            elif (NO_MOVEMENT1 == True):
-                pass
+            # No movement when NO_MOVEMENT1 is True
 
         if self.player_number == 2:
-            if (UP2 == True) and (self.rect.y > 5):
+            if UP2 and self.rect.y > 5:
                 self.rect.y -= self.speed
-            elif (DOWN2 == True) and (self.rect.bottom < WINDOW_HEIGHT-5):
+            elif DOWN2 and self.rect.bottom < WINDOW_HEIGHT - 5:
                 self.rect.y += self.speed
-            elif (NO_MOVEMENT2 == True):
-                pass
+            # No movement when NO_MOVEMENT2 is True
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self):

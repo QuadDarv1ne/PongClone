@@ -95,6 +95,7 @@ class Config:
                     self._config_file = path
                     break
                 except (json.JSONDecodeError, IOError):
+                    # Config file not found or invalid, continue to next path
                     pass
     
     def _merge_config(self, user_config: Dict[str, Any]):

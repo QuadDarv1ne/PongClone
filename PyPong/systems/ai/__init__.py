@@ -20,11 +20,11 @@ class AIBase(ABC):
         self.prediction_error: float = 0
         
     @abstractmethod
-    def get_target_y(self, ball_x: float, ball_y: float, 
+    def get_target_y(self, ball_x: float, ball_y: float,
                      ball_vx: float, ball_vy: float) -> float:
         """Get target Y position for paddle"""
-        pass
-    
+        raise NotImplementedError
+
     def update(self, ball: Ball) -> Optional[bool]:
         """
         Update AI decision.

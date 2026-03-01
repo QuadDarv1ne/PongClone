@@ -23,11 +23,11 @@ class MiniGame:
 
     def update(self, *args):
         """Update mini-game state"""
-        pass
+        raise NotImplementedError
 
     def draw(self, screen):
         """Draw mini-game specific elements"""
-        pass
+        raise NotImplementedError
 
     def is_complete(self):
         """Check if mini-game is complete"""

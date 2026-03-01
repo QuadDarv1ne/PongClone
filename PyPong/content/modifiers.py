@@ -12,15 +12,15 @@ class GameModifier:
 
     def apply_to_ball(self, ball):
         """Apply modifier effect to ball"""
-        pass
+        raise NotImplementedError
 
     def apply_to_paddle(self, paddle):
         """Apply modifier effect to paddle"""
-        pass
+        raise NotImplementedError
 
     def update(self):
         """Update modifier state"""
-        pass
+        raise NotImplementedError
 
 
 class GravityModifier(GameModifier):
