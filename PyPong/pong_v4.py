@@ -147,11 +147,7 @@ class PongGame:
 
     def reset_game(self):
         self.state_manager.reset_scores()
-        self.paddle1 = None  # Сброс для повторной инициализации
-        self.paddle2 = None
-        self.ball = None
-        self.all_sprites = None
-        self.powerups = None
+        self.init_game_objects()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -182,43 +178,34 @@ class PongGame:
                     if self.state_manager.state == GameState.PLAYING:
                         self.state_manager.state = GameState.PAUSED
                     elif self.state_manager.state == GameState.PAUSED:
-                        return False
-                    elif self.state_manager.state == GameState.STATS:
                         self.state_manager.state = GameState.MENU
-                    elif self.state_manager.state == GameState.SETTINGS:
-                        self.state_manager.state = GameState.MENU
-                    else:
-                        return False
-                
-                elif event.key == K_RETURN:
-                    if self.state_manager.state == GameState.MENU:
-                        self.state_manager.state = GameState.MODE_SELECT
-                    elif self.state_manager.state == GameState.MODE_SELECT:
-                        self.state_manager.state = GameState.PLAYING
-                        # Инициализация в update_game(), не здесь
-                        self.audio.play_music()
-                    elif self.state_manager.state == GameState.PAUSED:
-                        self.state_manager.state = GameState.PLAYING
-                    elif self.state_manager.state == GameState.GAME_OVER:
-                        self.reset_game()
-                        self.state_manager.state = GameState.MENU
-                    elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
-                        self.tournament.reset()
-                        self.state_manager.state = GameState.MENU
-
-                elif event.key == K_ESCAPE:
-                    # Возврат в меню из игры
-                    if self.state_manager.state == GameState.PLAYING:
-                        self.state_manager.state = GameState.MENU
-                        self.all_sprites = None  # Очистка для повторной инициализации
+                        self.all_sprites = None
                     elif self.state_manager.state == GameState.STATS:
                         self.state_manager.state = GameState.MENU
                     elif self.state_manager.state == GameState.SETTINGS:
                         self.state_manager.state = GameState.MENU
                     elif self.state_manager.state == GameState.HELP:
                         self.state_manager.state = GameState.MENU
+                    elif self.state_manager.state == GameState.MODE_SELECT:
+                        self.state_manager.state = GameState.MENU
+                        self.all_sprites = None
                     else:
                         return False
+
+                elif event.key == K_RETURN:
+                    if self.state_manager.state == GameState.MENU:
+                        self.state_manager.state = GameState.MODE_SELECT
+                    elif self.state_manager.state == GameState.MODE_SELECT:
+                        self.state_manager.state = GameState.PLAYING
+                        self.audio.play_music()
+                    elif self.state_manager.state == GameState.PAUSED:
+                        self.state_manager.state = GameState.PLAYING
+                    elif self.state_manager.state == GameState.GAME_OVER:
+                        self.reset_game()
+                        self.state_manager.state = GameState.PLAYING
+                    elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
+                        self.tournament.reset()
+                        self.state_manager.state = GameState.MENU
 
                 elif event.key == K_s and self.state_manager.state == GameState.MENU:
                     self.state_manager.state = GameState.STATS
@@ -271,11 +258,15 @@ class PongGame:
 
     def update_game(self):
         # Инициализация при переходе в PLAYING
-        if self.state_manager.state == GameState.PLAYING and self.all_sprites is None:
-            self.init_game_objects()
-        
-        if self.state_manager.state != GameState.PLAYING:
-            return
+        if self.state_manager.state == GameState.PLAYING:
+            if self.all_sprites is None:
+                self.init_game_objects()
+            else:
+                # Обновляем только если игра уже идёт
+                self._update_playing()
+
+    def _update_playing(self):
+        """Обновление игровой логики"""
         
         # Move paddles
         # Touch input
