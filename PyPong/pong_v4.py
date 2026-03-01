@@ -81,8 +81,13 @@ class PongGame:
             "up2": False,
             "down2": False,
         }
-        
-        self.init_game_objects()
+
+        # Game objects инициализируются при старте игры
+        self.paddle1 = None
+        self.paddle2 = None
+        self.ball = None
+        self.all_sprites = None
+        self.powerups = None
 
     def _detect_mobile(self):
         """Detect if running on mobile platform"""
@@ -201,8 +206,14 @@ class PongGame:
                     elif self.state_manager.state == GameState.PAUSED:
                         self.state_manager.state = GameState.PLAYING
                     elif self.state_manager.state == GameState.GAME_OVER:
-                        self.reset_game()
-                        self.state_manager.state = GameState.PLAYING
+                        # Сброс и возврат в меню
+                        self.paddle1 = None
+                        self.paddle2 = None
+                        self.ball = None
+                        self.all_sprites = None
+                        self.powerups = None
+                        self.state_manager.reset_scores()
+                        self.state_manager.state = GameState.MENU
                     elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
                         self.tournament.reset()
                         self.state_manager.state = GameState.MENU
@@ -258,12 +269,12 @@ class PongGame:
 
     def update_game(self):
         # Инициализация при переходе в PLAYING
+        if self.state_manager.state == GameState.PLAYING and self.all_sprites is None:
+            self.init_game_objects()
+        
+        # Обновление только если PLAYING
         if self.state_manager.state == GameState.PLAYING:
-            if self.all_sprites is None:
-                self.init_game_objects()
-            else:
-                # Обновляем только если игра уже идёт
-                self._update_playing()
+            self._update_playing()
 
     def _update_playing(self):
         """Обновление игровой логики"""
@@ -457,17 +468,7 @@ class PongGame:
             self.state_manager.draw_pause()
         
         elif self.state_manager.state == GameState.GAME_OVER:
-            if self.state_manager.tournament_mode and not self.tournament.is_complete():
-                # Record game win and continue tournament
-                self.tournament.record_game_win(self.state_manager.winner)
-                if self.tournament.is_complete():
-                    self.state_manager.state = GameState.TOURNAMENT_COMPLETE
-                else:
-                    # Next game
-                    self.reset_game()
-                    self.state_manager.state = GameState.PLAYING
-            else:
-                self.state_manager.draw_game_over()
+            self.state_manager.draw_game_over()
         
         elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
             self.tournament.draw_winner_screen(self.game_surface)

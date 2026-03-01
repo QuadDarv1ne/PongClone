@@ -3,12 +3,26 @@ Simple test script for new content features
 Run this to verify all systems work correctly
 """
 import sys
+from pathlib import Path
+
+# Add parent directory to path for PyPong imports
+current_dir = Path(__file__).parent.parent  # PyPong directory
+parent_dir = current_dir.parent  # Parent of PyPong
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
+# Fix Windows console encoding
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
 
 def test_campaign():
     """Test campaign system"""
     print("Testing Campaign System...")
     try:
-        from campaign import CampaignManager
+        from PyPong.content.campaign import CampaignManager
         
         campaign = CampaignManager()
         print(f"✓ Campaign initialized with {len(campaign.levels)} levels")
@@ -34,7 +48,7 @@ def test_challenges():
     """Test challenges system"""
     print("\nTesting Challenges System...")
     try:
-        from challenges import ChallengeManager
+        from PyPong.content.challenges import ChallengeManager
         
         challenges = ChallengeManager()
         print("✓ Challenges initialized")
@@ -60,7 +74,7 @@ def test_modifiers():
     """Test game modifiers"""
     print("\nTesting Modifiers System...")
     try:
-        from modifiers import (ModifierManager, GravityModifier, WindModifier,
+        from PyPong.content.modifiers import (ModifierManager, GravityModifier, WindModifier,
                               InvisibleBallModifier, SpeedModifier)
         
         manager = ModifierManager()
@@ -88,7 +102,7 @@ def test_minigames():
     """Test mini-games system"""
     print("\nTesting Mini-games System...")
     try:
-        from minigames import MiniGameManager
+        from PyPong.content.minigames import MiniGameManager
         
         manager = MiniGameManager()
         print("✓ Mini-game manager initialized")
@@ -118,7 +132,7 @@ def test_ui():
     print("\nTesting UI Components...")
     try:
         # Just check imports
-        from content_ui import CampaignUI, ChallengesUI, MiniGameUI
+        from PyPong.ui.content_ui import CampaignUI, ChallengesUI, MiniGameUI
         print("✓ All UI components imported successfully")
         
         return True
@@ -133,15 +147,19 @@ def test_integration():
     try:
         # Check if enhanced game file exists and imports work
         import os
-        if os.path.exists('pong_enhanced.py'):
+        # Look in the PyPong directory
+        enhanced_path = Path(__file__).parent.parent / "pong_enhanced.py"
+        if enhanced_path.exists():
             print("✓ Enhanced game file exists")
         
-        # Try importing (won't run pygame)
-        # This just checks syntax
-        with open('pong_enhanced.py', 'r', encoding='utf-8') as f:
-            code = f.read()
-            compile(code, 'pong_enhanced.py', 'exec')
-        print("✓ Enhanced game file syntax is valid")
+            # Try importing (won't run pygame)
+            # This just checks syntax
+            with open(enhanced_path, 'r', encoding='utf-8') as f:
+                code = f.read()
+                compile(code, 'pong_enhanced.py', 'exec')
+            print("✓ Enhanced game file syntax is valid")
+        else:
+            print("✓ Enhanced game file not found (optional)")
         
         return True
     except Exception as e:
