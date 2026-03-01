@@ -11,6 +11,7 @@ from effects import Particle, Trail, ScreenShake, GoalAnimation
 from stats import StatsManager
 from settings import Settings
 from ui import PowerUpIndicator, FPSCounter, SettingsMenu
+from tournament import Tournament
 
 class PongGame:
     def __init__(self):
@@ -25,6 +26,7 @@ class PongGame:
         self.state_manager = GameStateManager(self.game_surface)
         self.audio = AudioManager()
         self.stats = StatsManager()
+        self.tournament = Tournament()
         
         # UI
         self.powerup_indicator = PowerUpIndicator()
@@ -116,6 +118,9 @@ class PongGame:
                     elif self.state_manager.state == GameState.GAME_OVER:
                         self.reset_game()
                         self.state_manager.state = GameState.MENU
+                    elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
+                        self.tournament.reset()
+                        self.state_manager.state = GameState.MENU
                 
                 elif event.key == K_s and self.state_manager.state == GameState.MENU:
                     self.state_manager.state = GameState.STATS
@@ -135,7 +140,10 @@ class PongGame:
                 elif event.key == K_4:
                     if self.state_manager.state == GameState.MODE_SELECT:
                         self.state_manager.set_difficulty("Medium")
-                elif event.key == K_5:
+                elif event.key == K_t and self.state_manager.state == GameState.MODE_SELECT:
+                    self.state_manager.tournament_mode = not self.state_manager.tournament_mode
+                    if self.state_manager.tournament_mode:
+                        self.tournament.reset()
                     if self.state_manager.state == GameState.MODE_SELECT:
                         self.state_manager.set_difficulty("Hard")
                 
@@ -277,6 +285,10 @@ class PongGame:
             self.powerup_indicator.draw(self.game_surface, self.powerups, self.paddle1, self.paddle2)
             self.goal_anim.draw(self.game_surface)
             
+            if self.state_manager.state == GameState.PLAYING:
+                if self.state_manager.tournament_mode:
+                    self.tournament.draw_status(self.game_surface)
+            
             if self.settings.get("show_fps", False):
                 self.fps_counter.draw(self.game_surface, self.clock)
         
@@ -290,7 +302,20 @@ class PongGame:
             self.state_manager.draw_pause()
         
         elif self.state_manager.state == GameState.GAME_OVER:
-            self.state_manager.draw_game_over()
+            if self.state_manager.tournament_mode and not self.tournament.is_complete():
+                # Record game win and continue tournament
+                self.tournament.record_game_win(self.state_manager.winner)
+                if self.tournament.is_complete():
+                    self.state_manager.state = GameState.TOURNAMENT_COMPLETE
+                else:
+                    # Next game
+                    self.reset_game()
+                    self.state_manager.state = GameState.PLAYING
+            else:
+                self.state_manager.draw_game_over()
+        
+        elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
+            self.tournament.draw_winner_screen(self.game_surface)
         
         # Apply screen shake
         self.shake.apply(self.game_surface, self.screen)
