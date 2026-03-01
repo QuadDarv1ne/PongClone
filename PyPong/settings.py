@@ -23,7 +23,8 @@ class Settings:
             "winning_score": 5,
             "show_fps": False,
             "fullscreen": False,
-            "theme": "classic"
+            "theme": "classic",
+            "touch_controls": False
         }
 
     def save_settings(self):

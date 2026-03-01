@@ -14,6 +14,7 @@ from ui import PowerUpIndicator, FPSCounter, SettingsMenu
 from tournament import Tournament
 from themes import get_theme
 from gamepad import GamepadManager
+from mobile import TouchControls, AdaptiveScreen
 
 class PongGame:
     def __init__(self):
@@ -21,11 +22,14 @@ class PongGame:
         self.settings = Settings()
         
         # Setup display
-        flags = pygame.FULLSCREEN if self.settings.get("fullscreen", False) else 0
+        flags = pygame.FULLSCREEN if self.settings.get("fullscreen", False) else pygame.RESIZABLE
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), flags)
         self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Enhanced Pong")
         self.clock = pygame.time.Clock()
+        
+        # Adaptive screen
+        self.adaptive_screen = AdaptiveScreen()
         
         # Theme
         self.theme = get_theme(self.settings.get("theme", "classic"))
@@ -36,6 +40,7 @@ class PongGame:
         self.stats = StatsManager()
         self.tournament = Tournament()
         self.gamepad = GamepadManager()
+        self.touch = TouchControls(WINDOW_WIDTH, WINDOW_HEIGHT)
         
         # UI
         self.powerup_indicator = PowerUpIndicator()
@@ -78,7 +83,7 @@ class PongGame:
         if self.settings.get("fullscreen", False):
             self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.FULLSCREEN)
         else:
-            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
         
         # Check theme change
         new_theme = get_theme(self.settings.get("theme", "classic"))
@@ -118,6 +123,16 @@ class PongGame:
         for event in pygame.event.get():
             if event.type == QUIT:
                 return False
+            
+            # Handle window resize
+            if event.type == pygame.VIDEORESIZE:
+                self.adaptive_screen.update_resolution(event.w, event.h)
+                self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+            
+            # Touch controls
+            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
+                if self.settings.get("touch_controls", False):
+                    self.touch.handle_touch(event)
             
             # Settings menu input
             if self.state_manager.state == GameState.SETTINGS:
@@ -207,6 +222,17 @@ class PongGame:
             return
         
         # Move paddles
+        # Touch input
+        if self.settings.get("touch_controls", False):
+            touch_input1 = self.touch.get_input(1)
+            self.input_state["up1"] = self.input_state["up1"] or touch_input1["up"]
+            self.input_state["down1"] = self.input_state["down1"] or touch_input1["down"]
+            
+            if self.state_manager.game_mode == "pvp":
+                touch_input2 = self.touch.get_input(2)
+                self.input_state["up2"] = self.input_state["up2"] or touch_input2["up"]
+                self.input_state["down2"] = self.input_state["down2"] or touch_input2["down"]
+        
         # Gamepad input
         if self.gamepad.has_gamepad(1):
             gp_input = self.gamepad.get_input(1)
@@ -344,6 +370,9 @@ class PongGame:
             self.powerup_indicator.draw(self.game_surface, self.powerups, self.paddle1, self.paddle2)
             self.goal_anim.draw(self.game_surface)
             
+            if self.settings.get("touch_controls", False):
+                self.touch.draw(self.game_surface)
+            
             if self.state_manager.state == GameState.PLAYING:
                 if self.state_manager.tournament_mode:
                     self.tournament.draw_status(self.game_surface)
@@ -376,8 +405,9 @@ class PongGame:
         elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
             self.tournament.draw_winner_screen(self.game_surface)
         
-        # Apply screen shake
-        self.shake.apply(self.game_surface, self.screen)
+        # Apply screen shake and scale
+        scaled_surface = self.adaptive_screen.get_scaled_surface(self.game_surface)
+        self.shake.apply(scaled_surface, self.screen)
         pygame.display.flip()
 
     def run(self):
