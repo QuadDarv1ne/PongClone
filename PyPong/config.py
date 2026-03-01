@@ -29,6 +29,10 @@ WINNING_SCORE = 5
 POWERUP_DURATION = 5000
 POWERUP_SPAWN_CHANCE = 500
 
+# Game modes
+GAME_MODE_AI = "ai"
+GAME_MODE_PVP = "pvp"
+
 # AI settings
 DIFFICULTY_LEVELS = {
     "Easy": {"ai_speed": 4, "ball_increase": 1.05},

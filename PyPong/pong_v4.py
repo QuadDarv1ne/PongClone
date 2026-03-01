@@ -51,6 +51,8 @@ class PongGame:
         self.input_state = {
             "up1": False,
             "down1": False,
+            "up2": False,
+            "down2": False,
         }
         
         self.init_game_objects()
@@ -61,15 +63,17 @@ class PongGame:
             sound.set_volume(self.settings.get("sfx_volume", 0.7))
 
     def init_game_objects(self):
+        is_ai = self.state_manager.game_mode == "ai"
         self.paddle1 = Paddle(1, is_ai=False, color=GREEN)
-        self.paddle2 = Paddle(2, is_ai=True, color=YELLOW)
+        self.paddle2 = Paddle(2, is_ai=is_ai, color=YELLOW)
         self.ball = Ball()
         self.all_sprites = pygame.sprite.Group(self.paddle1, self.paddle2, self.ball)
         self.powerups = pygame.sprite.Group()
         
         # Set AI difficulty
-        difficulty = self.state_manager.difficulty
-        self.paddle2.set_speed(DIFFICULTY_LEVELS[difficulty]["ai_speed"])
+        if is_ai:
+            difficulty = self.state_manager.difficulty
+            self.paddle2.set_speed(DIFFICULTY_LEVELS[difficulty]["ai_speed"])
 
     def reset_game(self):
         self.state_manager.reset_scores()
@@ -102,7 +106,10 @@ class PongGame:
                 
                 elif event.key == K_RETURN:
                     if self.state_manager.state == GameState.MENU:
+                        self.state_manager.state = GameState.MODE_SELECT
+                    elif self.state_manager.state == GameState.MODE_SELECT:
                         self.state_manager.state = GameState.PLAYING
+                        self.init_game_objects()
                         self.audio.play_music()
                     elif self.state_manager.state == GameState.PAUSED:
                         self.state_manager.state = GameState.PLAYING
@@ -117,22 +124,39 @@ class PongGame:
                     self.state_manager.state = GameState.SETTINGS
                 
                 elif event.key == K_1:
-                    self.state_manager.set_difficulty("Easy")
+                    if self.state_manager.state == GameState.MODE_SELECT:
+                        self.state_manager.game_mode = "ai"
                 elif event.key == K_2:
-                    self.state_manager.set_difficulty("Medium")
+                    if self.state_manager.state == GameState.MODE_SELECT:
+                        self.state_manager.game_mode = "pvp"
                 elif event.key == K_3:
-                    self.state_manager.set_difficulty("Hard")
+                    if self.state_manager.state == GameState.MODE_SELECT:
+                        self.state_manager.set_difficulty("Easy")
+                elif event.key == K_4:
+                    if self.state_manager.state == GameState.MODE_SELECT:
+                        self.state_manager.set_difficulty("Medium")
+                elif event.key == K_5:
+                    if self.state_manager.state == GameState.MODE_SELECT:
+                        self.state_manager.set_difficulty("Hard")
                 
                 elif event.key == K_a:
                     self.input_state["up1"] = True
                 elif event.key == K_z:
                     self.input_state["down1"] = True
+                elif event.key == K_UP:
+                    self.input_state["up2"] = True
+                elif event.key == K_DOWN:
+                    self.input_state["down2"] = True
             
             elif event.type == KEYUP:
                 if event.key == K_a:
                     self.input_state["up1"] = False
                 elif event.key == K_z:
                     self.input_state["down1"] = False
+                elif event.key == K_UP:
+                    self.input_state["up2"] = False
+                elif event.key == K_DOWN:
+                    self.input_state["down2"] = False
         
         return True
 
@@ -142,7 +166,11 @@ class PongGame:
         
         # Move paddles
         self.paddle1.move(self.input_state["up1"], self.input_state["down1"])
-        self.paddle2.move(False, False, self.ball.rect.centery)
+        
+        if self.state_manager.game_mode == "ai":
+            self.paddle2.move(False, False, self.ball.rect.centery)
+        else:
+            self.paddle2.move(self.input_state["up2"], self.input_state["down2"])
         
         # Move ball and create trail
         self.ball.move()
@@ -229,6 +257,9 @@ class PongGame:
         
         if self.state_manager.state == GameState.MENU:
             self.state_manager.draw_menu()
+        
+        elif self.state_manager.state == GameState.MODE_SELECT:
+            self.state_manager.draw_mode_select()
         
         elif self.state_manager.state == GameState.STATS:
             self.state_manager.draw_stats(self.stats)

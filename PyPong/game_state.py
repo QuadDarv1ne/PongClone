@@ -4,11 +4,12 @@ from config import *
 
 class GameState(Enum):
     MENU = 1
-    PLAYING = 2
-    PAUSED = 3
-    GAME_OVER = 4
-    STATS = 5
-    SETTINGS = 6
+    MODE_SELECT = 2
+    PLAYING = 3
+    PAUSED = 4
+    GAME_OVER = 5
+    STATS = 6
+    SETTINGS = 7
 
 class GameStateManager:
     def __init__(self, screen):
@@ -18,6 +19,7 @@ class GameStateManager:
         self.player2_score = 0
         self.winner = None
         self.difficulty = "Medium"
+        self.game_mode = "ai"
         
         # Fonts
         self.title_font = pygame.font.SysFont(FONT_NAME, 72)
@@ -52,15 +54,34 @@ class GameStateManager:
         
         title = self.title_font.render("Enhanced Pong", True, WHITE)
         start = self.menu_font.render("Press ENTER to Start", True, WHITE)
-        diff_text = self.menu_font.render(f"Difficulty: {self.difficulty} (1/2/3)", True, WHITE)
-        controls = self.menu_font.render("Controls: A/Z - Player 1", True, WHITE)
         stats_text = self.small_font.render("Press S for Stats | Press O for Settings", True, WHITE)
         
-        self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 200)))
-        self.screen.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 350)))
-        self.screen.blit(diff_text, diff_text.get_rect(center=(WINDOW_WIDTH // 2, 450)))
-        self.screen.blit(controls, controls.get_rect(center=(WINDOW_WIDTH // 2, 550)))
+        self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 250)))
+        self.screen.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 400)))
         self.screen.blit(stats_text, stats_text.get_rect(center=(WINDOW_WIDTH // 2, 620)))
+
+    def draw_mode_select(self):
+        self.screen.fill(GRAY)
+        
+        title = self.title_font.render("Select Mode", True, WHITE)
+        ai_text = self.menu_font.render("1. vs AI", True, YELLOW if self.game_mode == "ai" else WHITE)
+        pvp_text = self.menu_font.render("2. Player vs Player", True, YELLOW if self.game_mode == "pvp" else WHITE)
+        diff_text = self.small_font.render(f"AI Difficulty: {self.difficulty} (3/4/5)", True, WHITE)
+        controls_ai = self.small_font.render("Controls: A/Z - Player 1", True, WHITE)
+        controls_pvp = self.small_font.render("Controls: A/Z - Player 1 | Arrows - Player 2", True, WHITE)
+        start = self.menu_font.render("Press ENTER to Start", True, GREEN)
+        
+        self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 150)))
+        self.screen.blit(ai_text, ai_text.get_rect(center=(WINDOW_WIDTH // 2, 280)))
+        self.screen.blit(pvp_text, pvp_text.get_rect(center=(WINDOW_WIDTH // 2, 340)))
+        
+        if self.game_mode == "ai":
+            self.screen.blit(diff_text, diff_text.get_rect(center=(WINDOW_WIDTH // 2, 420)))
+            self.screen.blit(controls_ai, controls_ai.get_rect(center=(WINDOW_WIDTH // 2, 480)))
+        else:
+            self.screen.blit(controls_pvp, controls_pvp.get_rect(center=(WINDOW_WIDTH // 2, 450)))
+        
+        self.screen.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 580)))
 
     def draw_pause(self):
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
