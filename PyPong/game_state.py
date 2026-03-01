@@ -11,6 +11,14 @@ class GameState(Enum):
     STATS = 6
     SETTINGS = 7
     TOURNAMENT_COMPLETE = 8
+    CAMPAIGN_SELECT = 9
+    CAMPAIGN_PLAYING = 10
+    CAMPAIGN_COMPLETE = 11
+    CHALLENGES = 12
+    MINIGAME_SELECT = 13
+    MINIGAME_PLAYING = 14
+    MINIGAME_COMPLETE = 15
+    HELP = 16
 
 class GameStateManager:
     def __init__(self, screen):
@@ -53,13 +61,19 @@ class GameStateManager:
 
     def draw_menu(self):
         self.screen.fill(GRAY)
-        
+
         title = self.title_font.render("Enhanced Pong", True, WHITE)
         start = self.menu_font.render("Press ENTER to Start", True, WHITE)
-        stats_text = self.small_font.render("Press S for Stats | Press O for Settings", True, WHITE)
-        
-        self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 250)))
-        self.screen.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 400)))
+        campaign = self.small_font.render("Press C for Campaign", True, YELLOW)
+        challenges = self.small_font.render("Press H for Challenges", True, GREEN)
+        minigames = self.small_font.render("Press M for Mini-Games", True, LIGHT_BLUE)
+        stats_text = self.small_font.render("Press S for Stats | Press O for Settings | Press F1 for Help", True, WHITE)
+
+        self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 180)))
+        self.screen.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 300)))
+        self.screen.blit(campaign, campaign.get_rect(center=(WINDOW_WIDTH // 2, 380)))
+        self.screen.blit(challenges, challenges.get_rect(center=(WINDOW_WIDTH // 2, 430)))
+        self.screen.blit(minigames, minigames.get_rect(center=(WINDOW_WIDTH // 2, 480)))
         self.screen.blit(stats_text, stats_text.get_rect(center=(WINDOW_WIDTH // 2, 620)))
 
     def draw_mode_select(self):
@@ -144,3 +158,66 @@ class GameStateManager:
         self.screen.blit(high_score, high_score.get_rect(center=(WINDOW_WIDTH // 2, 460)))
         self.screen.blit(total_goals, total_goals.get_rect(center=(WINDOW_WIDTH // 2, 540)))
         self.screen.blit(back, back.get_rect(center=(WINDOW_WIDTH // 2, 640)))
+
+    def draw_help(self):
+        self.screen.fill(GRAY)
+
+        title = self.title_font.render("How to Play", True, WHITE)
+        
+        # Player 1 controls
+        p1_title = self.menu_font.render("Player 1 (Left)", True, GREEN)
+        p1_up = self.small_font.render("A - Move Up", True, WHITE)
+        p1_down = self.small_font.render("Z - Move Down", True, WHITE)
+        
+        # Player 2 controls
+        p2_title = self.menu_font.render("Player 2 (Right / AI)", True, YELLOW)
+        p2_up = self.small_font.render("UP Arrow - Move Up", True, WHITE)
+        p2_down = self.small_font.render("DOWN Arrow - Move Down", True, WHITE)
+        
+        # General controls
+        gen_title = self.menu_font.render("General Controls", True, LIGHT_BLUE)
+        gen_start = self.small_font.render("ENTER - Start / Resume", True, WHITE)
+        gen_pause = self.small_font.render("ESCAPE - Pause / Back", True, WHITE)
+        gen_stats = self.small_font.render("S - Statistics (from Menu)", True, WHITE)
+        gen_settings = self.small_font.render("O - Settings (from Menu)", True, WHITE)
+        
+        # Power-ups info
+        power_title = self.menu_font.render("Power-Ups", True, (255, 165, 0))
+        power_speed = self.small_font.render("Green - Speed Boost (faster paddle)", True, WHITE)
+        power_large = self.small_font.render("Yellow - Large Paddle (bigger racket)", True, WHITE)
+        power_slow = self.small_font.render("Blue - Slow Ball (slower ball speed)", True, WHITE)
+        
+        # Objective
+        obj_title = self.menu_font.render("Objective", True, WHITE)
+        obj_text = self.small_font.render(f"First to {WINNING_SCORE} points wins!", True, WHITE)
+        obj_tip = self.small_font.render("Tip: Hit the ball with the edge of your paddle for angled shots!", True, (200, 200, 200))
+        
+        back = self.small_font.render("Press ESC to go back", True, WHITE)
+
+        # Blit all text
+        self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 60)))
+        
+        self.screen.blit(p1_title, p1_title.get_rect(center=(WINDOW_WIDTH // 4, 130)))
+        self.screen.blit(p1_up, p1_up.get_rect(center=(WINDOW_WIDTH // 4, 170)))
+        self.screen.blit(p1_down, p1_down.get_rect(center=(WINDOW_WIDTH // 4, 200)))
+        
+        self.screen.blit(p2_title, p2_title.get_rect(center=(3 * WINDOW_WIDTH // 4, 130)))
+        self.screen.blit(p2_up, p2_up.get_rect(center=(3 * WINDOW_WIDTH // 4, 170)))
+        self.screen.blit(p2_down, p2_down.get_rect(center=(3 * WINDOW_WIDTH // 4, 200)))
+        
+        self.screen.blit(gen_title, gen_title.get_rect(center=(WINDOW_WIDTH // 2, 260)))
+        self.screen.blit(gen_start, gen_start.get_rect(center=(WINDOW_WIDTH // 2, 300)))
+        self.screen.blit(gen_pause, gen_pause.get_rect(center=(WINDOW_WIDTH // 2, 330)))
+        self.screen.blit(gen_stats, gen_stats.get_rect(center=(WINDOW_WIDTH // 2, 360)))
+        self.screen.blit(gen_settings, gen_settings.get_rect(center=(WINDOW_WIDTH // 2, 390)))
+        
+        self.screen.blit(power_title, power_title.get_rect(center=(WINDOW_WIDTH // 2, 450)))
+        self.screen.blit(power_speed, power_speed.get_rect(center=(WINDOW_WIDTH // 2, 485)))
+        self.screen.blit(power_large, power_large.get_rect(center=(WINDOW_WIDTH // 2, 515)))
+        self.screen.blit(power_slow, power_slow.get_rect(center=(WINDOW_WIDTH // 2, 545)))
+        
+        self.screen.blit(obj_title, obj_title.get_rect(center=(WINDOW_WIDTH // 2, 590)))
+        self.screen.blit(obj_text, obj_text.get_rect(center=(WINDOW_WIDTH // 2, 625)))
+        self.screen.blit(obj_tip, obj_tip.get_rect(center=(WINDOW_WIDTH // 2, 660)))
+        
+        self.screen.blit(back, back.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30)))

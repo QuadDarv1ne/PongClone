@@ -1,10 +1,14 @@
 import json
 import os
+import pygame
 
 class Settings:
     def __init__(self, filename="settings.json"):
         self.filename = filename
         self.data = self.load_settings()
+        self._pending_save = False
+        self._save_timer = 0
+        self._SAVE_DELAY = 1000  # Задержка сохранения в мс
 
     def load_settings(self):
         if os.path.exists(self.filename):
@@ -23,7 +27,7 @@ class Settings:
             "winning_score": 5,
             "show_fps": False,
             "fullscreen": False,
-            "theme": "classic",
+            "theme": "dark",  # Dark theme by default
             "touch_controls": False
         }
 
@@ -39,4 +43,19 @@ class Settings:
 
     def set(self, key, value):
         self.data[key] = value
-        self.save_settings()
+        self._pending_save = True
+        self._save_timer = pygame.time.get_ticks()
+
+    def update(self):
+        """Проверить и выполнить отложенное сохранение"""
+        if self._pending_save:
+            current_time = pygame.time.get_ticks()
+            if current_time - self._save_timer >= self._SAVE_DELAY:
+                self.save_settings()
+                self._pending_save = False
+
+    def force_save(self):
+        """Принудительное сохранение (при выходе)"""
+        if self._pending_save:
+            self.save_settings()
+            self._pending_save = False

@@ -204,9 +204,15 @@ class PongGame:
                 
                 elif event.key == K_s and self.state_manager.state == GameState.MENU:
                     self.state_manager.state = GameState.STATS
-                
+
                 elif event.key == K_o and self.state_manager.state == GameState.MENU:
                     self.state_manager.state = GameState.SETTINGS
+
+                elif event.key == K_F1 and self.state_manager.state == GameState.MENU:
+                    self.state_manager.state = GameState.HELP
+
+                elif event.key == K_ESCAPE and self.state_manager.state == GameState.HELP:
+                    self.state_manager.state = GameState.MENU
                 
                 elif event.key == K_1:
                     if self.state_manager.state == GameState.MODE_SELECT:
@@ -276,9 +282,16 @@ class PongGame:
             self.input_state["down2"] = self.input_state["down2"] or gp_input["down"]
         
         self.paddle1.move(self.input_state["up1"], self.input_state["down1"])
-        
+
         if self.state_manager.game_mode == "ai":
-            self.paddle2.move(False, False, self.ball.rect.centery)
+            # AI использует предсказание траектории мяча
+            predicted_y = self.paddle2.predict_ball_position(
+                self.ball.rect.centerx,
+                self.ball.rect.centery,
+                self.ball.velocity_x,
+                self.ball.velocity_y
+            )
+            self.paddle2.move(False, False, predicted_y)
         else:
             self.paddle2.move(self.input_state["up2"], self.input_state["down2"])
         
@@ -295,14 +308,14 @@ class PongGame:
             if self.ball.velocity_x < 0:
                 self.ball.bounce_paddle(self.paddle1)
                 self.audio.play_sound("beep")
-                self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, GREEN)
+                self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, self.theme.accent_color)
                 self.shake.start(5, 5)
-        
+
         if pygame.sprite.collide_rect(self.ball, self.paddle2):
             if self.ball.velocity_x > 0:
                 self.ball.bounce_paddle(self.paddle2)
                 self.audio.play_sound("beep")
-                self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, YELLOW)
+                self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, self.theme.accent_color)
                 self.shake.start(5, 5)
         
         # Check scoring
@@ -337,20 +350,29 @@ class PongGame:
         if randint(1, POWERUP_SPAWN_CHANCE) == 1 and len(self.powerups) == 0:
             powerup = PowerUp()
             self.powerups.add(powerup)
-        
-        # Check powerup collisions
+
+        # Check powerup collisions with paddles
         for powerup in self.powerups:
             if not powerup.active:
                 if pygame.sprite.collide_rect(powerup, self.paddle1):
                     powerup.activate(self.paddle1)
                     self.audio.play_sound("powerup")
-                    self.create_particles(powerup.rect.centerx, powerup.rect.centery, LIGHT_BLUE)
+                    self.create_particles(powerup.rect.centerx, powerup.rect.centery, self.theme.accent_color)
                     self.handle_powerup_effect(powerup, self.paddle1, self.paddle2)
                 elif pygame.sprite.collide_rect(powerup, self.paddle2):
                     powerup.activate(self.paddle2)
                     self.audio.play_sound("powerup")
-                    self.create_particles(powerup.rect.centerx, powerup.rect.centery, LIGHT_BLUE)
+                    self.create_particles(powerup.rect.centerx, powerup.rect.centery, self.theme.accent_color)
                     self.handle_powerup_effect(powerup, self.paddle2, self.paddle1)
+        
+        # Check powerup collision with ball (for slow_ball)
+        for powerup in self.powerups:
+            if powerup.active and powerup.type == "slow_ball":
+                if pygame.sprite.collide_rect(powerup, self.ball):
+                    powerup.apply_to_ball(self.ball)
+                    self.audio.play_sound("powerup")
+                    self.create_particles(powerup.rect.centerx, powerup.rect.centery, self.theme.accent_color)
+                    powerup.deactivate()
         
         # Update effects
         self.powerups.update()
@@ -387,7 +409,10 @@ class PongGame:
         
         elif self.state_manager.state == GameState.STATS:
             self.state_manager.draw_stats(self.stats)
-        
+
+        elif self.state_manager.state == GameState.HELP:
+            self.state_manager.draw_help()
+
         elif self.state_manager.state == GameState.SETTINGS:
             self.settings_menu.draw()
         
@@ -446,9 +471,11 @@ class PongGame:
         while running:
             running = self.handle_events()
             self.update_game()
+            self.settings.update()  # Проверка отложенного сохранения настроек
             self.draw()
             self.clock.tick(FPS)
-        
+
+        self.settings.force_save()  # Принудительное сохранение при выходе
         pygame.quit()
         sys.exit()
 
