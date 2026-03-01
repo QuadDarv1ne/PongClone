@@ -1,0 +1,10 @@
+{
+  "music_volume": 0.5,
+  "sfx_volume": 0.7,
+  "difficulty": "Medium",
+  "winning_score": 5,
+  "show_fps": true,
+  "fullscreen": false,
+  "theme": "neon",
+  "touch_controls": false
+}

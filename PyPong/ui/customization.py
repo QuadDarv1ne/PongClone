@@ -47,24 +47,25 @@ class CourtTheme:
 
 class CustomizationManager:
     """Manages visual customization"""
-    
-    def __init__(self, filename: str = "PyPong/data/customization.json"):
-        self.filename = Path(filename)
-        
+
+    def __init__(self, filename: str = "customization.json"):
+        # Use absolute path relative to this module
+        self.filename = Path(__file__).parent.parent / 'data' / filename
+
         # Current selections
         self.player1_paddle_skin = "default"
         self.player2_paddle_skin = "default"
         self.ball_skin = "default"
         self.court_theme = "classic"
-        
+
         # Available options
         self.paddle_skins: Dict[str, PaddleSkin] = {}
         self.ball_skins: Dict[str, BallSkin] = {}
         self.court_themes: Dict[str, CourtTheme] = {}
-        
+
         self._create_default_options()
         self.load_customization()
-        
+
         logger.info("Customization manager initialized")
     
     def _create_default_options(self) -> None:
@@ -196,6 +197,9 @@ class CustomizationManager:
     def save_customization(self) -> None:
         """Save customization settings"""
         try:
+            # Ensure data directory exists
+            self.filename.parent.mkdir(parents=True, exist_ok=True)
+            
             data = {
                 'player1_paddle': self.player1_paddle_skin,
                 'player2_paddle': self.player2_paddle_skin,
@@ -216,12 +220,12 @@ class CustomizationManager:
                     ]
                 }
             }
-            
+
             with open(self.filename, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2)
-            
+
             logger.debug("Customization saved")
-        
+
         except Exception as e:
             logger.error(f"Failed to save customization: {e}", exc_info=True)
     

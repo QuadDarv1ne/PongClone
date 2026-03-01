@@ -2,7 +2,9 @@
 import json
 import os
 from datetime import datetime
+from pathlib import Path
 from PyPong.core.config import *
+from PyPong.core.logger import logger, log_exception
 
 class Level:
     def __init__(self, level_id, name, description, difficulty, modifiers, objectives, unlocked=False):
@@ -34,8 +36,9 @@ class Level:
 
 
 class CampaignManager:
-    def __init__(self, filename="PyPong/data/campaign_progress.json"):
-        self.filename = filename
+    def __init__(self, filename="campaign_progress.json"):
+        # Use absolute path relative to this module
+        self.filename = Path(__file__).parent.parent / 'data' / filename
         self.levels = self._create_levels()
         self.current_level = None
         self.load_progress()
@@ -101,24 +104,28 @@ class CampaignManager:
 
     def load_progress(self):
         """Load campaign progress from file"""
-        if os.path.exists(self.filename):
+        if self.filename.exists():
             try:
-                with open(self.filename, 'r') as f:
+                with open(self.filename, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     for level in self.levels:
                         if str(level.id) in data:
                             level.from_dict(data[str(level.id)])
-            except:
-                pass
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse campaign progress: {e}")
+            except Exception as e:
+                logger.error(f"Failed to load campaign progress: {e}")
 
     def save_progress(self):
         """Save campaign progress to file"""
         try:
+            # Ensure data directory exists
+            self.filename.parent.mkdir(parents=True, exist_ok=True)
             data = {str(level.id): level.to_dict() for level in self.levels}
-            with open(self.filename, 'w') as f:
+            with open(self.filename, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2)
-        except:
-            pass
+        except Exception as e:
+            logger.error(f"Failed to save campaign progress: {e}")
 
     def get_level(self, level_id):
         """Get level by ID"""

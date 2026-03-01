@@ -1,6 +1,7 @@
 import pygame
 from PyPong.core.config import *
 from pathlib import Path
+from PyPong.core.logger import logger
 
 class AudioManager:
     def __init__(self):
@@ -46,8 +47,8 @@ class AudioManager:
         if self.music_loaded:
             try:
                 pygame.mixer.music.play(loops)
-            except:
-                pass
+            except pygame.error as e:
+                logger.error(f"Failed to play music: {e}")
 
     def stop_music(self):
         pygame.mixer.music.stop()
@@ -56,5 +57,5 @@ class AudioManager:
         if sound_name in self.sounds:
             try:
                 self.sounds[sound_name].play()
-            except:
-                pass
+            except pygame.error as e:
+                logger.error(f"Failed to play sound {sound_name}: {e}")

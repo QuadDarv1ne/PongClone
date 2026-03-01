@@ -118,7 +118,7 @@ class Ball(pygame.sprite.Sprite):
         if self.rect.y > surface_rect.bottom and self.direction == DOWNRIGHT:
             self.direction = UPRIGHT
 
-# TODO: Подключение шрифтов для текста
+# Шрифты для текста
 basic_font = pygame.font.SysFont("Helvetica", 120)
 game_over_font_big = pygame.font.SysFont("Helvetica", 72)
 game_over_font_small = pygame.font.SysFont("Helvetica", 50)
@@ -204,12 +204,13 @@ while True:
                 DOWN2 = False
                 UP2 = False
 
-    score_board = basic_font.render(str(player1_score) + "           " + str(player2_score), True, WHITE, BLACK) 
+    score_board = basic_font.render(str(player1_score) + "           " + str(player2_score), True, WHITE, BLACK)
     score_board_rect = score_board.get_rect()
-    score_board_rect.centerx = surface_rect.centerx 
+    score_board_rect.centerx = surface_rect.centerx
     score_board_rect.y = 10
 
-    main_surface.fill(BLACK) # TODO: какого цвета будет backdround данной игры
+    # Очистка экрана чёрным цветом
+    main_surface.fill(BLACK)
 
     main_surface.blit(score_board, score_board_rect)
 
@@ -229,7 +230,7 @@ while True:
     net_rect11 = pygame.Rect(netx, 650, 5, 5) # 12-ый белый прямоугольник ( rectangle )
     net_rect12 = pygame.Rect(netx, 705, 5, 5) # 13-ый белый прямоугольник ( rectangle )
 
-    # TODO: Прорисовка каждого прямоугольника на поле
+    # Прорисовка сетки
     pygame.draw.rect(main_surface, WHITE, (net_rect0.left, net_rect0.top, net_rect0.width, net_rect0.height))
     pygame.draw.rect(main_surface, WHITE, (net_rect1.left, net_rect1.top, net_rect1.width, net_rect1.height))
     pygame.draw.rect(main_surface, WHITE, (net_rect2.left, net_rect2.top, net_rect2.width, net_rect2.height))

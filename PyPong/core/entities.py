@@ -205,6 +205,7 @@ class PowerUp(pygame.sprite.Sprite):
         # Остальные эффекты обрабатываются в game logic
 
     def deactivate(self) -> None:
+        self.active = False
         if self.affected_paddle:
             if self.type == "speed_boost":
                 self.affected_paddle.set_speed(PADDLE_SPEED)

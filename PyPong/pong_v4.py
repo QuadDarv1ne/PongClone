@@ -100,10 +100,10 @@ class PongGame:
                     with open('/proc/version', 'r') as f:
                         if 'android' in f.read().lower():
                             return True
-                except:
+                except (IOError, OSError):
                     pass
             return False
-        except:
+        except Exception:
             return False
 
     def apply_settings(self):

@@ -1,18 +1,27 @@
+"""Stats manager for tracking game statistics"""
 import json
 import os
+from pathlib import Path
 from datetime import datetime
+from PyPong.core.logger import logger, log_exception
+
 
 class StatsManager:
-    def __init__(self, filename="PyPong/data/stats.json"):
-        self.filename = filename
+    def __init__(self, filename="stats.json"):
+        # Use absolute path relative to this module
+        self.filename = Path(__file__).parent.parent / 'data' / filename
         self.stats = self.load_stats()
 
     def load_stats(self):
-        if os.path.exists(self.filename):
+        if self.filename.exists():
             try:
-                with open(self.filename, 'r') as f:
+                with open(self.filename, 'r', encoding='utf-8') as f:
                     return json.load(f)
-            except:
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse stats file: {e}")
+                return self.default_stats()
+            except Exception as e:
+                logger.error(f"Failed to load stats: {e}")
                 return self.default_stats()
         return self.default_stats()
 
@@ -27,12 +36,15 @@ class StatsManager:
             "last_played": None
         }
 
+    @log_exception
     def save_stats(self):
         try:
-            with open(self.filename, 'w') as f:
+            # Ensure data directory exists
+            self.filename.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.filename, 'w', encoding='utf-8') as f:
                 json.dump(self.stats, f, indent=2)
-        except:
-            pass
+        except Exception as e:
+            logger.error(f"Failed to save stats: {e}")
 
     def record_game(self, winner, player1_score, player2_score):
         self.stats["games_played"] += 1

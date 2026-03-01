@@ -226,19 +226,23 @@ def test_localization():
 
     try:
         from PyPong.ui.localization import Localization, t
-        
+
         loc = Localization()
         languages = loc.get_available_languages()
         print(f"✓ {len(languages)} languages supported")
-        
+
         # Test translation
         text_en = loc.get("menu.title")
         print(f"✓ English: {text_en}")
-        
+
         loc.set_language('ru')
         text_ru = loc.get("menu.title")
-        print(f"✓ Russian: {text_ru}")
-        
+        # Encode/decode to handle Windows console encoding issues
+        try:
+            print(f"✓ Russian: {text_ru}")
+        except UnicodeEncodeError:
+            print(f"✓ Russian: {text_ru.encode('utf-8').decode('utf-8')}")
+
         return True
     except Exception as e:
         print(f"✗ Localization test failed: {e}")

@@ -2,7 +2,9 @@
 import json
 import os
 from datetime import datetime, timedelta
+from pathlib import Path
 from random import choice, randint
+from PyPong.core.logger import logger, log_exception
 
 class Challenge:
     def __init__(self, challenge_id, name, description, challenge_type, target, reward, expires_at=None):
@@ -58,8 +60,9 @@ class Challenge:
 
 
 class ChallengeManager:
-    def __init__(self, filename="PyPong/data/challenges.json"):
-        self.filename = filename
+    def __init__(self, filename="challenges.json"):
+        # Use absolute path relative to this module
+        self.filename = Path(__file__).parent.parent / 'data' / filename
         self.daily_challenges = []
         self.weekly_challenges = []
         self.load_challenges()
@@ -67,26 +70,30 @@ class ChallengeManager:
 
     def load_challenges(self):
         """Load challenges from file"""
-        if os.path.exists(self.filename):
+        if self.filename.exists():
             try:
-                with open(self.filename, 'r') as f:
+                with open(self.filename, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     self.daily_challenges = [Challenge.from_dict(c) for c in data.get("daily", [])]
                     self.weekly_challenges = [Challenge.from_dict(c) for c in data.get("weekly", [])]
-            except:
-                pass
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse challenges file: {e}")
+            except Exception as e:
+                logger.error(f"Failed to load challenges: {e}")
 
     def save_challenges(self):
         """Save challenges to file"""
         try:
+            # Ensure data directory exists
+            self.filename.parent.mkdir(parents=True, exist_ok=True)
             data = {
                 "daily": [c.to_dict() for c in self.daily_challenges],
                 "weekly": [c.to_dict() for c in self.weekly_challenges]
             }
-            with open(self.filename, 'w') as f:
+            with open(self.filename, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2)
-        except:
-            pass
+        except Exception as e:
+            logger.error(f"Failed to save challenges: {e}")
 
     def refresh_challenges(self):
         """Refresh expired challenges"""

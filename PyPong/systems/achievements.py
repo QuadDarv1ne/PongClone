@@ -69,9 +69,10 @@ class Achievement:
 
 class AchievementManager:
     """Manages achievements and unlockables"""
-    
-    def __init__(self, filename: str = "PyPong/data/achievements.json"):
-        self.filename = Path(filename)
+
+    def __init__(self, filename: str = "achievements.json"):
+        # Use absolute path relative to this module
+        self.filename = Path(__file__).parent.parent / 'data' / filename
         self.achievements: Dict[str, Achievement] = {}
         self.listeners: Dict[EventType, List[Callable]] = {}
         self._create_achievements()
@@ -234,14 +235,17 @@ class AchievementManager:
     def save_progress(self) -> None:
         """Save achievement progress"""
         try:
+            # Ensure data directory exists
+            self.filename.parent.mkdir(parents=True, exist_ok=True)
+            
             data = {
                 ach_id: ach.to_dict()
                 for ach_id, ach in self.achievements.items()
             }
-            
+
             with open(self.filename, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2)
-            
+
             logger.debug("Achievement progress saved")
         except Exception as e:
             logger.error(f"Failed to save achievements: {e}", exc_info=True)
