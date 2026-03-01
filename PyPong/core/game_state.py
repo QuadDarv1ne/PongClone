@@ -30,12 +30,15 @@ class GameStateManager:
         self.difficulty = "Medium"
         self.game_mode = "ai"
         self.tournament_mode = False
-        
+
         # Fonts
         self.title_font = pygame.font.SysFont(FONT_NAME, 72)
         self.menu_font = pygame.font.SysFont(FONT_NAME, 40)
         self.score_font = pygame.font.SysFont(FONT_NAME, 120)
         self.small_font = pygame.font.SysFont(FONT_NAME, 30)
+        
+        # Пре-рендер сетки для производительности
+        self._net_surface = self._create_net_surface()
 
     def reset_scores(self):
         self.player1_score = 0
@@ -136,9 +139,16 @@ class GameStateManager:
         )
         self.screen.blit(score_text, score_text.get_rect(centerx=WINDOW_WIDTH // 2, y=10))
 
-    def draw_net(self):
+    def _create_net_surface(self) -> pygame.Surface:
+        """Создать пре-рендерную поверхность сетки"""
+        net = pygame.Surface((4, WINDOW_HEIGHT), pygame.SRCALPHA)
         for i in range(0, WINDOW_HEIGHT, 60):
-            pygame.draw.rect(self.screen, WHITE, (WINDOW_WIDTH // 2 - 2, i, 4, 30))
+            pygame.draw.rect(net, WHITE, (0, i, 4, 30))
+        return net
+
+    def draw_net(self):
+        """Отрисовать сетку (blit вместо draw каждый кадр)"""
+        self.screen.blit(self._net_surface, (WINDOW_WIDTH // 2 - 2, 0))
 
     def draw_stats(self, stats_manager):
         self.screen.fill(GRAY)

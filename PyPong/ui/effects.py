@@ -3,21 +3,31 @@ import pygame
 from random import randint, uniform
 from PyPong.core.config import *
 
+# Кэш поверхностей для частиц (оптимизация)
+_particle_surfaces = {}
+
+def _get_particle_surface(size: int, color: tuple) -> pygame.Surface:
+    """Получить закэшированную поверхность для частицы"""
+    key = (size, color)
+    if key not in _particle_surfaces:
+        surf = pygame.Surface([size, size])
+        surf.fill(color)
+        _particle_surfaces[key] = surf
+    return _particle_surfaces[key]
+
 class Particle(pygame.sprite.Sprite):
     def __init__(self, x, y, color=WHITE):
         super().__init__()
         self.size = randint(2, 5)
-        self.image = pygame.Surface([self.size, self.size])
-        self.image.fill(color)
+        self.image = _get_particle_surface(self.size, color)
         self.rect = self.image.get_rect(center=(x, y))
-        
+
         angle = uniform(0, 360)
         speed = uniform(1, 4)
-        import math
         rad = math.radians(angle)
         self.velocity_x = speed * math.cos(rad)
         self.velocity_y = speed * math.sin(rad)
-        
+
         self.lifetime = randint(20, 40)
         self.age = 0
 
@@ -26,16 +36,26 @@ class Particle(pygame.sprite.Sprite):
         self.rect.y += self.velocity_y
         self.velocity_y += 0.2  # Gravity
         self.age += 1
-        
+
         if self.age >= self.lifetime:
             self.kill()
+
+# Кэш для trail
+_trail_surface = None
+
+def _get_trail_surface(size: int) -> pygame.Surface:
+    """Получить закэшированную поверхность для trail"""
+    global _trail_surface
+    if _trail_surface is None or _trail_surface.get_width() != size:
+        _trail_surface = pygame.Surface([size, size])
+        _trail_surface.fill(WHITE)
+        _trail_surface.set_alpha(150)
+    return _trail_surface
 
 class Trail(pygame.sprite.Sprite):
     def __init__(self, x, y, size=8):
         super().__init__()
-        self.image = pygame.Surface([size, size])
-        self.image.fill(WHITE)
-        self.image.set_alpha(150)
+        self.image = _get_trail_surface(size)
         self.rect = self.image.get_rect(center=(x, y))
         self.lifetime = 10
         self.age = 0
@@ -44,7 +64,7 @@ class Trail(pygame.sprite.Sprite):
         self.age += 1
         alpha = int(150 * (1 - self.age / self.lifetime))
         self.image.set_alpha(max(0, alpha))
-        
+
         if self.age >= self.lifetime:
             self.kill()
 
