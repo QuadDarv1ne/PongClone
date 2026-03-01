@@ -65,6 +65,8 @@ class SettingsMenu:
             "music_volume",
             "sfx_volume",
             "show_fps",
+            "fullscreen",
+            "theme",
             "back"
         ]
 
@@ -87,6 +89,12 @@ class SettingsMenu:
             elif option == "show_fps":
                 val = "ON" if self.settings.get("show_fps", False) else "OFF"
                 text = f"Show FPS: {val}"
+            elif option == "fullscreen":
+                val = "ON" if self.settings.get("fullscreen", False) else "OFF"
+                text = f"Fullscreen: {val}"
+            elif option == "theme":
+                theme = self.settings.get("theme", "classic").title()
+                text = f"Theme: {theme}"
             elif option == "back":
                 text = "Back to Menu"
             
@@ -131,3 +139,14 @@ class SettingsMenu:
         elif option == "show_fps":
             current = self.settings.get("show_fps", False)
             self.settings.set("show_fps", not current)
+        
+        elif option == "fullscreen":
+            current = self.settings.get("fullscreen", False)
+            self.settings.set("fullscreen", not current)
+        
+        elif option == "theme":
+            themes = ["classic", "neon", "retro", "ocean"]
+            current = self.settings.get("theme", "classic")
+            idx = themes.index(current) if current in themes else 0
+            new_idx = (idx + direction) % len(themes)
+            self.settings.set("theme", themes[new_idx])

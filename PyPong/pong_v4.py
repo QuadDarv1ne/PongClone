@@ -12,17 +12,24 @@ from stats import StatsManager
 from settings import Settings
 from ui import PowerUpIndicator, FPSCounter, SettingsMenu
 from tournament import Tournament
+from themes import get_theme
 
 class PongGame:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.settings = Settings()
+        
+        # Setup display
+        flags = pygame.FULLSCREEN if self.settings.get("fullscreen", False) else 0
+        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), flags)
         self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Enhanced Pong")
         self.clock = pygame.time.Clock()
         
+        # Theme
+        self.theme = get_theme(self.settings.get("theme", "classic"))
+        
         # Managers
-        self.settings = Settings()
         self.state_manager = GameStateManager(self.game_surface)
         self.audio = AudioManager()
         self.stats = StatsManager()
@@ -41,6 +48,7 @@ class PongGame:
         
         # Apply settings
         self.apply_settings()
+        self.apply_theme()
         
         # Game objects
         self.paddle1 = None
@@ -63,12 +71,35 @@ class PongGame:
         pygame.mixer.music.set_volume(self.settings.get("music_volume", 0.5))
         for sound in self.audio.sounds.values():
             sound.set_volume(self.settings.get("sfx_volume", 0.7))
+        
+        # Check fullscreen toggle
+        if self.settings.get("fullscreen", False):
+            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.FULLSCREEN)
+        else:
+            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        
+        # Check theme change
+        new_theme = get_theme(self.settings.get("theme", "classic"))
+        if new_theme.name != self.theme.name:
+            self.theme = new_theme
+            self.apply_theme()
+
+    def apply_theme(self):
+        if hasattr(self, 'paddle1') and self.paddle1:
+            self.paddle1.color = self.theme.paddle1_color
+            self.paddle1.image.fill(self.theme.paddle1_color)
+        if hasattr(self, 'paddle2') and self.paddle2:
+            self.paddle2.color = self.theme.paddle2_color
+            self.paddle2.image.fill(self.theme.paddle2_color)
+        if hasattr(self, 'ball') and self.ball:
+            self.ball.image.fill(self.theme.ball_color)
 
     def init_game_objects(self):
         is_ai = self.state_manager.game_mode == "ai"
-        self.paddle1 = Paddle(1, is_ai=False, color=GREEN)
-        self.paddle2 = Paddle(2, is_ai=is_ai, color=YELLOW)
+        self.paddle1 = Paddle(1, is_ai=False, color=self.theme.paddle1_color)
+        self.paddle2 = Paddle(2, is_ai=is_ai, color=self.theme.paddle2_color)
         self.ball = Ball()
+        self.ball.image.fill(self.theme.ball_color)
         self.all_sprites = pygame.sprite.Group(self.paddle1, self.paddle2, self.ball)
         self.powerups = pygame.sprite.Group()
         
@@ -91,6 +122,7 @@ class PongGame:
                 result = self.settings_menu.handle_input(event)
                 if result == "back":
                     self.state_manager.state = GameState.MENU
+                    self.apply_settings()
                 continue
             
             if event.type == KEYDOWN:
@@ -261,7 +293,7 @@ class PongGame:
             self.particles.add(particle)
 
     def draw(self):
-        self.game_surface.fill(GRAY)
+        self.game_surface.fill(self.theme.bg_color)
         
         if self.state_manager.state == GameState.MENU:
             self.state_manager.draw_menu()

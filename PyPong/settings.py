@@ -22,7 +22,8 @@ class Settings:
             "difficulty": "Medium",
             "winning_score": 5,
             "show_fps": False,
-            "fullscreen": False
+            "fullscreen": False,
+            "theme": "classic"
         }
 
     def save_settings(self):
