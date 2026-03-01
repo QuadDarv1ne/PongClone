@@ -238,7 +238,7 @@ class Localization:
     
     def _save_translation(self, lang_code: str, translations: dict) -> None:
         """Save translation file"""
-        locale_dir = Path('PyPong/locales')
+        locale_dir = Path(__file__).parent.parent / 'locales'
         locale_dir.mkdir(exist_ok=True)
         
         try:

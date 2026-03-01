@@ -148,9 +148,9 @@ class ReplayRecorder:
         if not self.metadata or not self.frames:
             logger.warning("No replay data to save")
             return False
-        
+
         # Create replays directory
-        replay_dir = Path("PyPong/data/replays")
+        replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
         replay_dir.mkdir(exist_ok=True)
         
         # Generate filename
@@ -289,7 +289,7 @@ class ReplayManager:
     
     def list_replays(self) -> List[Dict[str, Any]]:
         """List all saved replays"""
-        replay_dir = Path("PyPong/data/replays")
+        replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
         if not replay_dir.exists():
             return []
         
@@ -314,7 +314,7 @@ class ReplayManager:
     
     def delete_replay(self, replay_id: str) -> bool:
         """Delete a replay"""
-        replay_dir = Path("PyPong/data/replays")
+        replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
         filepath = replay_dir / f"replay_{replay_id}.json.gz"
         
         try:
@@ -341,7 +341,7 @@ class ReplayManager:
         total_duration = sum(r['duration'] for r in replays)
         
         # Calculate total size
-        replay_dir = Path("PyPong/data/replays")
+        replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
         total_size = sum(
             f.stat().st_size
             for f in replay_dir.glob("replay_*.json.gz")

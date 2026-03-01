@@ -116,7 +116,7 @@ class SoundThemeManager:
         
         # Load sounds if not loaded
         if not isinstance(list(theme.sounds.values())[0], pygame.mixer.Sound):
-            base_path = Path("PyPong/assets/sounds")
+            base_path = Path(__file__).parent.parent / 'assets' / 'sounds'
             if not theme.load_sounds(base_path):
                 logger.warning(f"Some sounds failed to load for theme: {theme.name}")
         
@@ -131,7 +131,7 @@ class SoundThemeManager:
     
     def _load_music(self, music_file: str) -> None:
         """Load background music"""
-        music_path = Path("PyPong/assets/music") / music_file
+        music_path = Path(__file__).parent.parent / 'assets' / 'music' / music_file
         
         if not music_path.exists():
             logger.warning(f"Music file not found: {music_path}")
