@@ -3,7 +3,7 @@ import os
 import pygame
 
 class Settings:
-    def __init__(self, filename="settings.json"):
+    def __init__(self, filename="PyPong/data/settings.json"):
         self.filename = filename
         self.data = self.load_settings()
         self._pending_save = False

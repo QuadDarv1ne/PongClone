@@ -3,18 +3,18 @@ import sys
 from pygame.locals import *
 from random import randint
 
-from config import *
-from entities import Paddle, Ball, PowerUp
-from game_state import GameState, GameStateManager
-from audio import AudioManager
-from effects import Particle, Trail, ScreenShake, GoalAnimation
-from stats import StatsManager
-from settings import Settings
-from ui import PowerUpIndicator, FPSCounter, SettingsMenu
-from tournament import Tournament
-from themes import get_theme
-from gamepad import GamepadManager
-from mobile import TouchControls, AdaptiveScreen
+from PyPong.core.config import *
+from PyPong.core.entities import Paddle, Ball, PowerUp
+from PyPong.core.game_state import GameState, GameStateManager
+from PyPong.systems.audio import AudioManager
+from PyPong.ui.effects import Particle, Trail, ScreenShake, GoalAnimation
+from PyPong.systems.stats import StatsManager
+from PyPong.systems.settings import Settings
+from PyPong.ui.ui import PowerUpIndicator, FPSCounter, SettingsMenu
+from PyPong.content.tournament import Tournament
+from PyPong.ui.themes import get_theme
+from PyPong.gamepad import GamepadManager
+from PyPong.mobile import TouchControls, AdaptiveScreen
 
 class PongGame:
     def __init__(self):

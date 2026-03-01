@@ -1,7 +1,7 @@
 import math
 import pygame
 from random import randint, uniform
-from config import *
+from PyPong.core.config import *
 
 class Particle(pygame.sprite.Sprite):
     def __init__(self, x, y, color=WHITE):

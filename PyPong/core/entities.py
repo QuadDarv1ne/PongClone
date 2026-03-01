@@ -2,7 +2,7 @@ import math
 from typing import Optional, Tuple, Dict, Any
 import pygame
 from random import randint, choice
-from config import *
+from PyPong.core.config import *
 
 
 class Paddle(pygame.sprite.Sprite):

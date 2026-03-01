@@ -1,6 +1,6 @@
 import pygame
 from enum import Enum
-from config import *
+from PyPong.core.config import *
 
 class GameState(Enum):
     MENU = 1
