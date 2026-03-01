@@ -60,7 +60,7 @@ class Menu:
     def __init__(self, screen: Surface, title: str = "menu.title"):
         self.screen = screen
         self.loc = get_localization()
-        self.theme = get_theme()
+        self.theme = get_theme("dark")  # Default theme
         
         # Menu state
         self.items: List[MenuItem] = []
