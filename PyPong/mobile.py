@@ -78,12 +78,14 @@ class AdaptiveScreen:
         self.current_height = WINDOW_HEIGHT
         self.scale_x = 1.0
         self.scale_y = 1.0
+        self._needs_resize = False
 
     def update_resolution(self, width, height):
         self.current_width = width
         self.current_height = height
         self.scale_x = width / self.base_width
         self.scale_y = height / self.base_height
+        self._needs_resize = (self.scale_x != 1.0 or self.scale_y != 1.0)
 
     def scale_position(self, x, y):
         return int(x * self.scale_x), int(y * self.scale_y)
@@ -92,6 +94,6 @@ class AdaptiveScreen:
         return int(width * self.scale_x), int(height * self.scale_y)
 
     def get_scaled_surface(self, surface):
-        if self.scale_x == 1.0 and self.scale_y == 1.0:
+        if not self._needs_resize:
             return surface
-        return pygame.transform.scale(surface, (self.current_width, self.current_height))
+        return pygame.transform.smoothscale(surface, (self.current_width, self.current_height))

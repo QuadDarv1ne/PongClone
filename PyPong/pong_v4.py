@@ -295,9 +295,9 @@ class PongGame:
         else:
             self.paddle2.move(self.input_state["up2"], self.input_state["down2"])
         
-        # Move ball and create trail
+        # Move ball and create trail (ограничено для производительности)
         self.ball.move()
-        if randint(1, 2) == 1:
+        if len(self.trails) < 20 and randint(1, 4) == 1:
             trail = Trail(self.ball.rect.centerx, self.ball.rect.centery)
             self.trails.add(trail)
         
@@ -382,9 +382,11 @@ class PongGame:
         self.goal_anim.update()
 
     def create_particles(self, x, y, color):
-        for _ in range(10):
-            particle = Particle(x, y, color)
-            self.particles.add(particle)
+        # Ограничение количества частиц для производительности
+        if len(self.particles) < 50:
+            for _ in range(8):
+                particle = Particle(x, y, color)
+                self.particles.add(particle)
 
     def handle_powerup_effect(self, powerup, collector, opponent):
         if powerup.type == "multi_ball":
@@ -425,14 +427,13 @@ class PongGame:
             self.particles.draw(self.game_surface)
             self.powerup_indicator.draw(self.game_surface, self.powerups, self.paddle1, self.paddle2)
             self.goal_anim.draw(self.game_surface)
-            
+
             if self.settings.get("touch_controls", False):
                 self.touch.draw(self.game_surface)
-            
-            if self.state_manager.state == GameState.PLAYING:
-                if self.state_manager.tournament_mode:
-                    self.tournament.draw_status(self.game_surface)
-            
+
+            if self.state_manager.tournament_mode:
+                self.tournament.draw_status(self.game_surface)
+
             if self.settings.get("show_fps", False):
                 self.fps_counter.draw(self.game_surface, self.clock)
         
