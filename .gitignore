@@ -20,6 +20,10 @@ wheels/
 .installed.cfg
 *.egg
 
+# Buildozer
+.buildozer/
+bin/
+
 # Virtual Environment
 venv/
 ENV/
