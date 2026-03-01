@@ -21,8 +21,18 @@ class PongGame:
         pygame.init()
         self.settings = Settings()
         
+        # Detect platform
+        self.is_mobile = self._detect_mobile()
+        
         # Setup display
-        flags = pygame.FULLSCREEN if self.settings.get("fullscreen", False) else pygame.RESIZABLE
+        if self.is_mobile:
+            # Mobile: start with fullscreen and touch controls enabled
+            self.settings.set("fullscreen", True)
+            self.settings.set("touch_controls", True)
+            flags = pygame.FULLSCREEN
+        else:
+            flags = pygame.FULLSCREEN if self.settings.get("fullscreen", False) else pygame.RESIZABLE
+        
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), flags)
         self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Enhanced Pong")
@@ -74,6 +84,23 @@ class PongGame:
         
         self.init_game_objects()
 
+    def _detect_mobile(self):
+        """Detect if running on mobile platform"""
+        try:
+            import platform
+            system = platform.system().lower()
+            # Check for Android
+            if system == 'linux':
+                try:
+                    with open('/proc/version', 'r') as f:
+                        if 'android' in f.read().lower():
+                            return True
+                except:
+                    pass
+            return False
+        except:
+            return False
+
     def apply_settings(self):
         pygame.mixer.music.set_volume(self.settings.get("music_volume", 0.5))
         for sound in self.audio.sounds.values():
@@ -83,7 +110,10 @@ class PongGame:
         if self.settings.get("fullscreen", False):
             self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.FULLSCREEN)
         else:
-            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+            if not self.is_mobile:
+                self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+            else:
+                self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.FULLSCREEN)
         
         # Check theme change
         new_theme = get_theme(self.settings.get("theme", "classic"))
@@ -126,8 +156,9 @@ class PongGame:
             
             # Handle window resize
             if event.type == pygame.VIDEORESIZE:
-                self.adaptive_screen.update_resolution(event.w, event.h)
-                self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+                if not self.is_mobile:
+                    self.adaptive_screen.update_resolution(event.w, event.h)
+                    self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
             
             # Touch controls
             if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):

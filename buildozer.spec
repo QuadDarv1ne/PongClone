@@ -20,13 +20,25 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,pygame
+requirements = python3,pygame_sdl2
 
 # (str) Supported orientation (landscape, portrait or all)
 orientation = landscape
 
+# (str) Presplash background color (for new android toolchain)
+android.presplash_color = #808080
+
+# (str) Icon of the application
+#android.icon.filename = %(source.dir)s/data/icon.png
+
+# (str) Presplash of the application
+#android.presplash.filename = %(source.dir)s/data/presplash.png
+
 # (bool) Indicate if the application should be fullscreen or not
 fullscreen = 1
+
+# (string) Presplash background color (for old android toolchain)
+#android.presplash_color = #FFFFFF
 
 # (list) Permissions
 android.permissions = INTERNET,VIBRATE,WRITE_EXTERNAL_STORAGE
