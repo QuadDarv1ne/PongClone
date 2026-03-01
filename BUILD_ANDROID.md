@@ -2,81 +2,199 @@
 
 ## Требования
 
-- Linux или WSL (Windows Subsystem for Linux)
-- Python 3.8+
-- Java JDK 8 или 11
-- Android SDK и NDK
+**ВАЖНО:** Buildozer работает только на Linux. На Windows используй WSL 2.
 
-## Установка Buildozer
+### Для Windows (WSL 2)
+
+1. **Установка WSL 2:**
+
+```powershell
+# В PowerShell от администратора
+wsl --install
+
+# Или обновление до WSL 2
+wsl --set-default-version 2
+wsl --install -d Ubuntu-22.04
+
+# Перезагрузи компьютер
+```
+
+2. **Проверка версии WSL:**
+
+```powershell
+wsl --version
+# Должно показать WSL версии 2.x.x
+```
+
+3. **Запуск Ubuntu:**
+- Открой "Ubuntu" из меню Пуск
+- Создай пользователя при первом запуске
+
+### Для Linux
+
+- Ubuntu 20.04+ или Debian 11+
+- Python 3.8+
+- Java JDK 11 или 17
+- Android SDK и NDK (скачаются автоматически)
+
+## Установка зависимостей (в WSL/Linux)
 
 ```bash
-# Установка зависимостей (Ubuntu/Debian)
+# Обновление системы
 sudo apt update
-sudo apt install -y git zip unzip openjdk-11-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+sudo apt upgrade -y
 
-# Установка Buildozer
-pip3 install --user buildozer
-pip3 install --user cython
+# Установка необходимых пакетов
+sudo apt install -y \
+    git zip unzip openjdk-17-jdk \
+    python3-pip autoconf libtool pkg-config \
+    zlib1g-dev libncurses5-dev libncursesw5-dev \
+    libtinfo5 cmake libffi-dev libssl-dev \
+    build-essential ccache libsqlite3-dev \
+    libffi-dev libssl-dev python3-dev
+
+# Установка Buildozer и Cython
+pip3 install --user --upgrade buildozer cython
+
+# Добавление в PATH (добавь в ~/.bashrc)
+echo 'export PATH=$PATH:~/.local/bin' >> ~/.bashrc
+source ~/.bashrc
+```
+
+## Копирование проекта в WSL (только для Windows)
+
+```bash
+# В WSL терминале
+cd ~
+
+# Копирование из Windows в WSL
+cp -r /mnt/c/Users/maksi/OneDrive/Documents/GitHub/PongClone .
+
+# Переход в проект
+cd PongClone
 ```
 
 ## Сборка APK
 
 ```bash
-# Перейти в корень проекта
-cd PongClone
-
-# Первая сборка (долго, скачивает SDK/NDK)
+# Первая сборка (долго, ~30-60 минут, скачивает SDK/NDK)
 buildozer android debug
 
-# Последующие сборки
+# Последующие сборки (быстрее, ~5-10 минут)
 buildozer android debug
 
-# Сборка release версии (для публикации)
+# Сборка release версии (для публикации в Google Play)
 buildozer android release
 ```
 
 ## Результат
 
 APK файл будет в папке `bin/`:
-- `enhancedpong-1.0-arm64-v8a-debug.apk` - для установки на устройство
-- `enhancedpong-1.0-armeabi-v7a-debug.apk` - для старых устройств
+- `enhancedpong-1.0-arm64-v8a-debug.apk` - для современных устройств (64-bit)
+- `enhancedpong-1.0-armeabi-v7a-debug.apk` - для старых устройств (32-bit)
 
 ## Установка на устройство
 
-```bash
-# Через ADB
-adb install bin/enhancedpong-1.0-arm64-v8a-debug.apk
+### Через ADB (Android Debug Bridge)
 
-# Или скопировать APK на устройство и установить вручную
+```bash
+# Установка ADB в WSL/Linux
+sudo apt install adb
+
+# Включи "Отладка по USB" на Android устройстве
+# Подключи устройство к компьютеру
+
+# Проверка подключения
+adb devices
+
+# Установка APK
+adb install bin/enhancedpong-1.0-arm64-v8a-debug.apk
 ```
 
-## Проблемы
+### Вручную
 
-### Ошибка "Command failed"
-- Проверьте наличие Java JDK: `java -version`
-- Установите правильную версию NDK в buildozer.spec
+1. Скопируй APK из WSL в Windows:
+```bash
+# В WSL
+cp bin/*.apk /mnt/c/Users/maksi/Downloads/
+```
+
+2. Перенеси APK на Android устройство
+3. Открой файл на устройстве и установи
+
+## Проблемы и решения
+
+### Ошибка "FancyURLopener" на Windows
+- Buildozer не работает на Windows напрямую
+- Используй WSL 2 (инструкция выше)
+
+### Ошибка "Command failed" или "Java not found"
+```bash
+# Проверь Java
+java -version
+
+# Если не установлена
+sudo apt install openjdk-17-jdk
+```
 
 ### Долгая первая сборка
-- Нормально, скачивается ~2GB (SDK, NDK, зависимости)
-- Последующие сборки быстрее
+- Нормально, скачивается ~2-3GB (SDK, NDK, зависимости)
+- Последующие сборки намного быстрее
+- Используй `ccache` для ускорения
 
 ### Ошибки с правами
-- Не запускайте buildozer от root
-- Используйте `--user` при установке pip пакетов
+```bash
+# Не запускай buildozer от root
+# Используй --user при установке pip пакетов
+pip3 install --user buildozer
+```
 
-## Альтернатива - Pygame-CE
+### Недостаточно места в WSL
+```bash
+# Проверка места
+df -h
 
-Если buildozer не работает, используйте Pygame-CE:
+# Очистка кеша buildozer
+rm -rf .buildozer
+```
+
+## Оптимизация сборки
 
 ```bash
-pip install pygame-ce
-# Pygame-CE имеет лучшую поддержку Android
+# Использование ccache для ускорения
+export USE_CCACHE=1
+export NDK_CCACHE=ccache
+
+# Сборка только для одной архитектуры (быстрее)
+# Отредактируй buildozer.spec:
+# android.archs = arm64-v8a
 ```
 
 ## Тестирование
 
-1. Включите "Отладка по USB" на Android устройстве
-2. Подключите устройство к компьютеру
-3. Установите APK через ADB
-4. Запустите игру на устройстве
-5. Включите "Touch Controls" в настройках игры
+1. Включи "Отладка по USB" на Android устройстве
+2. Подключи устройство к компьютеру
+3. Установи APK через ADB или вручную
+4. Запусти игру на устройстве
+5. Touch-управление включится автоматически
+
+## GitHub Actions (автоматическая сборка)
+
+Для автоматической сборки APK при каждом коммите используй GitHub Actions.
+Создай файл `.github/workflows/android.yml` (спроси, если нужно).
+
+## Полезные команды
+
+```bash
+# Очистка сборки
+buildozer android clean
+
+# Просмотр логов
+buildozer android debug | tee build.log
+
+# Обновление buildozer
+pip3 install --user --upgrade buildozer
+
+# Проверка версии
+buildozer --version
+```
