@@ -214,36 +214,10 @@ while True:
 
     main_surface.blit(score_board, score_board_rect)
 
-    netx = surface_rect.centerx # Центрирование сетки
-
-    net_rect0 = pygame.Rect(netx, 0, 5, 5)    # 1-ый белый прямоугольник ( rectangle )
-    net_rect1 = pygame.Rect(netx, 60, 5, 5)   # 2-ой белый прямоугольник ( rectangle )
-    net_rect2 = pygame.Rect(netx, 120, 5, 5)  # 3-ий белый прямоугольник ( rectangle )
-    net_rect3 = pygame.Rect(netx, 180, 5, 5)  # 4-ый белый прямоугольник ( rectangle )
-    net_rect4 = pygame.Rect(netx, 240, 5, 5)  # 5-ый белый прямоугольник ( rectangle )
-    net_rect5 = pygame.Rect(netx, 300, 5, 5)  # 6-ой белый прямоугольник ( rectangle )
-    net_rect6 = pygame.Rect(netx, 360, 5, 5)  # 7-ой белый прямоугольник ( rectangle )
-    net_rect7 = pygame.Rect(netx, 420, 5, 5)  # 8-ой белый прямоугольник ( rectangle )
-    net_rect8 = pygame.Rect(netx, 480, 5, 5)  # 9-ый белый прямоугольник ( rectangle )
-    net_rect9 = pygame.Rect(netx, 540, 5, 5)  # 10-ый белый прямоугольник ( rectangle )
-    net_rect10 = pygame.Rect(netx, 595, 5, 5) # 11-ый белый прямоугольник ( rectangle )
-    net_rect11 = pygame.Rect(netx, 650, 5, 5) # 12-ый белый прямоугольник ( rectangle )
-    net_rect12 = pygame.Rect(netx, 705, 5, 5) # 13-ый белый прямоугольник ( rectangle )
-
     # Прорисовка сетки
-    pygame.draw.rect(main_surface, WHITE, (net_rect0.left, net_rect0.top, net_rect0.width, net_rect0.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect1.left, net_rect1.top, net_rect1.width, net_rect1.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect2.left, net_rect2.top, net_rect2.width, net_rect2.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect3.left, net_rect3.top, net_rect3.width, net_rect3.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect4.left, net_rect4.top, net_rect4.width, net_rect4.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect5.left, net_rect5.top, net_rect5.width, net_rect5.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect6.left, net_rect6.top, net_rect6.width, net_rect6.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect7.left, net_rect7.top, net_rect7.width, net_rect7.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect8.left, net_rect8.top, net_rect8.width, net_rect8.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect9.left, net_rect9.top, net_rect9.width, net_rect9.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect10.left, net_rect10.top, net_rect10.width, net_rect10.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect11.left, net_rect11.top, net_rect11.width, net_rect11.height))
-    pygame.draw.rect(main_surface, WHITE, (net_rect12.left, net_rect12.top, net_rect12.width, net_rect12.height))
+    netx = surface_rect.centerx
+    for i in range(0, 720, 60):
+        pygame.draw.rect(main_surface, WHITE, (netx, i, 5, 5))
 
     all_sprites.draw(main_surface) # прорисовка всех спрайтов
 
