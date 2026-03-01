@@ -1,3 +1,4 @@
+import math
 import pygame
 from random import randint, uniform
 from config import *
