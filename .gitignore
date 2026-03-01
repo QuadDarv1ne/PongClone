@@ -49,7 +49,6 @@ desktop.ini
 # Logs
 *.log
 
-# AI scripts (temporary)
-duckduckgo-ai.py
-gigachat-cli.py
-test_ai/
+# AI scripts (временные, но test_ai/ отслеживается)
+/duckduckgo-ai.py
+/gigachat-cli.py
