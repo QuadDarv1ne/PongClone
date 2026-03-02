@@ -64,9 +64,13 @@ class Paddle(pygame.sprite.Sprite):
     def predict_ball_position(self, ball_x: float, ball_y: float, ball_velocity_x: float, ball_velocity_y: float) -> float:
         """Предсказать Y-позицию мяча, когда он достигнет ракетки AI"""
         # Если мяч летит не к нам, возвращаем текущую позицию
-        if self.player_number == 1 and ball_velocity_x < 0:
+        if self.player_number == 1 and ball_velocity_x > 0:
             return ball_y
-        if self.player_number == 2 and ball_velocity_x > 0:
+        if self.player_number == 2 and ball_velocity_x < 0:
+            return ball_y
+
+        # Если скорость мяча нулевая, возвращаем текущую позицию
+        if abs(ball_velocity_x) < 0.1:
             return ball_y
 
         # Симулируем полёт мяча до ракетки
@@ -74,10 +78,16 @@ class Paddle(pygame.sprite.Sprite):
         sim_y = ball_y
         sim_vy = ball_velocity_y
 
-        target_x = self.rect.centerx if self.player_number == 2 else self.rect.centerx
+        target_x = self.rect.centerx
+
+        # Ограничение итераций для предотвращения зацикливания
+        max_iterations = 1000
+        iterations = 0
 
         # Шаг симуляции
-        while True:
+        while iterations < max_iterations:
+            iterations += 1
+
             # Проверяем, достиг ли мяч ракетки
             if self.player_number == 2 and sim_x >= target_x:
                 return sim_y
