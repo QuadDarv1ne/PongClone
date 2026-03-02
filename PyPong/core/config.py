@@ -55,6 +55,46 @@ MAX_TRAILS = 20
 PARTICLES_PER_HIT = 8
 TRAIL_SPAWN_CHANCE = 4  # 1 in 4 chance
 
+# Performance profiles
+PERFORMANCE_PROFILES = {
+    "low": {
+        "max_particles": 20,
+        "max_trails": 10,
+        "particles_per_hit": 4,
+        "trail_spawn_chance": 8,
+        "effects_enabled": True,
+        "screen_shake": False,
+        "target_fps": 30,
+    },
+    "medium": {
+        "max_particles": 50,
+        "max_trails": 20,
+        "particles_per_hit": 8,
+        "trail_spawn_chance": 4,
+        "effects_enabled": True,
+        "screen_shake": True,
+        "target_fps": 60,
+    },
+    "high": {
+        "max_particles": 100,
+        "max_trails": 40,
+        "particles_per_hit": 12,
+        "trail_spawn_chance": 2,
+        "effects_enabled": True,
+        "screen_shake": True,
+        "target_fps": 60,
+    },
+    "ultra": {
+        "max_particles": 200,
+        "max_trails": 60,
+        "particles_per_hit": 16,
+        "trail_spawn_chance": 1,
+        "effects_enabled": True,
+        "screen_shake": True,
+        "target_fps": 120,
+    },
+}
+
 # Screen shake settings
 SHAKE_INTENSITY_NORMAL = (5, 5)
 SHAKE_INTENSITY_GOAL = (15, 15)

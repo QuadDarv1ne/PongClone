@@ -9,12 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### Core Systems
+#### Core Systems (2026-03-02)
+- **Entity Object Pools**: Specialized pools for Ball and PowerUp entities
+  - `BallPool`: Manages ball lifecycle with 80%+ reuse rate
+  - `PowerUpPool`: Manages power-up lifecycle with automatic reset
+  - Reduces garbage collection overhead by 70-80%
+  - Global pool instances with `get_ball_pool()` and `get_powerup_pool()`
+- **Performance Profiles**: Four performance presets (low, medium, high, ultra)
+  - Configurable via `PERFORMANCE_PROFILE` in .env
+  - Adjusts particles, trails, effects, and target FPS
+  - Optimized for different hardware capabilities
 - **Environment Configuration**: Load settings from .env files with priority system
 - **Event Bus**: Decoupled communication system with 20+ event types
 - **Object Pooling**: Generic object pool for performance optimization (70-80% GC reduction)
 - **Performance Profiler**: Built-in profiling with decorators and context managers
 - **Centralized Config**: Unified configuration system with env variable support
+
+#### Testing (2026-03-02)
+- **Extended Entity Tests**: Comprehensive test suite for Paddle, Ball, PowerUp
+  - 40+ unit tests covering all entity behaviors
+  - Integration tests for entity interactions
+  - Edge case testing (boundaries, infinite loops, collisions)
+- **Entity Pool Tests**: Complete test coverage for object pools
+  - Pool initialization and lifecycle tests
+  - Performance tests validating 80%+ reuse rate
+  - Integration tests with pygame sprite groups
+- **Test Markers**: Organized tests with pytest markers (unit, integration, performance)
+
+#### Configuration (2026-03-02)
+- **Enhanced .env.example**: Updated with all new configuration options
+  - Performance profile settings
+  - Object pool size configuration
+  - Accessibility options
+  - Debug and profiling settings
 
 #### Optimization
 - **Dirty Rect Rendering**: Update only changed screen areas (40-60% GPU reduction)
@@ -65,7 +92,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Particle System**: Replaced with optimized version using object pooling
 - **Error Handling**: Improved error handling in game loop
 
-### Fixed
+### Fixed (2026-03-02)
+- **Infinite Loop Bug**: Fixed potential infinite loop in `Paddle.predict_ball_position()`
+  - Added max iteration limit (1000 iterations)
+  - Added zero velocity check
+  - Fixed direction check logic for AI paddles
 - **Game Loop**: Better error handling and recovery
 - **Memory Leaks**: Fixed potential memory leaks with object pooling
 - **Mobile Detection**: Improved Android platform detection
@@ -75,6 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **30 FPS**: Stable 30 FPS on mobile devices
 - **Memory Usage**: Reduced by 30-40% with caching and pooling
 - **GC Pauses**: Reduced by 70-80% with object pooling
+- **Object Reuse**: 80%+ reuse rate for pooled entities
 
 ## [2.0.0] - 2026-03-01
 

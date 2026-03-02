@@ -80,10 +80,10 @@ class PongGame:
                 self.settings.set("touch_controls", True)
                 flags = pygame.FULLSCREEN
             else:
-                flags = pygame.FULLSCREEN if self.settings.get("fullscreen", False) else pygame.RESIZABLE
-            
+                flags = pygame.RESIZABLE if self.settings.get("fullscreen", False) else 0
+
             self.screen = pygame.display.set_mode(
-                (WINDOW_WIDTH, WINDOW_HEIGHT), 
+                (WINDOW_WIDTH, WINDOW_HEIGHT),
                 flags
             )
             self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -180,35 +180,25 @@ class PongGame:
         try:
             import platform
             import os
-            
+
             system = platform.system().lower()
-            
+
             # Android detection
             if system == 'linux':
                 try:
-                    # Check for Android in /proc/version
                     with open('/proc/version', 'r') as f:
                         if 'android' in f.read().lower():
                             return True
                 except (IOError, OSError):
                     pass
-                
-                # Check for Android environment variables
                 if os.environ.get('ANDROID_ROOT') or os.environ.get('ANDROID_DATA'):
                     return True
-            
-            # iOS detection (if pygame-ce supports it in future)
-            if system == 'darwin':
-                # Check if running on iOS (not macOS)
+            # iOS detection
+            elif system == 'darwin':
                 machine = platform.machine().lower()
                 if 'iphone' in machine or 'ipad' in machine:
                     return True
-            
-            # Check for touch screen on Windows/Linux tablets
-            if hasattr(pygame, 'FINGERDOWN'):
-                # If pygame supports touch events, assume mobile/tablet
-                return True
-            
+
             return False
         except Exception as e:
             logger.warning(f"Platform detection failed: {e}")
@@ -308,13 +298,14 @@ class PongGame:
             GameState.HELP: GameState.MENU,
             GameState.MODE_SELECT: GameState.MENU,
         }
-        
+
         new_state = transitions.get(state)
         if new_state:
             self.state_manager.state = new_state
             if new_state == GameState.MENU:
                 self.game_loop.cleanup_game_objects()
-        else:
+        elif state == GameState.MENU:
+            logger.info("ESC pressed in MENU, exiting game")
             raise SystemExit()
     
     @log_exception
@@ -439,6 +430,7 @@ class PongGame:
         """Запустить игровой цикл"""
         running = True
         frame_count = 0
+        logger.info(f"Starting game loop, state: {self.state_manager.state}")
         try:
             while running:
                 running = self.handle_events()
@@ -447,8 +439,7 @@ class PongGame:
                 self.draw()
                 self.clock.tick(FPS)
                 frame_count += 1
-                
-                # Логирование каждые 100 кадров
+
                 if frame_count % 100 == 0:
                     fps = self.clock.get_fps()
                     logger.debug(f"Frame: {frame_count}, FPS: {fps:.1f}, State: {self.state_manager.state}")

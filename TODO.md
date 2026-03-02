@@ -3,21 +3,25 @@
 ## 🔴 Критично (сделать сейчас)
 
 ### Интеграция новых модулей
-- [ ] Интегрировать `config_extended` в `pong.py`
-- [ ] Подключить Event Bus к игровым событиям
-- [ ] Заменить ParticlePool на OptimizedParticlePool
-- [ ] Добавить Object Pooling для Ball и PowerUp
+- [x] Исправлен баг с бесконечным циклом в predict_ball_position
+- [x] Добавлен Object Pooling для Ball и PowerUp (entity_pools.py)
+- [x] Добавлены профили производительности в config.py
+- [ ] Интегрировать entity_pools в game_loop.py
+- [ ] Подключить Event Bus к игровым событиям (частично сделано)
 - [ ] Интегрировать AccessibilityManager в настройки
 
 ### Тестирование
+- [x] Созданы расширенные тесты для entities (test_entities_extended.py)
+- [x] Созданы тесты для entity_pools (test_entity_pools.py)
 - [ ] Запустить все тесты и исправить ошибки
-- [ ] Добавить тесты для существующих модулей (entities, game_state)
+- [ ] Добавить тесты для game_state, collision_manager
 - [ ] Достичь 80%+ покрытия кода
 
 ### Документация
+- [x] Обновлен .env.example с новыми настройками
 - [ ] Обновить README.md с новыми функциями
 - [ ] Добавить скриншоты новых функций
-- [ ] Создать CHANGELOG.md
+- [ ] Обновить CHANGELOG.md
 
 ## 🟡 Важно (1-2 недели)
 
