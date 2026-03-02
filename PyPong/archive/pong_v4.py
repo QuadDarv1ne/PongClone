@@ -23,6 +23,7 @@ from PyPong.ui.themes import get_theme
 from PyPong.gamepad import GamepadManager
 from PyPong.mobile import TouchControls, AdaptiveScreen
 from PyPong.core.logger import logger, log_exception
+from PyPong.ui.localization import init_localization, get_localization
 
 
 class PongGame:
@@ -35,6 +36,9 @@ class PongGame:
             logger.error(f"Failed to initialize pygame: {e}")
             raise
 
+        # Инициализация локализации (русский по умолчанию)
+        init_localization('ru')
+        
         self._init_settings()
         self._init_display()
         self._init_managers()
@@ -262,11 +266,14 @@ class PongGame:
             GameState.GAME_OVER: GameState.MENU,
             GameState.TOURNAMENT_COMPLETE: GameState.MENU,
         }
-        
+
         new_state = transitions.get(state)
         if new_state:
             self.state_manager.state = new_state
             if new_state == GameState.PLAYING:
+                # Очистить старые объекты перед новой игрой
+                if state == GameState.MODE_SELECT:
+                    self.game_loop.cleanup_game_objects()
                 self.audio.play_music()
             elif new_state == GameState.MENU:
                 if state == GameState.GAME_OVER:
@@ -317,15 +324,19 @@ class PongGame:
         """Обновить игру"""
         if self.state_manager.state == GameState.PLAYING:
             if self.game_loop.all_sprites is None:
+                logger.info("Initializing game objects...")
                 self.game_loop.init_game_objects()
                 # Обновить sprite groups в renderer
                 self.renderer.set_sprite_groups(
                     self.game_loop.all_sprites,
                     self.game_loop.powerups,
-                    self.particles,
+                    self.particle_pool,
                     self.trails,
                 )
-            
+                logger.info(f"Game objects initialized: all_sprites={self.game_loop.all_sprites is not None}")
+            else:
+                logger.debug(f"Game already initialized: all_sprites={self.game_loop.all_sprites is not None}")
+
             self.game_loop.update()
     
     @log_exception
@@ -344,6 +355,7 @@ class PongGame:
     def run(self) -> None:
         """Запустить игровой цикл"""
         running = True
+        frame_count = 0
         try:
             while running:
                 running = self.handle_events()
@@ -351,6 +363,12 @@ class PongGame:
                 self.settings.update()
                 self.draw()
                 self.clock.tick(FPS)
+                frame_count += 1
+                
+                # Логирование каждые 100 кадров
+                if frame_count % 100 == 0:
+                    fps = self.clock.get_fps()
+                    logger.debug(f"Frame: {frame_count}, FPS: {fps:.1f}, State: {self.state_manager.state}")
         except Exception as e:
             logger.error(f"Game loop error: {e}", exc_info=True)
         finally:

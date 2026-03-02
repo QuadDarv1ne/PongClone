@@ -20,13 +20,13 @@ class Localization:
         'ja': '日本語'
     }
 
-    def __init__(self, default_language: str = 'en') -> None:
+    def __init__(self, default_language: str = 'ru') -> None:
         self.current_language = default_language
         self.translations: Dict[str, Dict[str, str]] = {}
-        self.fallback_language = 'en'
+        self.fallback_language = 'ru'  # Русский как основной язык
 
         self._load_translations()
-        logger.info(f"Localization initialized: {default_language}")
+        logger.info(f"Localization initialized: {self.SUPPORTED_LANGUAGES.get(default_language, default_language)}")
 
     @log_exception
     def _load_translations(self) -> None:
@@ -283,21 +283,37 @@ class Localization:
         if lang_code not in self.SUPPORTED_LANGUAGES:
             logger.warning(f"Unsupported language: {lang_code}")
             return False
-        
+
         self.current_language = lang_code
         logger.info(f"Language changed to: {self.SUPPORTED_LANGUAGES[lang_code]}")
         return True
-    
+
+    def get_current_language(self) -> str:
+        """Get current language code"""
+        return self.current_language
+
+    def get_current_language_name(self) -> str:
+        """Get current language name"""
+        return self.SUPPORTED_LANGUAGES.get(self.current_language, self.current_language)
+
     def get_available_languages(self) -> Dict[str, str]:
         """Get available languages"""
         return self.SUPPORTED_LANGUAGES.copy()
+
+    def cycle_language(self) -> str:
+        """Cycle to next available language"""
+        langs = list(self.SUPPORTED_LANGUAGES.keys())
+        current_idx = langs.index(self.current_language) if self.current_language in langs else 0
+        next_idx = (current_idx + 1) % len(langs)
+        self.set_language(langs[next_idx])
+        return langs[next_idx]
 
 
 # Global localization instance
 _localization: Optional[Localization] = None
 
 
-def init_localization(language: str = 'en') -> Localization:
+def init_localization(language: str = 'ru') -> Localization:
     """Initialize global localization"""
     global _localization
     _localization = Localization(language)
@@ -315,3 +331,18 @@ def get_localization() -> Localization:
 def t(key: str, *args, **kwargs) -> str:
     """Shorthand for translation"""
     return get_localization().get(key, *args, **kwargs)
+
+
+def set_language(lang_code: str) -> bool:
+    """Set global localization language"""
+    return get_localization().set_language(lang_code)
+
+
+def get_current_language() -> str:
+    """Get current language code"""
+    return get_localization().get_current_language()
+
+
+def cycle_language() -> str:
+    """Cycle to next language"""
+    return get_localization().cycle_language()

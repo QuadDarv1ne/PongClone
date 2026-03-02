@@ -29,11 +29,14 @@ pip install pygame-ce>=2.4.0
 
 ```bash
 # Из корня проекта
-python -c "from PyPong.pong_v4 import PongGame; PongGame().run()"
+python -c "from PyPong.pong import PongGame; PongGame().run()"
+
+# Или напрямую
+python PyPong/pong.py
 
 # Или из папки PyPong
 cd PyPong
-python pong_v4.py
+python pong.py
 ```
 
 ### Тестирование
@@ -110,15 +113,13 @@ PongClone/
 │   │   ├── modifiers.py    # Модификаторы физики (10 типов)
 │   │   └── tournament.py   # Турнирный режим
 │   │
+│   ├── archive/            # Старые версии игры
 │   ├── data/               # Сохранения (генерируется)
 │   ├── locales/            # Локализация (en.json, ru.json)
 │   ├── assets/             # Ресурсы (спрайты, звуки)
 │   ├── tests/              # Тесты
 │   │
-│   ├── pong.py             # Базовая версия (2 игрока)
-│   ├── pong_v2.py          # AI + power-ups
-│   ├── pong_v3.py          # Сложность + очки
-│   ├── pong_v4.py          # Полная версия ⭐
+│   ├── pong.py             # Основная версия игры ⭐
 │   ├── main.py             # Android entry point
 │   └── requirements.txt    # Зависимости
 │
@@ -130,7 +131,13 @@ PongClone/
 
 ## 🎮 Режимы игры
 
-| Режим | Описание |
+| **Версия** | **Файл** | **Строк** | **Функции** |
+|--------|------|-------|---------|
+| **v1.0** | `archive/pong_original.py` | 309 | 2 игрока, базовая физика |
+| **v1.5** | `archive/pong_enhanced.py` | 299 | AI, power-ups, меню |
+| **v2.0** | `archive/pong_v2.py` | 329 | Сложность, очки, цвета |
+| **v3.0** | `archive/pong_v3.py` | 485 | Модульная архитектура |
+| **v4.0** | `pong.py` ⭐ | ~600 | Полная версия со всеми функциями |
 |-------|----------|
 | **Одиночная** | Игра против AI с выбором сложности |
 | **2 игрока** | Локальный мультиплеер |
@@ -191,9 +198,9 @@ PongClone/
 
 | Платформа | Статус | Инструкция |
 |-----------|--------|------------|
-| **Windows** | ✅ Готово | `python pong_v4.py` |
-| **Linux** | ✅ Готово | `python pong_v4.py` |
-| **macOS** | ✅ Готово | `python pong_v4.py` |
+| **Windows** | ✅ Готово | `python PyPong/pong.py` |
+| **Linux** | ✅ Готово | `python PyPong/pong.py` |
+| **macOS** | ✅ Готово | `python PyPong/pong.py` |
 | **Android** | 🟡 Требуется сборка | [BUILD_ANDROID.md](BUILD_ANDROID.md) |
 
 ## 🛠️ Разработка

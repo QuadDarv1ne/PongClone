@@ -101,15 +101,17 @@ class GameLoop:
         if self.powerups:
             self.powerups.empty()
         if self.particles:
-            self.particles.empty()
+            if isinstance(self.particles, ParticlePool):
+                self.particles.clear()
         if self.trails:
             self.trails.empty()
-        
+
         self.paddle1 = None
         self.paddle2 = None
         self.ball = None
         self.all_sprites = None
         self.powerups = None
+        self.particles = None
     
     def update(self) -> None:
         """

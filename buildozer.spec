@@ -20,7 +20,7 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,pygame_sdl2
+requirements = python3,pygame-ce>=2.4.0
 
 # (str) Supported orientation (landscape, portrait or all)
 orientation = landscape

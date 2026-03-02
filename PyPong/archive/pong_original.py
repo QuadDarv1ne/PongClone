@@ -1,0 +1,282 @@
+import pygame, sys, time
+from pygame.locals import *
+from random import randint
+
+pygame.init() # Инициализация модуля -- PyGame --
+
+WINDOW_WIDTH = 1024 # Ширина окна
+WINDOW_HEIGHT = 720 # Высота окна
+
+clock = pygame.time.Clock() # создание таймера
+
+player1_win = False
+player2_win = False
+
+### Paddle Stuff ###
+
+PADDLE_SPEED = 10 # Скорость мячика
+
+# Первый игрок
+UP1 = False
+DOWN1 = False
+NO_MOVEMENT1 = True
+
+# Второй игрок
+UP2 = False
+DOWN2 = False
+NO_MOVEMENT2 = True
+
+### Ball Stuff : Горячие клавиши ###
+UPLEFT = 0
+DOWNLEFT = 1
+UPRIGHT = 2
+DOWNRIGHT = 3
+
+### Music : Музыка ###
+pygame.mixer.music.load("endofline.ogg")
+sound_effect = pygame.mixer.Sound("beep.wav")
+
+### Colors : Цвета ###
+WHITE = (255, 255, 255)
+BLACK = (80, 80, 80)
+
+### Creating the main surface ###
+main_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), 0, 32)
+surface_rect = main_surface.get_rect()
+
+class Paddle(pygame.sprite.Sprite):
+    def __init__(self, player_number):
+
+        ### Creating the paddle ###
+        pygame.sprite.Sprite.__init__(self)
+
+        self.player_number = player_number
+        self.image = pygame.Surface([10, 100])
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        self.speed = 8
+
+        ### Establishing the location of each paddle ##
+        if self.player_number == 1:
+            self.rect.centerx = main_surface.get_rect().left
+            self.rect.centerx += 50
+        elif self.player_number == 2:
+            self.rect.centerx = main_surface.get_rect().right
+            self.rect.centerx -= 50
+        self.rect.centery = main_surface.get_rect().centery
+
+    def move(self):
+        if self.player_number == 1:
+            if UP1 and self.rect.y > 5:
+                self.rect.y -= self.speed
+            elif DOWN1 and self.rect.bottom < WINDOW_HEIGHT - 5:
+                self.rect.y += self.speed
+            # No movement when NO_MOVEMENT1 is True
+
+        if self.player_number == 2:
+            if UP2 and self.rect.y > 5:
+                self.rect.y -= self.speed
+            elif DOWN2 and self.rect.bottom < WINDOW_HEIGHT - 5:
+                self.rect.y += self.speed
+            # No movement when NO_MOVEMENT2 is True
+
+class Ball(pygame.sprite.Sprite):
+    def __init__(self) -> None:
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.Surface([10, 10])
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = surface_rect.centerx
+        self.rect.centery = surface_rect.centery
+        self.direction = randint(0,3)
+        self.speed = 4
+
+    def move(self) -> None:
+        if self.direction == UPLEFT:
+            self.rect.x -= self.speed
+            self.rect.y -= self.speed
+        elif self.direction == UPRIGHT:
+            self.rect.x += self.speed
+            self.rect.y -= self.speed
+        elif self.direction == DOWNLEFT:
+            self.rect.x -= self.speed
+            self.rect.y += self.speed
+        elif self.direction == DOWNRIGHT:
+            self.rect.x += self.speed
+            self.rect.y += self.speed
+
+    def change_direction(self):
+        if self.rect.y < 0 and self.direction == UPLEFT:
+            self.direction = DOWNLEFT
+        if self.rect.y < 0 and self.direction == UPRIGHT:
+            self.direction = DOWNRIGHT
+        if self.rect.y > surface_rect.bottom and self.direction == DOWNLEFT:
+            self.direction = UPLEFT
+        if self.rect.y > surface_rect.bottom and self.direction == DOWNRIGHT:
+            self.direction = UPRIGHT
+
+# Шрифты для текста
+basic_font = pygame.font.SysFont("Helvetica", 120)
+game_over_font_big = pygame.font.SysFont("Helvetica", 72)
+game_over_font_small = pygame.font.SysFont("Helvetica", 50)
+
+paddle1 = Paddle(1)
+paddle2 = Paddle(2)
+
+ball = Ball()
+
+all_sprites = pygame.sprite.RenderPlain(paddle1, paddle2, ball) 
+
+player1_score = 0 # Стартовое кол-во очков первого игрока
+player2_score = 0 # Стартовое кол-во очков второго игрока
+
+def paddle_hit():
+    if pygame.sprite.collide_rect(ball, paddle2):
+        if (ball.direction == UPRIGHT):
+            ball.direction = UPLEFT
+        elif (ball.direction == DOWNRIGHT):
+            ball.direction = DOWNLEFT
+        ball.speed += 1
+        sound_effect.play()
+    elif pygame.sprite.collide_rect(ball, paddle1):
+        if (ball.direction == UPLEFT):
+            ball.direction = UPRIGHT
+        elif (ball.direction == DOWNLEFT):
+            ball.direction = DOWNRIGHT
+        ball.speed +=1
+        sound_effect.play()
+
+counter = 0
+
+while True:
+
+    clock.tick(60)
+
+    if (ball.rect.x > WINDOW_WIDTH):
+        ball.rect.centerx = surface_rect.centerx
+        ball.rect.centery = surface_rect.centery
+        ball.direction = randint(0, 1)
+        ball.speed = 4
+    elif (ball.rect.x < 0):
+        ball.rect.centerx = surface_rect.centerx
+        ball.rect.centery = surface_rect.centery
+        ball.direction = randint(2, 3)
+        ball.speed = 4
+
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+            
+            if event.key == ord('a'):
+                UP1 = True
+                DOWN1 = False
+                NO_MOVEMENT1 = False
+            elif event.key == ord('z'):
+                UP1 = False
+                DOWN1 = True
+                NO_MOVEMENT1 = False
+                
+            elif event.key == K_UP:
+                UP2 = True
+                DOWN2 = False
+                NO_MOVEMENT2 = False
+            elif event.key == K_DOWN:
+                UP2 = False
+                DOWN2 = True
+                NO_MOVEMENT2 = False
+
+        elif event.type == KEYUP:
+            if event.key == ord('a') or event.key == ord('z'):
+                NO_MOVEMENT1 = True
+                DOWN1 = False
+                UP1 = False
+            elif event.key == K_DOWN or event.key == K_UP:
+                NO_MOVEMENT2 = True
+                DOWN2 = False
+                UP2 = False
+
+    score_board = basic_font.render(str(player1_score) + "           " + str(player2_score), True, WHITE, BLACK)
+    score_board_rect = score_board.get_rect()
+    score_board_rect.centerx = surface_rect.centerx
+    score_board_rect.y = 10
+
+    # Очистка экрана чёрным цветом
+    main_surface.fill(BLACK)
+
+    main_surface.blit(score_board, score_board_rect)
+
+    # Прорисовка сетки
+    netx = surface_rect.centerx
+    for i in range(0, 720, 60):
+        pygame.draw.rect(main_surface, WHITE, (netx, i, 5, 5))
+
+    all_sprites.draw(main_surface) # прорисовка всех спрайтов
+
+    paddle1.move()
+    paddle2.move()
+    ball.move()
+    ball.change_direction()
+
+    paddle_hit()
+
+    if ball.rect.x > WINDOW_WIDTH:
+        player1_score += 1
+    elif ball.rect.x < 0:
+        player2_score += 1
+
+    pygame.display.update()
+
+    if counter == 0:
+        time.sleep(1.5)
+        pygame.mixer.music.play(-1, 0.5)
+
+    if player1_score == 5:
+        player1_win = True
+        break
+    elif player2_score == 5:
+        player2_win = True
+        break
+
+    counter += 1
+
+while True:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+
+    main_surface.fill(BLACK)
+
+    if player1_win == True:
+        game_over = game_over_font_big.render("GAME OVER", True, WHITE, BLACK)
+        game_over1 = game_over_font_small.render("Player 1 Wins", True, WHITE, BLACK)
+    elif player2_win == True:
+        game_over = game_over_font_big.render("GAME OVER", True, WHITE, BLACK)
+        game_over1 = game_over_font_small.render("Player 2 Wins", True, WHITE, BLACK)
+
+    game_over_rect = game_over.get_rect()
+    game_over_rect.centerx = surface_rect.centerx
+    game_over_rect.centery = surface_rect.centery - 50
+    game_over1_rect = game_over1.get_rect()
+    game_over1_rect.centerx = game_over_rect.centerx
+    game_over1_rect.centery = game_over_rect.centery + 75
+
+    main_surface.blit(game_over, game_over_rect)
+    main_surface.blit(game_over1, game_over1_rect)
+
+    pygame.display.update()
+
+''' Первая версия (V1.0): 24.01.2023 '''
+# Итоговый проект 8-Bit Ponge Game
