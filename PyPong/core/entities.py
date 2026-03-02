@@ -16,10 +16,12 @@ from PyPong.core.config import (
 class Paddle(pygame.sprite.Sprite):
     """Player or AI paddle"""
     
+    DEAD_ZONE = 5  # Мёртвая зона для AI
+
     def __init__(
-        self, 
-        player_number: int, 
-        is_ai: bool = False, 
+        self,
+        player_number: int,
+        is_ai: bool = False,
         color: Tuple[int, int, int] = WHITE
     ):
         super().__init__()
@@ -36,29 +38,19 @@ class Paddle(pygame.sprite.Sprite):
         self.original_height = PADDLE_HEIGHT
 
     def reset_position(self) -> None:
-        if self.player_number == 1:
-            self.rect.centerx = PADDLE_OFFSET
-        else:
-            self.rect.centerx = WINDOW_WIDTH - PADDLE_OFFSET
+        x = PADDLE_OFFSET if self.player_number == 1 else WINDOW_WIDTH - PADDLE_OFFSET
+        self.rect.centerx = x
         self.rect.centery = WINDOW_HEIGHT // 2
 
     def move(self, up: bool, down: bool, ball_y: Optional[float] = None) -> None:
         if self.is_ai and ball_y is not None:
-            # AI с предсказанием: двигаемся к_predicted позиции мяча
-            target_y = ball_y
-            # Мёртвая зона — не дрожим у центра
-            if abs(self.rect.centery - target_y) > 5:
-                if self.rect.centery < target_y:
-                    self.rect.y += self.speed
-                else:
-                    self.rect.y -= self.speed
+            if abs(self.rect.centery - ball_y) > self.DEAD_ZONE:
+                self.rect.y += self.speed if self.rect.centery < ball_y else -self.speed
         else:
             if up and self.rect.top > 5:
                 self.rect.y -= self.speed
             elif down and self.rect.bottom < WINDOW_HEIGHT - 5:
                 self.rect.y += self.speed
-
-        # Keep paddle in bounds
         self.rect.clamp_ip(pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
 
     def predict_ball_position(self, ball_x: float, ball_y: float, ball_velocity_x: float, ball_velocity_y: float) -> float:
@@ -136,8 +128,6 @@ class Ball(pygame.sprite.Sprite):
     def reset_ball(self) -> None:
         self.rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
         self.speed = BALL_INITIAL_SPEED
-
-        # Random direction
         angle = choice([45, 135, 225, 315])
         rad = math.radians(angle)
         self.velocity_x = self.speed * math.cos(rad)
@@ -160,29 +150,19 @@ class Ball(pygame.sprite.Sprite):
             self.rect.clamp_ip(pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
 
     def bounce_paddle(self, paddle: Paddle) -> None:
-        # Calculate hit position on paddle (-1 to 1)
         hit_pos = (self.rect.centery - paddle.rect.centery) / (paddle.height / 2)
         hit_pos = max(-1, min(1, hit_pos))
-
-        # Adjust angle based on hit position
         max_angle = 60
         angle = hit_pos * max_angle
-
-        # Determine direction
         direction = 1 if paddle.player_number == 1 else -1
-
-        # Calculate new velocity
         rad = math.radians(angle)
         self.velocity_x = direction * self.speed * math.cos(rad)
         self.velocity_y = self.speed * math.sin(rad)
-
-        # Increase speed
         self.increase_speed()
 
     def increase_speed(self) -> None:
         if self.speed < MAX_BALL_SPEED:
             self.speed = min(self.speed * BALL_SPEED_INCREASE, MAX_BALL_SPEED)
-            # Update velocity magnitude
             current_angle = math.atan2(self.velocity_y, self.velocity_x)
             self.velocity_x = self.speed * math.cos(current_angle)
             self.velocity_y = self.speed * math.sin(current_angle)
