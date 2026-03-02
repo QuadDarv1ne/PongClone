@@ -36,10 +36,20 @@ env/
 *.swo
 *~
 
+# Environment variables
+.env
+.env.local
+
 # Game data
 PyPong/*.json
 PyPong/stats.json
 PyPong/settings.json
+
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
 
 # OS
 .DS_Store
@@ -48,6 +58,7 @@ desktop.ini
 
 # Logs
 *.log
+PyPong/logs/*.log
 
 # AI scripts (временные, но test_ai/ отслеживается)
 /duckduckgo-ai.py

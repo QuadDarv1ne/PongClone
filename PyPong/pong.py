@@ -5,10 +5,14 @@ import pygame
 from pygame.locals import *
 from typing import Optional, Dict, Any
 
+from PyPong.core.env_config import init_env_config, get_env_config
 from PyPong.core.config import (
     WINDOW_WIDTH, WINDOW_HEIGHT, FPS, BLACK,
     DIFFICULTY_LEVELS, FONT_NAME,
 )
+from PyPong.core.config_extended import config
+from PyPong.core.event_bus import get_event_bus, GameEvent
+from PyPong.core.profiler import get_profiler
 from PyPong.core.game_state import GameState, GameStateManager
 from PyPong.game.input_handler import InputHandler
 from PyPong.game.collision_manager import CollisionManager
@@ -21,23 +25,38 @@ from PyPong.ui.ui import PowerUpIndicator, FPSCounter, SettingsMenu
 from PyPong.content.tournament import Tournament
 from PyPong.ui.themes import get_theme
 from PyPong.gamepad import GamepadManager
-from PyPong.mobile import TouchControls, AdaptiveScreen
+import PyPong.mobile as mobile_module
 from PyPong.core.logger import logger, log_exception
 from PyPong.ui.localization import init_localization, get_localization
+from PyPong.ui.accessibility import get_accessibility_manager
 
 
 class PongGame:
     """Main game class with modular architecture"""
 
     def __init__(self) -> None:
+        # Инициализация конфигурации из .env
+        init_env_config()
+        self.env = get_env_config()
+        
+        # Инициализация систем
+        self.event_bus = get_event_bus()
+        self.profiler = get_profiler()
+        self.accessibility = get_accessibility_manager()
+        
+        # Включить профилирование в debug режиме
+        if self.env.get_bool('DEBUG', False):
+            self.profiler.enable()
+        
         try:
             pygame.init()
         except pygame.error as e:
             logger.error(f"Failed to initialize pygame: {e}")
             raise
 
-        # Инициализация локализации (русский по умолчанию)
-        init_localization('ru')
+        # Инициализация локализации (из .env или русский по умолчанию)
+        language = self.env.get('LANGUAGE', 'ru')
+        init_localization(language)
         
         self._init_settings()
         self._init_display()
@@ -70,7 +89,7 @@ class PongGame:
             self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
             pygame.display.set_caption("Enhanced Pong")
             self.clock = pygame.time.Clock()
-            self.adaptive_screen = AdaptiveScreen()
+            self.adaptive_screen = mobile_module.AdaptiveScreen()
             self.theme = get_theme(self.settings.get("theme", "classic"))
         except pygame.error as e:
             logger.error(f"Failed to initialize display: {e}")
@@ -84,7 +103,7 @@ class PongGame:
             self.stats = StatsManager()
             self.tournament = Tournament()
             self.gamepad = GamepadManager()
-            self.touch = TouchControls(WINDOW_WIDTH, WINDOW_HEIGHT)
+            self.touch = mobile_module.TouchControls(WINDOW_WIDTH, WINDOW_HEIGHT)
         except Exception as e:
             logger.error(f"Failed to initialize managers: {e}")
             raise
@@ -121,11 +140,15 @@ class PongGame:
     
     def _init_effects(self) -> None:
         """Инициализация эффектов"""
-        from PyPong.ui.effects import ParticlePool
+        from PyPong.ui.effects_optimized import OptimizedParticlePool, TrailPool
         
-        # Используем ParticlePool для оптимизации
-        self.particle_pool = ParticlePool()
-        self.trails = pygame.sprite.Group()
+        # Используем оптимизированный пул частиц
+        max_particles = config.get('max_particles', 50)
+        self.particle_pool = OptimizedParticlePool(max_size=max_particles)
+        
+        max_trails = config.get('max_trails', 20)
+        self.trails = TrailPool(max_size=max_trails)
+        
         self.shake = ScreenShake()
         self.goal_anim = GoalAnimation()
 
@@ -314,10 +337,14 @@ class PongGame:
                 if state == GameState.MODE_SELECT:
                     self.game_loop.cleanup_game_objects()
                 self.audio.play_music()
+                # Публикуем событие начала игры
+                self.event_bus.publish(GameEvent.GAME_START, {'mode': self.state_manager.game_mode})
             elif new_state == GameState.MENU:
                 if state == GameState.GAME_OVER:
                     self.game_loop.cleanup_game_objects()
                     self.state_manager.reset_scores()
+                    # Публикуем событие окончания игры
+                    self.event_bus.publish(GameEvent.GAME_OVER)
                 elif state == GameState.TOURNAMENT_COMPLETE:
                     self.tournament.reset()
     
@@ -362,21 +389,38 @@ class PongGame:
     def update_game(self) -> None:
         """Обновить игру"""
         if self.state_manager.state == GameState.PLAYING:
-            if self.game_loop.all_sprites is None:
-                logger.info("Initializing game objects...")
-                self.game_loop.init_game_objects()
-                # Обновить sprite groups в renderer
-                self.renderer.set_sprite_groups(
-                    self.game_loop.all_sprites,
-                    self.game_loop.powerups,
-                    self.particle_pool,
-                    self.trails,
-                )
-                logger.info(f"Game objects initialized: all_sprites={self.game_loop.all_sprites is not None}")
-            else:
-                logger.debug(f"Game already initialized: all_sprites={self.game_loop.all_sprites is not None}")
+            with self.profiler.profile_section('game_update'):
+                if self.game_loop.all_sprites is None:
+                    try:
+                        logger.info("Initializing game objects...")
+                        self.game_loop.init_game_objects()
+                        
+                        # Проверка успешной инициализации
+                        if self.game_loop.all_sprites is None:
+                            logger.error("Failed to initialize game objects: all_sprites is still None")
+                            self.state_manager.state = GameState.MENU
+                            return
+                        
+                        # Обновить sprite groups в renderer
+                        self.renderer.set_sprite_groups(
+                            self.game_loop.all_sprites,
+                            self.game_loop.powerups,
+                            self.particle_pool,
+                            self.trails,
+                        )
+                        logger.info(f"Game objects initialized successfully")
+                    except Exception as e:
+                        logger.error(f"Error initializing game objects: {e}", exc_info=True)
+                        self.state_manager.state = GameState.MENU
+                        return
+                else:
+                    logger.debug(f"Game already initialized")
 
-            self.game_loop.update()
+                try:
+                    self.game_loop.update()
+                except Exception as e:
+                    logger.error(f"Error updating game loop: {e}", exc_info=True)
+                    self.state_manager.state = GameState.MENU
     
     @log_exception
     def draw(self) -> None:
@@ -417,6 +461,10 @@ class PongGame:
     def shutdown(self) -> None:
         """Корректное завершение работы"""
         try:
+            # Вывести статистику профилирования
+            if self.profiler._enabled:
+                self.profiler.print_timing_report()
+            
             self.settings.force_save()
             self.audio.stop_music()
             self.game_loop.cleanup_game_objects()

@@ -2,5 +2,11 @@
 from .config import *
 from .constants import *
 from .logger import logger
-from .entities import Paddle, Ball, PowerUp
-from .game_state import GameState, GameStateManager
+
+# Lazy imports для модулей, требующих pygame
+# from .entities import Paddle, Ball, PowerUp
+# from .game_state import GameState, GameStateManager
+
+__all__ = [
+    'logger',
+]
