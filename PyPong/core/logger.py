@@ -11,18 +11,18 @@ from PyPong.core.constants import LogLevel
 
 class GameLogger:
     """Centralized logger for the game"""
-    
+
     _instance: Optional['GameLogger'] = None
-    
-    def __new__(cls):
+
+    def __new__(cls) -> 'GameLogger':
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         if hasattr(self, '_initialized'):
             return
-        
+
         self._initialized = True
         self.logger = logging.getLogger('PyPong')
         self.logger.setLevel(logging.DEBUG)

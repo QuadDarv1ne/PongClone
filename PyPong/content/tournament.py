@@ -1,17 +1,18 @@
 import pygame
+from typing import Optional
 from PyPong.core.config import *
 
 class Tournament:
-    def __init__(self):
+    def __init__(self) -> None:
         self.mode = "best_of_3"  # best_of_3 or best_of_5
         self.player1_wins = 0
         self.player2_wins = 0
         self.current_game = 1
-        self.winner = None
+        self.winner: Optional[int] = None
         self.font = pygame.font.SysFont(FONT_NAME, 36)
         self.small_font = pygame.font.SysFont(FONT_NAME, 24)
 
-    def reset(self):
+    def reset(self) -> None:
         self.player1_wins = 0
         self.player2_wins = 0
         self.current_game = 1
