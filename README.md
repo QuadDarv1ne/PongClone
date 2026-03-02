@@ -227,11 +227,11 @@ python tests/test_all_features.py
 
 | Файл | Описание |
 |------|----------|
-| [NOTES.md](PyPong/NOTES.md) | Заметки разработчика, архитектура |
-| [BUILD_ANDROID.md](BUILD_ANDROID.md) | Сборка APK для Android |
-| [BUILD_DESKTOP.md](BUILD_DESKTOP.md) | Сборка для Desktop |
-| [GITHUB_ACTIONS.md](GITHUB_ACTIONS.md) | CI/CD настройка |
-| [AI_CLI_MANUAL.md](AI_CLI_MANUAL.md) | AI CLI руководство |
+| [NOTES.md](docs/NOTES.md) | Заметки разработчика, архитектура |
+| [BUILD_ANDROID.md](docs/BUILD_ANDROID.md) | Сборка APK для Android |
+| [BUILD_DESKTOP.md](docs/BUILD_DESKTOP.md) | Сборка для Desktop |
+| [GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md) | CI/CD настройка |
+| [AI_CLI_MANUAL.md](docs/AI_CLI_MANUAL.md) | AI CLI руководство |
 
 ## 🤝 Вклад
 
