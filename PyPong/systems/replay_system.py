@@ -4,7 +4,7 @@ Replay system for recording and playing back games
 import json
 import gzip
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from PyPong.core.logger import logger, log_exception
@@ -15,19 +15,19 @@ class GameFrame:
     """Single frame of game state"""
     frame_number: int
     timestamp: float
-    ball_pos: tuple[float, float]
-    ball_velocity: tuple[float, float]
-    paddle1_pos: tuple[float, float]
-    paddle2_pos: tuple[float, float]
+    ball_pos: Tuple[float, float]
+    ball_velocity: Tuple[float, float]
+    paddle1_pos: Tuple[float, float]
+    paddle2_pos: Tuple[float, float]
     score1: int
     score2: int
     events: List[str]  # Events that occurred this frame
-    
-    def to_dict(self) -> dict:
+
+    def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
-    
+
     @staticmethod
-    def from_dict(data: dict) -> 'GameFrame':
+    def from_dict(data: Dict[str, Any]) -> 'GameFrame':
         return GameFrame(**data)
 
 
@@ -39,32 +39,32 @@ class ReplayMetadata:
     duration: float
     player1_name: str
     player2_name: str
-    final_score: tuple[int, int]
+    final_score: Tuple[int, int]
     winner: int
     game_mode: str
     difficulty: Optional[str] = None
     total_frames: int = 0
-    
-    def to_dict(self) -> dict:
+
+    def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
-    
+
     @staticmethod
-    def from_dict(data: dict) -> 'ReplayMetadata':
+    def from_dict(data: Dict[str, Any]) -> 'ReplayMetadata':
         return ReplayMetadata(**data)
 
 
 class ReplayRecorder:
     """Records game replays"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.recording = False
         self.frames: List[GameFrame] = []
         self.metadata: Optional[ReplayMetadata] = None
         self.start_time = 0
         self.frame_count = 0
-        
+
         logger.debug("Replay recorder initialized")
-    
+
     def start_recording(
         self,
         player1_name: str = "Player 1",
