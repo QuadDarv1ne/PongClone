@@ -297,12 +297,12 @@ class Arena:
 
 class ArenaManager:
     """Manages arena selection and creation"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.current_arena: Optional[Arena] = None
-        self.unlocked_arenas = [ArenaType.CLASSIC]
+        self.unlocked_arenas: List[ArenaType] = [ArenaType.CLASSIC]
         logger.info("Arena manager initialized")
-    
+
     def create_arena(self, arena_type: ArenaType) -> Arena:
         """Create and set current arena"""
         self.current_arena = Arena(arena_type)

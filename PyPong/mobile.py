@@ -1,15 +1,16 @@
 import pygame
+from typing import Dict, List, Optional, Tuple, Any
 from PyPong.core.config import *
 
 class TouchControls:
-    def __init__(self, screen_width, screen_height):
+    def __init__(self, screen_width: int, screen_height: int) -> None:
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.touch_zones = self._create_touch_zones()
-        self.active_touches = {}
+        self.active_touches: Dict[str, bool] = {}
         self.font = pygame.font.SysFont(FONT_NAME, 20)
 
-    def _create_touch_zones(self):
+    def _create_touch_zones(self) -> Dict[str, pygame.Rect]:
         # Left side for player 1, right side for player 2
         zone_width = self.screen_width // 2
         
@@ -71,7 +72,7 @@ class TouchControls:
 
 
 class AdaptiveScreen:
-    def __init__(self):
+    def __init__(self) -> None:
         self.base_width = WINDOW_WIDTH
         self.base_height = WINDOW_HEIGHT
         self.current_width = WINDOW_WIDTH
@@ -80,7 +81,7 @@ class AdaptiveScreen:
         self.scale_y = 1.0
         self._needs_resize = False
 
-    def update_resolution(self, width, height):
+    def update_resolution(self, width: int, height: int) -> None:
         self.current_width = width
         self.current_height = height
         self.scale_x = width / self.base_width

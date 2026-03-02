@@ -165,13 +165,13 @@ class Trail(pygame.sprite.Sprite):
 
 class ScreenShake:
     """Эффект тряски экрана"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.offset_x = 0
         self.offset_y = 0
         self.intensity = 0
         self.duration = 0
-    
+
     def start(self, intensity: int = 10, duration: int = 10) -> None:
         self.intensity = intensity
         self.duration = duration
@@ -192,14 +192,14 @@ class ScreenShake:
 
 class GoalAnimation:
     """Анимация гола"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.active = False
         self.timer = 0
         self.duration = 60
-        self.player = None
+        self.player: Optional[int] = None
         self.font = pygame.font.SysFont(FONT_NAME, 80)
-    
+
     def start(self, player: int) -> None:
         self.active = True
         self.timer = 0

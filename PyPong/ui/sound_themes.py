@@ -3,8 +3,8 @@ Sound theme system with different audio sets
 """
 import pygame
 from pathlib import Path
-from typing import Dict, Optional
-from dataclasses import dataclass
+from typing import Dict, Optional, Union, List
+from dataclasses import dataclass, field
 from PyPong.core.constants import SoundTheme
 from PyPong.core.logger import logger, log_exception
 
@@ -19,29 +19,32 @@ class SoundConfig:
 
 class AudioTheme:
     """Audio theme with sound effects"""
-    
-    def __init__(self, name: str, theme_type: SoundTheme):
+
+    def __init__(self, name: str, theme_type: SoundTheme) -> None:
         self.name = name
         self.type = theme_type
-        self.sounds: Dict[str, pygame.mixer.Sound] = {}
+        self.sounds: Dict[str, Union[SoundConfig, pygame.mixer.Sound]] = {}
         self.music_file: Optional[str] = None
-        
+
     def add_sound(self, sound_id: str, config: SoundConfig) -> None:
         """Add sound to theme"""
         self.sounds[sound_id] = config
-    
+
     def load_sounds(self, base_path: Path) -> bool:
         """Load all sounds"""
         success = True
-        
+
         for sound_id, config in self.sounds.items():
+            if isinstance(config, pygame.mixer.Sound):
+                continue
+                
             sound_path = base_path / config.file
-            
+
             if not sound_path.exists():
                 logger.warning(f"Sound file not found: {sound_path}")
                 success = False
                 continue
-            
+
             try:
                 sound = pygame.mixer.Sound(str(sound_path))
                 sound.set_volume(config.volume)
@@ -50,23 +53,23 @@ class AudioTheme:
             except Exception as e:
                 logger.error(f"Failed to load sound {sound_id}: {e}")
                 success = False
-        
+
         return success
 
 
 class SoundThemeManager:
     """Manages sound themes"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.themes: Dict[SoundTheme, AudioTheme] = {}
         self.current_theme: Optional[AudioTheme] = None
         self.master_volume = 1.0
         self.sfx_volume = 0.7
         self.music_volume = 0.5
-        
+
         self._create_themes()
         logger.info("Sound theme manager initialized")
-    
+
     def _create_themes(self) -> None:
         """Create all sound themes"""
         # Classic theme

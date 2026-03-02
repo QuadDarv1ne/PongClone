@@ -48,7 +48,7 @@ class CourtTheme:
 class CustomizationManager:
     """Manages visual customization"""
 
-    def __init__(self, filename: str = "customization.json"):
+    def __init__(self, filename: str = "customization.json") -> None:
         # Use absolute path relative to this module
         self.filename = Path(__file__).parent.parent / 'data' / filename
 
