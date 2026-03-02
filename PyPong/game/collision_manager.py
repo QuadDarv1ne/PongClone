@@ -57,19 +57,20 @@ class CollisionManager:
         return (True, paddle.player_number)
     
     def check_powerup_collision(
-        self, 
-        powerup: PowerUp, 
+        self,
+        powerup: PowerUp,
         paddle: Paddle
     ) -> bool:
         """
         Проверить коллизию power-up с ракеткой.
-        
+
         Returns:
             bool: True если была коллизия
         """
-        if not powerup.active and powerup.affected_paddle is None:
-            return pygame.sprite.collide_rect(powerup, paddle)
-        return False
+        # Power-up активен только если ещё не подобран
+        if powerup.active or powerup.affected_paddle is not None:
+            return False
+        return pygame.sprite.collide_rect(powerup, paddle)
     
     def check_ball_powerup_collision(
         self, 
