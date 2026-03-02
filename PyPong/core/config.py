@@ -48,3 +48,22 @@ POWERUP_SOUND = "powerup.wav"
 
 # Font
 FONT_NAME = "Helvetica"
+
+# Effects limits (performance optimization)
+MAX_PARTICLES = 50
+MAX_TRAILS = 20
+PARTICLES_PER_HIT = 8
+TRAIL_SPAWN_CHANCE = 4  # 1 in 4 chance
+
+# Screen shake settings
+SHAKE_INTENSITY_NORMAL = (5, 5)
+SHAKE_INTENSITY_GOAL = (15, 15)
+
+# Power-up settings
+POWERUP_TYPES = [
+    "speed_boost",
+    "large_paddle", 
+    "slow_ball",
+    "multi_ball",
+    "shrink_opponent",
+]

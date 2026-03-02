@@ -3,7 +3,16 @@ import sys
 from pygame.locals import *
 from random import randint
 
-from PyPong.core.config import *
+from PyPong.core.config import (
+    WINDOW_WIDTH, WINDOW_HEIGHT, FPS, COLORS,
+    WHITE, BLACK, GRAY, LIGHT_BLUE, RED, GREEN, YELLOW,
+    PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_OFFSET,
+    BALL_SIZE, BALL_INITIAL_SPEED, BALL_SPEED_INCREASE, MAX_BALL_SPEED,
+    WINNING_SCORE, POWERUP_DURATION, POWERUP_SPAWN_CHANCE,
+    DIFFICULTY_LEVELS, FONT_NAME,
+    MAX_PARTICLES, MAX_TRAILS, PARTICLES_PER_HIT, TRAIL_SPAWN_CHANCE,
+    SHAKE_INTENSITY_NORMAL, SHAKE_INTENSITY_GOAL,
+)
 from PyPong.core.entities import Paddle, Ball, PowerUp
 from PyPong.core.game_state import GameState, GameStateManager
 from PyPong.systems.audio import AudioManager
@@ -62,18 +71,11 @@ class PongGame:
         self.trails = pygame.sprite.Group()
         self.shake = ScreenShake()
         self.goal_anim = GoalAnimation()
-        
+
         # Apply settings
         self.apply_settings()
         self.apply_theme()
-        
-        # Game objects
-        self.paddle1 = None
-        self.paddle2 = None
-        self.ball = None
-        self.all_sprites = None
-        self.powerups = None
-        
+
         # Input state
         self.input_state = {
             "up1": False,
@@ -82,12 +84,84 @@ class PongGame:
             "down2": False,
         }
 
-        # Game objects инициализируются при старте игры
-        self.paddle1 = None
-        self.paddle2 = None
-        self.ball = None
-        self.all_sprites = None
-        self.powerups = None
+        # Game objects (инициализируются при старте игры)
+        self._init_game_objects()
+
+    def _handle_escape(self) -> None:
+        """Обработать нажатие ESC"""
+        state = self.state_manager.state
+        transitions = {
+            GameState.PLAYING: GameState.PAUSED,
+            GameState.PAUSED: GameState.MENU,
+            GameState.STATS: GameState.MENU,
+            GameState.SETTINGS: GameState.MENU,
+            GameState.HELP: GameState.MENU,
+            GameState.MODE_SELECT: GameState.MENU,
+        }
+        
+        new_state = transitions.get(state)
+        if new_state:
+            self.state_manager.state = new_state
+            if new_state == GameState.MENU:
+                self._cleanup_game_objects()
+        else:
+            # Quit from menu
+            raise SystemExit()
+
+    def _handle_enter(self) -> None:
+        """Обработать нажатие ENTER"""
+        state = self.state_manager.state
+        transitions = {
+            GameState.MENU: GameState.MODE_SELECT,
+            GameState.MODE_SELECT: GameState.PLAYING,
+            GameState.PAUSED: GameState.PLAYING,
+            GameState.GAME_OVER: GameState.MENU,
+            GameState.TOURNAMENT_COMPLETE: GameState.MENU,
+        }
+        
+        new_state = transitions.get(state)
+        if new_state:
+            self.state_manager.state = new_state
+            if new_state == GameState.PLAYING:
+                self.audio.play_music()
+            elif new_state == GameState.MENU:
+                if state == GameState.GAME_OVER:
+                    self._cleanup_game_objects()
+                    self.state_manager.reset_scores()
+                elif state == GameState.TOURNAMENT_COMPLETE:
+                    self.tournament.reset()
+
+    def _handle_mode_select_keys(self, key: int) -> None:
+        """Обработать клавиши выбора режима"""
+        if self.state_manager.state != GameState.MODE_SELECT:
+            return
+            
+        if key == K_1:
+            self.state_manager.game_mode = "ai"
+        elif key == K_2:
+            self.state_manager.game_mode = "pvp"
+        elif key == K_3:
+            self.state_manager.set_difficulty("Easy")
+        elif key == K_4:
+            self.state_manager.set_difficulty("Medium")
+        elif key == K_t:
+            self.state_manager.tournament_mode = not self.state_manager.tournament_mode
+            if self.state_manager.tournament_mode:
+                self.tournament.reset()
+                self.state_manager.set_difficulty("Hard")
+
+    def _handle_movement_input(self, key: int, is_pressed: bool) -> None:
+        """Обработать ввод движения"""
+        key_map = {
+            K_a: ("up1", is_pressed),
+            K_z: ("down1", is_pressed),
+            K_UP: ("up2", is_pressed),
+            K_DOWN: ("down2", is_pressed),
+        }
+        
+        if key in key_map:
+            action, value = key_map[key]
+            self.input_state[action] = value
 
     def _detect_mobile(self):
         """Detect if running on mobile platform"""
@@ -136,6 +210,14 @@ class PongGame:
         if hasattr(self, 'ball') and self.ball:
             self.ball.image.fill(self.theme.ball_color)
 
+    def _init_game_objects(self):
+        """Инициализировать игровые объекты"""
+        self.paddle1 = None
+        self.paddle2 = None
+        self.ball = None
+        self.all_sprites = None
+        self.powerups = None
+
     def init_game_objects(self):
         is_ai = self.state_manager.game_mode == "ai"
         self.paddle1 = Paddle(1, is_ai=False, color=self.theme.paddle1_color)
@@ -159,25 +241,44 @@ class PongGame:
         }
 
     def reset_game(self):
+        """Сбросить игру к начальному состоянию"""
         self.state_manager.reset_scores()
-        self.init_game_objects()
+        self._init_game_objects()
 
-    def handle_events(self):
+    def _cleanup_game_objects(self):
+        """Очистить игровые объекты"""
+        if self.all_sprites:
+            self.all_sprites.empty()
+        if self.powerups:
+            self.powerups.empty()
+        if self.particles:
+            self.particles.empty()
+        if self.trails:
+            self.trails.empty()
+        self._init_game_objects()
+
+    def handle_events(self) -> bool:
+        """
+        Обработать события pygame.
+        
+        Returns:
+            bool: True если игра должна продолжаться, False для выхода
+        """
         for event in pygame.event.get():
             if event.type == QUIT:
                 return False
-            
+
             # Handle window resize
             if event.type == pygame.VIDEORESIZE:
                 if not self.is_mobile:
                     self.adaptive_screen.update_resolution(event.w, event.h)
                     self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-            
+
             # Touch controls
             if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
                 if self.settings.get("touch_controls", False):
                     self.touch.handle_touch(event)
-            
+
             # Settings menu input
             if self.state_manager.state == GameState.SETTINGS:
                 result = self.settings_menu.handle_input(event)
@@ -185,95 +286,42 @@ class PongGame:
                     self.state_manager.state = GameState.MENU
                     self.apply_settings()
                 continue
-            
+
             if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    if self.state_manager.state == GameState.PLAYING:
-                        self.state_manager.state = GameState.PAUSED
-                    elif self.state_manager.state == GameState.PAUSED:
-                        self.state_manager.state = GameState.MENU
-                        self.all_sprites = None
-                    elif self.state_manager.state == GameState.STATS:
-                        self.state_manager.state = GameState.MENU
-                    elif self.state_manager.state == GameState.SETTINGS:
-                        self.state_manager.state = GameState.MENU
-                    elif self.state_manager.state == GameState.HELP:
-                        self.state_manager.state = GameState.MENU
-                    elif self.state_manager.state == GameState.MODE_SELECT:
-                        self.state_manager.state = GameState.MENU
-                        self.all_sprites = None
-                    else:
-                        return False
-
-                elif event.key == K_RETURN:
-                    if self.state_manager.state == GameState.MENU:
-                        self.state_manager.state = GameState.MODE_SELECT
-                    elif self.state_manager.state == GameState.MODE_SELECT:
-                        self.state_manager.state = GameState.PLAYING
-                        self.audio.play_music()
-                    elif self.state_manager.state == GameState.PAUSED:
-                        self.state_manager.state = GameState.PLAYING
-                    elif self.state_manager.state == GameState.GAME_OVER:
-                        # Сброс и возврат в меню
-                        self.paddle1 = None
-                        self.paddle2 = None
-                        self.ball = None
-                        self.all_sprites = None
-                        self.powerups = None
-                        self.state_manager.reset_scores()
-                        self.state_manager.state = GameState.MENU
-                    elif self.state_manager.state == GameState.TOURNAMENT_COMPLETE:
-                        self.tournament.reset()
-                        self.state_manager.state = GameState.MENU
-
-                elif event.key == K_s and self.state_manager.state == GameState.MENU:
-                    self.state_manager.state = GameState.STATS
-
-                elif event.key == K_o and self.state_manager.state == GameState.MENU:
-                    self.state_manager.state = GameState.SETTINGS
-
-                elif event.key == K_F1 and self.state_manager.state == GameState.MENU:
-                    self.state_manager.state = GameState.HELP
-                
-                elif event.key == K_1:
-                    if self.state_manager.state == GameState.MODE_SELECT:
-                        self.state_manager.game_mode = "ai"
-                elif event.key == K_2:
-                    if self.state_manager.state == GameState.MODE_SELECT:
-                        self.state_manager.game_mode = "pvp"
-                elif event.key == K_3:
-                    if self.state_manager.state == GameState.MODE_SELECT:
-                        self.state_manager.set_difficulty("Easy")
-                elif event.key == K_4:
-                    if self.state_manager.state == GameState.MODE_SELECT:
-                        self.state_manager.set_difficulty("Medium")
-                elif event.key == K_t and self.state_manager.state == GameState.MODE_SELECT:
-                    self.state_manager.tournament_mode = not self.state_manager.tournament_mode
-                    if self.state_manager.tournament_mode:
-                        self.tournament.reset()
-                    if self.state_manager.state == GameState.MODE_SELECT:
-                        self.state_manager.set_difficulty("Hard")
-                
-                elif event.key == K_a:
-                    self.input_state["up1"] = True
-                elif event.key == K_z:
-                    self.input_state["down1"] = True
-                elif event.key == K_UP:
-                    self.input_state["up2"] = True
-                elif event.key == K_DOWN:
-                    self.input_state["down2"] = True
-            
+                self._handle_keydown(event.key)
             elif event.type == KEYUP:
-                if event.key == K_a:
-                    self.input_state["up1"] = False
-                elif event.key == K_z:
-                    self.input_state["down1"] = False
-                elif event.key == K_UP:
-                    self.input_state["up2"] = False
-                elif event.key == K_DOWN:
-                    self.input_state["down2"] = False
-        
+                self._handle_keyup(event.key)
+
         return True
+
+    def _handle_keydown(self, key: int) -> None:
+        """Обработать нажатие клавиши"""
+        if key == K_ESCAPE:
+            try:
+                self._handle_escape()
+            except SystemExit:
+                raise
+        
+        elif key == K_RETURN:
+            self._handle_enter()
+        
+        elif self.state_manager.state == GameState.MENU:
+            if key == K_s:
+                self.state_manager.state = GameState.STATS
+            elif key == K_o:
+                self.state_manager.state = GameState.SETTINGS
+            elif key == K_F1:
+                self.state_manager.state = GameState.HELP
+        
+        elif self.state_manager.state == GameState.MODE_SELECT:
+            self._handle_mode_select_keys(key)
+        
+        else:
+            self._handle_movement_input(key, is_pressed=True)
+
+    def _handle_keyup(self, key: int) -> None:
+        """Обработать отпускание клавиши"""
+        self._handle_movement_input(key, is_pressed=False)
 
     def update_game(self):
         # Инициализация при переходе в PLAYING
@@ -326,7 +374,7 @@ class PongGame:
         
         # Move ball and create trail (ограничено для производительности)
         self.ball.move()
-        if len(self.trails) < 20 and randint(1, 4) == 1:
+        if len(self.trails) < MAX_TRAILS and randint(1, TRAIL_SPAWN_CHANCE) == 1:
             trail = Trail(self.ball.rect.centerx, self.ball.rect.centery)
             self.trails.add(trail)
         
@@ -338,21 +386,21 @@ class PongGame:
                 self.ball.bounce_paddle(self.paddle1)
                 self.audio.play_sound("beep")
                 self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, self.theme.accent_color)
-                self.shake.start(5, 5)
+                self.shake.start(*SHAKE_INTENSITY_NORMAL)
 
         if pygame.sprite.collide_rect(self.ball, self.paddle2):
             if self.ball.velocity_x > 0:
                 self.ball.bounce_paddle(self.paddle2)
                 self.audio.play_sound("beep")
                 self.create_particles(self.ball.rect.centerx, self.ball.rect.centery, self.theme.accent_color)
-                self.shake.start(5, 5)
-        
+                self.shake.start(*SHAKE_INTENSITY_NORMAL)
+
         # Check scoring
         if self.ball.is_out_left():
             self.state_manager.add_score(2)
             self.audio.play_sound("score")
             self.goal_anim.start(2)
-            self.shake.start(15, 15)
+            self.shake.start(*SHAKE_INTENSITY_GOAL)
             if self.state_manager.state == GameState.PLAYING:
                 self.ball.reset_ball()
             elif self.state_manager.state == GameState.GAME_OVER:
@@ -365,7 +413,7 @@ class PongGame:
             self.state_manager.add_score(1)
             self.audio.play_sound("score")
             self.goal_anim.start(1)
-            self.shake.start(15, 15)
+            self.shake.start(*SHAKE_INTENSITY_GOAL)
             if self.state_manager.state == GameState.PLAYING:
                 self.ball.reset_ball()
             elif self.state_manager.state == GameState.GAME_OVER:
@@ -411,9 +459,9 @@ class PongGame:
         self.goal_anim.update()
 
     def create_particles(self, x, y, color):
-        # Ограничение количества частиц для производительности
-        if len(self.particles) < 50:
-            for _ in range(8):
+        """Создать частицы с ограничением для производительности"""
+        if len(self.particles) < MAX_PARTICLES:
+            for _ in range(PARTICLES_PER_HIT):
                 particle = Particle(x, y, color)
                 self.particles.add(particle)
 
@@ -496,9 +544,22 @@ class PongGame:
             self.draw()
             self.clock.tick(FPS)
 
+        self.shutdown()
+
+    def shutdown(self):
+        """Корректное завершение работы игры"""
         self.settings.force_save()  # Принудительное сохранение при выходе
+        self.audio.stop_music()
+        self._cleanup_game_objects()
         pygame.quit()
-        sys.exit()
+
+    def __del__(self):
+        """Гарантировать очистку ресурсов при уничтожении объекта"""
+        try:
+            if pygame.get_init():
+                pygame.quit()
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     game = PongGame()

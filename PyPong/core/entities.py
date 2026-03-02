@@ -1,12 +1,27 @@
+"""
+Game entities: Paddle, Ball, PowerUp
+"""
 import math
 from typing import Optional, Tuple, Dict, Any
 import pygame
 from random import randint, choice
-from PyPong.core.config import *
+from PyPong.core.config import (
+    WHITE, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_OFFSET,
+    WINDOW_WIDTH, WINDOW_HEIGHT, BALL_SIZE, BALL_INITIAL_SPEED,
+    BALL_SPEED_INCREASE, MAX_BALL_SPEED, POWERUP_DURATION,
+    DIFFICULTY_LEVELS, GREEN, YELLOW, LIGHT_BLUE, RED,
+)
 
 
 class Paddle(pygame.sprite.Sprite):
-    def __init__(self, player_number: int, is_ai: bool = False, color: Tuple[int, int, int] = WHITE):
+    """Player or AI paddle"""
+    
+    def __init__(
+        self, 
+        player_number: int, 
+        is_ai: bool = False, 
+        color: Tuple[int, int, int] = WHITE
+    ):
         super().__init__()
         self.player_number = player_number
         self.is_ai = is_ai
@@ -99,6 +114,8 @@ class Paddle(pygame.sprite.Sprite):
 
 
 class Ball(pygame.sprite.Sprite):
+    """Game ball with physics"""
+    
     def __init__(self):
         super().__init__()
         self.image = pygame.Surface([BALL_SIZE, BALL_SIZE])
@@ -171,6 +188,8 @@ class Ball(pygame.sprite.Sprite):
 
 
 class PowerUp(pygame.sprite.Sprite):
+    """Power-up with various effects"""
+    
     TYPES: Dict[str, Dict[str, Any]] = {
         "speed_boost": {"color": GREEN, "duration": POWERUP_DURATION},
         "large_paddle": {"color": YELLOW, "duration": POWERUP_DURATION},

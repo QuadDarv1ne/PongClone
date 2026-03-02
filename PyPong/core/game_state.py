@@ -1,8 +1,21 @@
+"""
+Game state management with state machine pattern
+"""
+from typing import Optional, TYPE_CHECKING
 import pygame
 from enum import Enum
-from PyPong.core.config import *
+from PyPong.core.config import (
+    WHITE, BLACK, GRAY, LIGHT_BLUE, RED, GREEN, YELLOW,
+    FONT_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, WINNING_SCORE,
+    DIFFICULTY_LEVELS,
+)
+
+if TYPE_CHECKING:
+    from PyPong.systems.stats import StatsManager
+
 
 class GameState(Enum):
+    """Enumeration of all game states"""
     MENU = 1
     MODE_SELECT = 2
     PLAYING = 3
@@ -20,8 +33,15 @@ class GameState(Enum):
     MINIGAME_COMPLETE = 15
     HELP = 16
 
+
 class GameStateManager:
-    def __init__(self, screen, game_surface=None):
+    """Manages game state transitions and rendering"""
+    
+    def __init__(
+        self, 
+        screen: pygame.Surface, 
+        game_surface: Optional[pygame.Surface] = None
+    ):
         self.screen = screen
         self.game_surface = game_surface if game_surface else screen
         self.state = GameState.MENU
@@ -41,12 +61,14 @@ class GameStateManager:
         # Пре-рендер сетки для производительности
         self._net_surface = self._create_net_surface()
 
-    def reset_scores(self):
+    def reset_scores(self) -> None:
+        """Сбросить очки"""
         self.player1_score = 0
         self.player2_score = 0
         self.winner = None
 
-    def add_score(self, player):
+    def add_score(self, player: int) -> None:
+        """Добавить очко игроку"""
         if player == 1:
             self.player1_score += 1
         else:
@@ -59,11 +81,13 @@ class GameStateManager:
             self.winner = 2
             self.state = GameState.GAME_OVER
 
-    def set_difficulty(self, difficulty):
+    def set_difficulty(self, difficulty: str) -> None:
+        """Установить сложность"""
         if difficulty in DIFFICULTY_LEVELS:
             self.difficulty = difficulty
 
-    def draw_menu(self):
+    def draw_menu(self) -> None:
+        """Отрисовать главное меню"""
         self.game_surface.fill(GRAY)
 
         title = self.title_font.render("Enhanced Pong", True, WHITE)
@@ -80,7 +104,8 @@ class GameStateManager:
         self.game_surface.blit(minigames, minigames.get_rect(center=(WINDOW_WIDTH // 2, 480)))
         self.game_surface.blit(stats_text, stats_text.get_rect(center=(WINDOW_WIDTH // 2, 620)))
 
-    def draw_mode_select(self):
+    def draw_mode_select(self) -> None:
+        """Отрисовать выбор режима игры"""
         self.game_surface.fill(GRAY)
 
         title = self.title_font.render("Select Mode", True, WHITE)
@@ -108,7 +133,8 @@ class GameStateManager:
 
         self.game_surface.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 600)))
 
-    def draw_pause(self):
+    def draw_pause(self) -> None:
+        """Отрисовать экран паузы"""
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         overlay.set_alpha(128)
         overlay.fill(BLACK)
@@ -122,7 +148,8 @@ class GameStateManager:
         self.game_surface.blit(resume, resume.get_rect(center=(WINDOW_WIDTH // 2, 350)))
         self.game_surface.blit(quit_text, quit_text.get_rect(center=(WINDOW_WIDTH // 2, 450)))
 
-    def draw_game_over(self):
+    def draw_game_over(self) -> None:
+        """Отрисовать экран конца игры"""
         self.game_surface.fill(GRAY)
         
         game_over = self.title_font.render("GAME OVER", True, WHITE)
@@ -133,7 +160,8 @@ class GameStateManager:
         self.game_surface.blit(winner_text, winner_text.get_rect(center=(WINDOW_WIDTH // 2, 350)))
         self.game_surface.blit(restart, restart.get_rect(center=(WINDOW_WIDTH // 2, 450)))
 
-    def draw_score(self):
+    def draw_score(self) -> None:
+        """Отрисовать счёт"""
         score_text = self.score_font.render(
             f"{self.player1_score}   {self.player2_score}", 
             True, WHITE
@@ -147,11 +175,12 @@ class GameStateManager:
             pygame.draw.rect(net, WHITE, (0, i, 4, 30))
         return net
 
-    def draw_net(self):
+    def draw_net(self) -> None:
         """Отрисовать сетку (blit вместо draw каждый кадр)"""
         self.game_surface.blit(self._net_surface, (WINDOW_WIDTH // 2 - 2, 0))
 
-    def draw_stats(self, stats_manager):
+    def draw_stats(self, stats_manager: "StatsManager") -> None:
+        """Отрисовать статистику"""
         self.game_surface.fill(GRAY)
         
         title = self.title_font.render("Statistics", True, WHITE)
@@ -170,7 +199,8 @@ class GameStateManager:
         self.game_surface.blit(total_goals, total_goals.get_rect(center=(WINDOW_WIDTH // 2, 540)))
         self.game_surface.blit(back, back.get_rect(center=(WINDOW_WIDTH // 2, 640)))
 
-    def draw_help(self):
+    def draw_help(self) -> None:
+        """Отрисовать справку"""
         self.game_surface.fill(GRAY)
 
         title = self.title_font.render("How to Play", True, WHITE)
