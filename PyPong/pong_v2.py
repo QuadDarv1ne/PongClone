@@ -73,19 +73,19 @@ class Paddle(pygame.sprite.Sprite):
                 self.rect.y += self.speed
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.image = pygame.Surface([10, 10])
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.reset_ball()
 
-    def reset_ball(self):
+    def reset_ball(self) -> None:
         self.rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
         self.direction = choice([0, 1, 2, 3])
         self.speed = 4
 
-    def move(self):
+    def move(self) -> None:
         if self.direction == 0:
             self.rect.x -= self.speed
             self.rect.y -= self.speed
@@ -107,7 +107,7 @@ class Ball(pygame.sprite.Sprite):
         self.speed = min(self.speed * BALL_SPEED_INCREASE, MAX_BALL_SPEED)
 
 class PowerUp(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.image = pygame.Surface([20, 20])
         self.image.fill(LIGHT_BLUE)
@@ -117,7 +117,7 @@ class PowerUp(pygame.sprite.Sprite):
         self.active = False
         self.start_time = 0
 
-    def activate(self, paddle):
+    def activate(self, paddle) -> None:
         self.active = True
         self.start_time = pygame.time.get_ticks()
         if self.type == "speed_boost":
