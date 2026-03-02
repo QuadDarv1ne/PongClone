@@ -3,9 +3,9 @@ Achievement system with unlockable rewards
 """
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Callable
+from typing import Dict, List, Optional, Callable, Any
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from PyPong.core.constants import AchievementType, Balance, EventType
 from PyPong.core.logger import logger, log_exception
 
@@ -24,42 +24,42 @@ class Achievement:
     points: int = 0
     icon: str = "🏆"
     hidden: bool = False
-    
+
     def update_progress(self, value: int) -> bool:
         """Update progress and check if unlocked"""
         if self.unlocked:
             return False
-        
+
         self.progress = min(self.progress + value, self.requirement)
-        
+
         if self.progress >= self.requirement:
             self.unlock()
             return True
-        
+
         return False
-    
+
     def unlock(self) -> None:
         """Unlock achievement"""
         if not self.unlocked:
             self.unlocked = True
             self.unlocked_at = datetime.now().isoformat()
             logger.info(f"Achievement unlocked: {self.name}")
-    
+
     def get_progress_percent(self) -> float:
         """Get progress as percentage"""
         if self.requirement == 0:
             return 100.0
         return (self.progress / self.requirement) * 100
-    
-    def to_dict(self) -> dict:
+
+    def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
-        data = asdict(self)
+        data: Dict[str, Any] = asdict(self)
         # Convert enum to string for JSON serialization
         data['type'] = self.type.value
         return data
-    
+
     @staticmethod
-    def from_dict(data: dict) -> 'Achievement':
+    def from_dict(data: Dict[str, Any]) -> 'Achievement':
         """Create from dictionary"""
         # Convert type string back to enum
         if isinstance(data.get('type'), str):
@@ -70,7 +70,7 @@ class Achievement:
 class AchievementManager:
     """Manages achievements and unlockables"""
 
-    def __init__(self, filename: str = "achievements.json"):
+    def __init__(self, filename: str = "achievements.json") -> None:
         # Use absolute path relative to this module
         self.filename = Path(__file__).parent.parent / 'data' / filename
         self.achievements: Dict[str, Achievement] = {}
@@ -78,7 +78,7 @@ class AchievementManager:
         self._create_achievements()
         self.load_progress()
         logger.info("Achievement system initialized")
-    
+
     def _create_achievements(self) -> None:
         """Create all achievements"""
         achievements_data = [
