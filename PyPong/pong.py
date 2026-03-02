@@ -156,14 +156,36 @@ class PongGame:
         """Detect if running on mobile platform"""
         try:
             import platform
+            import os
+            
             system = platform.system().lower()
+            
+            # Android detection
             if system == 'linux':
                 try:
+                    # Check for Android in /proc/version
                     with open('/proc/version', 'r') as f:
                         if 'android' in f.read().lower():
                             return True
                 except (IOError, OSError):
                     pass
+                
+                # Check for Android environment variables
+                if os.environ.get('ANDROID_ROOT') or os.environ.get('ANDROID_DATA'):
+                    return True
+            
+            # iOS detection (if pygame-ce supports it in future)
+            if system == 'darwin':
+                # Check if running on iOS (not macOS)
+                machine = platform.machine().lower()
+                if 'iphone' in machine or 'ipad' in machine:
+                    return True
+            
+            # Check for touch screen on Windows/Linux tablets
+            if hasattr(pygame, 'FINGERDOWN'):
+                # If pygame supports touch events, assume mobile/tablet
+                return True
+            
             return False
         except Exception as e:
             logger.warning(f"Platform detection failed: {e}")
@@ -189,6 +211,7 @@ class PongGame:
             if event.type == QUIT:
                 return False
             
+            # Handle window resize
             if event.type == pygame.VIDEORESIZE:
                 if not self.is_mobile:
                     self.adaptive_screen.update_resolution(event.w, event.h)
@@ -197,11 +220,25 @@ class PongGame:
                         pygame.RESIZABLE
                     )
                     self.renderer.screen = self.screen
+                    # Update touch controls for new screen size
+                    if self.settings.get("touch_controls", False):
+                        self.touch.update_screen_size(event.w, event.h)
             
+            # Handle touch/mouse events
             if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
-                if self.settings.get("touch_controls", False):
+                if self.settings.get("touch_controls", False) or self.is_mobile:
                     self.touch.handle_touch(event)
             
+            # Handle native touch events (FINGERDOWN, FINGERUP)
+            if hasattr(pygame, 'FINGERDOWN') and event.type == pygame.FINGERDOWN:
+                if self.settings.get("touch_controls", False) or self.is_mobile:
+                    self.touch.handle_touch(event)
+            
+            if hasattr(pygame, 'FINGERUP') and event.type == pygame.FINGERUP:
+                if self.settings.get("touch_controls", False) or self.is_mobile:
+                    self.touch.handle_touch(event)
+            
+            # Settings menu
             if self.state_manager.state == GameState.SETTINGS:
                 result = self.settings_menu.handle_input(event)
                 if result == "back":
@@ -209,6 +246,7 @@ class PongGame:
                     self._apply_settings()
                 continue
             
+            # Keyboard events
             if event.type == KEYDOWN:
                 self._handle_keydown(event.key)
             elif event.type == KEYUP:
