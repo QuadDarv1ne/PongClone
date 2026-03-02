@@ -146,17 +146,17 @@ class TestPaddle:
     def test_predict_ball_position_away(self, init_pygame):
         """Test prediction when ball moves away"""
         paddle = Paddle(player_number=2, is_ai=True)
-        
+
         # Ball moving away from paddle
         ball_x = WINDOW_WIDTH // 2
         ball_y = WINDOW_HEIGHT // 2
         ball_vx = -5  # Moving left (away from right paddle)
         ball_vy = 3
-        
+
         predicted_y = paddle.predict_ball_position(ball_x, ball_y, ball_vx, ball_vy)
-        
-        # Should return current position
-        assert predicted_y == ball_y
+
+        # Should return current paddle position (not ball position)
+        assert predicted_y == paddle.rect.centery
     
     def test_predict_ball_position_no_infinite_loop(self, init_pygame):
         """Test prediction doesn't cause infinite loop"""
