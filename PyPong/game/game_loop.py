@@ -308,11 +308,7 @@ class GameLoop:
     def _update_effects(self) -> None:
         """Обновить эффекты"""
         if self.particles:
-            # Поддержка как ParticlePool, так и sprite.Group
-            if isinstance(self.particles, ParticlePool):
-                self.particles.update()
-            else:
-                self.particles.update()
+            self.particles.update()
         if self.trails:
             self.trails.update()
         if self.shake:
