@@ -81,7 +81,7 @@ class Paddle(pygame.sprite.Sprite):
             # No movement when NO_MOVEMENT2 is True
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self) -> None:
         pygame.sprite.Sprite.__init__(self)
 
         self.image = pygame.Surface([10, 10])
@@ -92,7 +92,7 @@ class Ball(pygame.sprite.Sprite):
         self.direction = randint(0,3)
         self.speed = 4
 
-    def move(self):
+    def move(self) -> None:
         if self.direction == UPLEFT:
             self.rect.x -= self.speed
             self.rect.y -= self.speed
