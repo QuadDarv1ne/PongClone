@@ -27,14 +27,14 @@ from PyPong.core.logger import logger, log_exception
 
 class PongGame:
     """Main game class with modular architecture"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         try:
             pygame.init()
         except pygame.error as e:
             logger.error(f"Failed to initialize pygame: {e}")
             raise
-        
+
         self._init_settings()
         self._init_display()
         self._init_managers()
