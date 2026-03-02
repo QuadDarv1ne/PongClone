@@ -3,14 +3,14 @@ Localization system for multi-language support
 """
 import json
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from PyPong.core.logger import logger, log_exception
 
 
 class Localization:
     """Manages game localization"""
-    
-    SUPPORTED_LANGUAGES = {
+
+    SUPPORTED_LANGUAGES: Dict[str, str] = {
         'en': 'English',
         'ru': 'Русский',
         'es': 'Español',
@@ -19,15 +19,15 @@ class Localization:
         'zh': '中文',
         'ja': '日本語'
     }
-    
-    def __init__(self, default_language: str = 'en'):
+
+    def __init__(self, default_language: str = 'en') -> None:
         self.current_language = default_language
         self.translations: Dict[str, Dict[str, str]] = {}
         self.fallback_language = 'en'
-        
+
         self._load_translations()
         logger.info(f"Localization initialized: {default_language}")
-    
+
     @log_exception
     def _load_translations(self) -> None:
         """Load all translation files"""
@@ -38,10 +38,10 @@ class Localization:
             logger.warning("Locales directory not found, creating default translations")
             self._create_default_translations()
             return
-        
+
         for lang_code in self.SUPPORTED_LANGUAGES.keys():
             lang_file = locale_dir / f'{lang_code}.json'
-            
+
             if lang_file.exists():
                 try:
                     with open(lang_file, 'r', encoding='utf-8') as f:
@@ -49,7 +49,7 @@ class Localization:
                     logger.debug(f"Loaded translations: {lang_code}")
                 except Exception as e:
                     logger.error(f"Failed to load {lang_code}: {e}")
-    
+
     def _create_default_translations(self) -> None:
         """Create default English translations"""
         locale_dir = Path(__file__).parent.parent / 'locales'
