@@ -23,24 +23,24 @@ from PyPong.ui.content_ui import CampaignUI, ChallengesUI, MiniGameUI
 
 
 class EnhancedPongGame:
-    def __init__(self):
+    def __init__(self) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Enhanced Pong - Campaign Edition")
         self.clock = pygame.time.Clock()
-        
+
         # Core systems
         self.state_manager = GameStateManager(self.screen)
         self.audio = AudioManager()
         self.stats = StatsManager()
         self.settings = Settings()
-        
+
         # New content systems
         self.campaign = CampaignManager()
         self.challenges = ChallengeManager()
         self.minigames = MiniGameManager()
         self.modifiers = ModifierManager()
-        
+
         # UI systems
         self.campaign_ui = CampaignUI(self.screen, self.campaign)
         self.challenges_ui = ChallengesUI(self.screen, self.challenges)
@@ -48,14 +48,14 @@ class EnhancedPongGame:
         self.powerup_indicator = PowerUpIndicator()
         self.fps_counter = FPSCounter()
         self.settings_menu = SettingsMenu(self.screen, self.settings)
-        
+
         # Game objects
         self.paddle1 = None
         self.paddle2 = None
         self.ball = None
         self.balls = []
         self.powerups = pygame.sprite.Group()
-        
+
         # Campaign state
         self.current_level = None
         self.level_start_time = None
