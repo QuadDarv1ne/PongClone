@@ -54,17 +54,22 @@ class Renderer:
     def render_game(self, state_manager: Any, shake: Any) -> None:
         """
         Отрисовать игровой экран.
-        
+
         Args:
             state_manager: Менеджер состояния игры
             shake: ScreenShake эффект
         """
         self.clear()
-        
+
         # Draw net and score
         state_manager.draw_net()
         state_manager.draw_score()
-        
+
+        # Debug: check if sprites are set
+        if self.all_sprites is None:
+            from PyPong.core.logger import logger
+            logger.warning("render_game: all_sprites is None!")
+
         # Draw sprites
         if self.trails:
             self.trails.draw(self.game_surface)

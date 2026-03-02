@@ -9,6 +9,7 @@ from PyPong.core.config import (
     FONT_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, WINNING_SCORE,
     DIFFICULTY_LEVELS,
 )
+from PyPong.ui.localization import t
 
 if TYPE_CHECKING:
     from PyPong.systems.stats import StatsManager
@@ -90,12 +91,15 @@ class GameStateManager:
         """Отрисовать главное меню"""
         self.game_surface.fill(GRAY)
 
-        title = self.title_font.render("Enhanced Pong", True, WHITE)
-        start = self.menu_font.render("Press ENTER to Start", True, WHITE)
-        campaign = self.small_font.render("Press C for Campaign", True, YELLOW)
-        challenges = self.small_font.render("Press H for Challenges", True, GREEN)
-        minigames = self.small_font.render("Press M for Mini-Games", True, LIGHT_BLUE)
-        stats_text = self.small_font.render("Press S for Stats | Press O for Settings | Press F1 for Help", True, WHITE)
+        title = self.title_font.render(t("menu.title"), True, WHITE)
+        start = self.menu_font.render(t("menu.start"), True, WHITE)
+        campaign = self.small_font.render(t("menu.campaign"), True, YELLOW)
+        challenges = self.small_font.render(t("menu.challenges"), True, GREEN)
+        minigames = self.small_font.render(t("menu.minigames"), True, LIGHT_BLUE)
+        stats_text = self.small_font.render(
+            f"{t('menu.stats')} | {t('menu.settings')} | {t('menu.help')}",
+            True, WHITE
+        )
 
         self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 180)))
         self.game_surface.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 300)))
@@ -108,17 +112,17 @@ class GameStateManager:
         """Отрисовать выбор режима игры"""
         self.game_surface.fill(GRAY)
 
-        title = self.title_font.render("Select Mode", True, WHITE)
-        ai_text = self.menu_font.render("1. vs AI", True, YELLOW if self.game_mode == "ai" else WHITE)
-        pvp_text = self.menu_font.render("2. Player vs Player", True, YELLOW if self.game_mode == "pvp" else WHITE)
-        tournament_text = self.small_font.render(
-            f"Tournament: {'ON (Best of 3)' if self.tournament_mode else 'OFF'} (Press T)",
-            True, GREEN if self.tournament_mode else WHITE
-        )
-        diff_text = self.small_font.render(f"AI Difficulty: {self.difficulty} (3/4/5)", True, WHITE)
-        controls_ai = self.small_font.render("Controls: A/Z - Player 1", True, WHITE)
-        controls_pvp = self.small_font.render("Controls: A/Z - Player 1 | Arrows - Player 2", True, WHITE)
-        start = self.menu_font.render("Press ENTER to Start", True, GREEN)
+        title = self.title_font.render(t("mode.select_title"), True, WHITE)
+        ai_text = self.menu_font.render(t("mode.ai"), True, YELLOW if self.game_mode == "ai" else WHITE)
+        pvp_text = self.menu_font.render(t("mode.pvp"), True, YELLOW if self.game_mode == "pvp" else WHITE)
+        
+        tournament_key = "mode.tournament_on" if self.tournament_mode else "mode.tournament_off"
+        tournament_text = self.small_font.render(t(tournament_key), True, GREEN if self.tournament_mode else WHITE)
+        
+        diff_text = self.small_font.render(t("mode.difficulty").format(self.difficulty), True, WHITE)
+        controls_ai = self.small_font.render(t("mode.controls_ai"), True, WHITE)
+        controls_pvp = self.small_font.render(t("mode.controls_pvp"), True, WHITE)
+        start = self.menu_font.render(t("mode.start"), True, GREEN)
 
         self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 120)))
         self.game_surface.blit(ai_text, ai_text.get_rect(center=(WINDOW_WIDTH // 2, 240)))
@@ -139,11 +143,11 @@ class GameStateManager:
         overlay.set_alpha(128)
         overlay.fill(BLACK)
         self.game_surface.blit(overlay, (0, 0))
-        
-        pause = self.title_font.render("PAUSED", True, WHITE)
-        resume = self.menu_font.render("Press ENTER to Resume", True, WHITE)
-        quit_text = self.menu_font.render("Press ESC to Quit", True, WHITE)
-        
+
+        pause = self.title_font.render(t("game.paused"), True, WHITE)
+        resume = self.menu_font.render(t("game.resume"), True, WHITE)
+        quit_text = self.menu_font.render(t("game.quit_to_menu"), True, WHITE)
+
         self.game_surface.blit(pause, pause.get_rect(center=(WINDOW_WIDTH // 2, 250)))
         self.game_surface.blit(resume, resume.get_rect(center=(WINDOW_WIDTH // 2, 350)))
         self.game_surface.blit(quit_text, quit_text.get_rect(center=(WINDOW_WIDTH // 2, 450)))
@@ -151,11 +155,11 @@ class GameStateManager:
     def draw_game_over(self) -> None:
         """Отрисовать экран конца игры"""
         self.game_surface.fill(GRAY)
-        
-        game_over = self.title_font.render("GAME OVER", True, WHITE)
-        winner_text = self.menu_font.render(f"Player {self.winner} Wins!", True, WHITE)
-        restart = self.menu_font.render("Press ENTER to Restart", True, WHITE)
-        
+
+        game_over = self.title_font.render(t("game.game_over"), True, WHITE)
+        winner_text = self.menu_font.render(t("game.winner").format(self.winner), True, WHITE)
+        restart = self.menu_font.render(t("game.restart"), True, WHITE)
+
         self.game_surface.blit(game_over, game_over.get_rect(center=(WINDOW_WIDTH // 2, 250)))
         self.game_surface.blit(winner_text, winner_text.get_rect(center=(WINDOW_WIDTH // 2, 350)))
         self.game_surface.blit(restart, restart.get_rect(center=(WINDOW_WIDTH // 2, 450)))
@@ -182,15 +186,15 @@ class GameStateManager:
     def draw_stats(self, stats_manager: "StatsManager") -> None:
         """Отрисовать статистику"""
         self.game_surface.fill(GRAY)
-        
-        title = self.title_font.render("Statistics", True, WHITE)
-        games = self.menu_font.render(f"Games Played: {stats_manager.stats['games_played']}", True, WHITE)
-        p1_wins = self.menu_font.render(f"Player 1 Wins: {stats_manager.stats['player1_wins']}", True, WHITE)
-        p2_wins = self.menu_font.render(f"Player 2 Wins: {stats_manager.stats['player2_wins']}", True, WHITE)
-        high_score = self.menu_font.render(f"Highest Score: {stats_manager.stats['highest_score']}", True, WHITE)
-        total_goals = self.menu_font.render(f"Total Goals: {stats_manager.stats['total_goals']}", True, WHITE)
-        back = self.small_font.render("Press ESC to go back", True, WHITE)
-        
+
+        title = self.title_font.render(t("stats.title"), True, WHITE)
+        games = self.menu_font.render(t("stats.games_played").format(stats_manager.stats['games_played']), True, WHITE)
+        p1_wins = self.menu_font.render(t("stats.player1_wins").format(stats_manager.stats['player1_wins']), True, WHITE)
+        p2_wins = self.menu_font.render(t("stats.player2_wins").format(stats_manager.stats['player2_wins']), True, WHITE)
+        high_score = self.menu_font.render(t("stats.highest_score").format(stats_manager.stats['highest_score']), True, WHITE)
+        total_goals = self.menu_font.render(t("stats.total_goals").format(stats_manager.stats['total_goals']), True, WHITE)
+        back = self.small_font.render(t("stats.back"), True, WHITE)
+
         self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 100)))
         self.game_surface.blit(games, games.get_rect(center=(WINDOW_WIDTH // 2, 220)))
         self.game_surface.blit(p1_wins, p1_wins.get_rect(center=(WINDOW_WIDTH // 2, 300)))
@@ -203,62 +207,62 @@ class GameStateManager:
         """Отрисовать справку"""
         self.game_surface.fill(GRAY)
 
-        title = self.title_font.render("How to Play", True, WHITE)
-        
+        title = self.title_font.render(t("help.title"), True, WHITE)
+
         # Player 1 controls
-        p1_title = self.menu_font.render("Player 1 (Left)", True, GREEN)
-        p1_up = self.small_font.render("A - Move Up", True, WHITE)
-        p1_down = self.small_font.render("Z - Move Down", True, WHITE)
-        
+        p1_title = self.menu_font.render(t("help.player1_title"), True, GREEN)
+        p1_up = self.small_font.render(t("help.player1_up"), True, WHITE)
+        p1_down = self.small_font.render(t("help.player1_down"), True, WHITE)
+
         # Player 2 controls
-        p2_title = self.menu_font.render("Player 2 (Right / AI)", True, YELLOW)
-        p2_up = self.small_font.render("UP Arrow - Move Up", True, WHITE)
-        p2_down = self.small_font.render("DOWN Arrow - Move Down", True, WHITE)
-        
+        p2_title = self.menu_font.render(t("help.player2_title"), True, YELLOW)
+        p2_up = self.small_font.render(t("help.player2_up"), True, WHITE)
+        p2_down = self.small_font.render(t("help.player2_down"), True, WHITE)
+
         # General controls
-        gen_title = self.menu_font.render("General Controls", True, LIGHT_BLUE)
-        gen_start = self.small_font.render("ENTER - Start / Resume", True, WHITE)
-        gen_pause = self.small_font.render("ESCAPE - Pause / Back", True, WHITE)
-        gen_stats = self.small_font.render("S - Statistics (from Menu)", True, WHITE)
-        gen_settings = self.small_font.render("O - Settings (from Menu)", True, WHITE)
-        
+        gen_title = self.menu_font.render(t("help.general_title"), True, LIGHT_BLUE)
+        gen_start = self.small_font.render(t("help.general_start"), True, WHITE)
+        gen_pause = self.small_font.render(t("help.general_pause"), True, WHITE)
+        gen_stats = self.small_font.render(t("help.general_stats"), True, WHITE)
+        gen_settings = self.small_font.render(t("help.general_settings"), True, WHITE)
+
         # Power-ups info
-        power_title = self.menu_font.render("Power-Ups", True, (255, 165, 0))
-        power_speed = self.small_font.render("Green - Speed Boost (faster paddle)", True, WHITE)
-        power_large = self.small_font.render("Yellow - Large Paddle (bigger racket)", True, WHITE)
-        power_slow = self.small_font.render("Blue - Slow Ball (slower ball speed)", True, WHITE)
-        
+        power_title = self.menu_font.render(t("help.powerups_title"), True, (255, 165, 0))
+        power_speed = self.small_font.render(t("help.powerups_speed"), True, WHITE)
+        power_large = self.small_font.render(t("help.powerups_large"), True, WHITE)
+        power_slow = self.small_font.render(t("help.powerups_slow"), True, WHITE)
+
         # Objective
-        obj_title = self.menu_font.render("Objective", True, WHITE)
-        obj_text = self.small_font.render(f"First to {WINNING_SCORE} points wins!", True, WHITE)
-        obj_tip = self.small_font.render("Tip: Hit the ball with the edge of your paddle for angled shots!", True, (200, 200, 200))
-        
-        back = self.small_font.render("Press ESC to go back", True, WHITE)
+        obj_title = self.menu_font.render(t("help.objective_title"), True, WHITE)
+        obj_text = self.small_font.render(t("help.objective_text").format(WINNING_SCORE), True, WHITE)
+        obj_tip = self.small_font.render(t("help.objective_tip"), True, (200, 200, 200))
+
+        back = self.small_font.render(t("help.back"), True, WHITE)
 
         # Blit all text
         self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 60)))
-        
+
         self.game_surface.blit(p1_title, p1_title.get_rect(center=(WINDOW_WIDTH // 4, 130)))
         self.game_surface.blit(p1_up, p1_up.get_rect(center=(WINDOW_WIDTH // 4, 170)))
         self.game_surface.blit(p1_down, p1_down.get_rect(center=(WINDOW_WIDTH // 4, 200)))
-        
+
         self.game_surface.blit(p2_title, p2_title.get_rect(center=(3 * WINDOW_WIDTH // 4, 130)))
         self.game_surface.blit(p2_up, p2_up.get_rect(center=(3 * WINDOW_WIDTH // 4, 170)))
         self.game_surface.blit(p2_down, p2_down.get_rect(center=(3 * WINDOW_WIDTH // 4, 200)))
-        
+
         self.game_surface.blit(gen_title, gen_title.get_rect(center=(WINDOW_WIDTH // 2, 260)))
         self.game_surface.blit(gen_start, gen_start.get_rect(center=(WINDOW_WIDTH // 2, 300)))
         self.game_surface.blit(gen_pause, gen_pause.get_rect(center=(WINDOW_WIDTH // 2, 330)))
         self.game_surface.blit(gen_stats, gen_stats.get_rect(center=(WINDOW_WIDTH // 2, 360)))
         self.game_surface.blit(gen_settings, gen_settings.get_rect(center=(WINDOW_WIDTH // 2, 390)))
-        
+
         self.game_surface.blit(power_title, power_title.get_rect(center=(WINDOW_WIDTH // 2, 450)))
         self.game_surface.blit(power_speed, power_speed.get_rect(center=(WINDOW_WIDTH // 2, 485)))
         self.game_surface.blit(power_large, power_large.get_rect(center=(WINDOW_WIDTH // 2, 515)))
         self.game_surface.blit(power_slow, power_slow.get_rect(center=(WINDOW_WIDTH // 2, 545)))
-        
+
         self.game_surface.blit(obj_title, obj_title.get_rect(center=(WINDOW_WIDTH // 2, 590)))
         self.game_surface.blit(obj_text, obj_text.get_rect(center=(WINDOW_WIDTH // 2, 625)))
         self.game_surface.blit(obj_tip, obj_tip.get_rect(center=(WINDOW_WIDTH // 2, 660)))
-        
+
         self.game_surface.blit(back, back.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30)))

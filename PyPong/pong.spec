@@ -3,14 +3,16 @@
 block_cipher = None
 
 a = Analysis(
-    ['pong_v4.py'],
+    ['pong.py'],
     pathex=[],
     binaries=[],
     datas=[
-        ('*.wav', '.'),
-        ('*.ogg', '.'),
-        ('*.mp3', '.'),
-        ('music', 'music'),
+        ('assets/sounds/*.wav', 'assets/sounds'),
+        ('assets/music/*.ogg', 'assets/music'),
+        ('assets/music/*.mp3', 'assets/music'),
+        ('music/*.mp3', 'music'),
+        ('locales/*.json', 'locales'),
+        ('data/*.json', 'data'),
     ],
     hiddenimports=[],
     hookspath=[],
