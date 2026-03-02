@@ -35,7 +35,7 @@ pip install pygame-ce pyinstaller
 
 # Сборка EXE
 cd PyPong
-pyinstaller --onefile --windowed --name EnhancedPong pong_v4.py
+pyinstaller --onefile --windowed --name EnhancedPong pong.py
 
 # Результат в PyPong/dist/EnhancedPong.exe
 ```
@@ -49,7 +49,7 @@ pip install pygame-ce pyinstaller
 
 # Сборка
 cd PyPong
-pyinstaller --onefile --name EnhancedPong pong_v4.py
+pyinstaller --onefile --name EnhancedPong pong.py
 
 # Результат в PyPong/dist/EnhancedPong
 ```
@@ -62,7 +62,7 @@ pip install pygame-ce pyinstaller
 
 # Сборка
 cd PyPong
-pyinstaller --onefile --windowed --name EnhancedPong pong_v4.py
+pyinstaller --onefile --windowed --name EnhancedPong pong.py
 
 # Результат в PyPong/dist/EnhancedPong.app
 ```
@@ -110,17 +110,17 @@ pyinstaller pong.spec
 
 ```bash
 # Используй UPX компрессию
-pyinstaller --onefile --upx-dir=/path/to/upx pong_v4.py
+pyinstaller --onefile --upx-dir=/path/to/upx pong.py
 
 # Исключи ненужные модули
-pyinstaller --onefile --exclude-module tkinter pong_v4.py
+pyinstaller --onefile --exclude-module tkinter pong.py
 ```
 
 ### Ускорение запуска:
 
 ```bash
 # Используй --onedir вместо --onefile
-pyinstaller --onedir --windowed pong_v4.py
+pyinstaller --onedir --windowed pong.py
 ```
 
 ---
