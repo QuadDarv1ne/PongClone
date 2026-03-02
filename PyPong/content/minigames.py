@@ -1,21 +1,22 @@
 """Mini-games and variations of Pong"""
 import pygame
 import math
+from typing import List, Optional, Any
 from random import randint, choice
 from PyPong.core.entities import Ball, Paddle
 from PyPong.core.config import *
 
 class MiniGame:
     """Base class for mini-games"""
-    def __init__(self, name, description):
+    def __init__(self, name: str, description: str) -> None:
         self.name = name
         self.description = description
         self.active = False
         self.score = 0
-        self.time_limit = None
-        self.start_time = None
+        self.time_limit: Optional[int] = None
+        self.start_time: Optional[int] = None
 
-    def start(self):
+    def start(self) -> None:
         """Start the mini-game"""
         self.active = True
         self.score = 0
@@ -46,14 +47,14 @@ class MiniGame:
 
 class TargetPractice(MiniGame):
     """Hit targets that appear on screen"""
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Target Practice", "Hit as many targets as possible")
-        self.targets = []
+        self.targets: List[dict] = []
         self.time_limit = 60  # 60 seconds
         self.target_spawn_interval = 2000
         self.last_spawn = 0
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.targets = []
         self.spawn_target()
@@ -97,15 +98,15 @@ class TargetPractice(MiniGame):
 
 class BreakoutMode(MiniGame):
     """Breakout-style game with bricks"""
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Breakout", "Break all the bricks")
-        self.bricks = []
+        self.bricks: List[dict] = []
         self.rows = 5
         self.cols = 10
         self.brick_width = 80
         self.brick_height = 30
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.create_bricks()
 
@@ -156,13 +157,13 @@ class BreakoutMode(MiniGame):
 
 class SurvivalMode(MiniGame):
     """Survive as long as possible with increasing difficulty"""
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Survival", "Survive as long as possible")
         self.difficulty_increase_interval = 10000  # Every 10 seconds
         self.last_increase = 0
         self.current_speed_multiplier = 1.0
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.current_speed_multiplier = 1.0
         self.last_increase = pygame.time.get_ticks()
@@ -186,12 +187,12 @@ class SurvivalMode(MiniGame):
 
 class KeepUpMode(MiniGame):
     """Keep the ball in the air without letting it touch the bottom"""
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Keep Up", "Don't let the ball touch the bottom")
         self.time_limit = 60
         self.touches = 0
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.touches = 0
 
@@ -214,14 +215,14 @@ class KeepUpMode(MiniGame):
 
 class PrecisionMode(MiniGame):
     """Hit specific zones on the paddle for bonus points"""
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Precision", "Hit the sweet spot for bonus points")
         self.time_limit = 60
         self.perfect_hits = 0
         self.good_hits = 0
         self.normal_hits = 0
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.perfect_hits = 0
         self.good_hits = 0
@@ -264,7 +265,7 @@ class PrecisionMode(MiniGame):
 
 class MiniGameManager:
     """Manages mini-games"""
-    def __init__(self):
+    def __init__(self) -> None:
         self.minigames = {
             'target_practice': TargetPractice(),
             'breakout': BreakoutMode(),
@@ -272,9 +273,9 @@ class MiniGameManager:
             'keep_up': KeepUpMode(),
             'precision': PrecisionMode()
         }
-        self.current_minigame = None
+        self.current_minigame: Optional[MiniGame] = None
 
-    def start_minigame(self, name):
+    def start_minigame(self, name: str) -> bool:
         """Start a specific mini-game"""
         if name in self.minigames:
             self.current_minigame = self.minigames[name]
