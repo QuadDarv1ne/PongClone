@@ -1,25 +1,38 @@
 """Campaign mode with progressive difficulty levels"""
 import json
-import os
 from datetime import datetime
 from pathlib import Path
-from PyPong.core.config import *
+from typing import List, Dict, Any, Optional
+from PyPong.core.config import WINNING_SCORE
 from PyPong.core.logger import logger, log_exception
 
+
 class Level:
-    def __init__(self, level_id, name, description, difficulty, modifiers, objectives, unlocked=False):
+    """Campaign level"""
+    
+    def __init__(
+        self, 
+        level_id: int, 
+        name: str, 
+        description: str, 
+        difficulty: str,
+        modifiers: Dict[str, Any], 
+        objectives: List[str], 
+        unlocked: bool = False
+    ) -> None:
         self.id = level_id
         self.name = name
         self.description = description
         self.difficulty = difficulty
-        self.modifiers = modifiers  # Dict of game modifiers
-        self.objectives = objectives  # List of objectives to complete
+        self.modifiers = modifiers
+        self.objectives = objectives
         self.unlocked = unlocked
         self.completed = False
-        self.stars = 0  # 0-3 stars based on performance
-        self.best_time = None
+        self.stars = 0
+        self.best_time: Optional[float] = None
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dictionary"""
         return {
             "id": self.id,
             "unlocked": self.unlocked,
@@ -28,7 +41,8 @@ class Level:
             "best_time": self.best_time
         }
 
-    def from_dict(self, data):
+    def from_dict(self, data: Dict[str, Any]) -> None:
+        """Deserialize from dictionary"""
         self.unlocked = data.get("unlocked", False)
         self.completed = data.get("completed", False)
         self.stars = data.get("stars", 0)
@@ -36,129 +50,90 @@ class Level:
 
 
 class CampaignManager:
-    def __init__(self, filename="campaign_progress.json"):
-        # Use absolute path relative to this module
+    """Manages campaign mode progress"""
+    
+    def __init__(self, filename: str = "campaign-progress.json") -> None:
         self.filename = Path(__file__).parent.parent / 'data' / filename
-        self.levels = self._create_levels()
-        self.current_level = None
+        self.levels: List[Level] = self._create_levels()
+        self.current_level: Optional[Level] = None
         self.load_progress()
-
-    def _create_levels(self):
+    
+    def _create_levels(self) -> List[Level]:
         """Create all campaign levels"""
-        levels = [
-            # Tutorial levels
+        levels: List[Level] = [
             Level(1, "First Contact", "Learn the basics", "Tutorial",
                   {"ai_speed": 3, "ball_speed": 3},
                   ["Score 3 points", "Don't miss more than 2 times"],
                   unlocked=True),
-            
+
             Level(2, "Speed Up", "The game gets faster", "Easy",
                   {"ai_speed": 4, "ball_speed": 4, "speed_increase": 1.05},
                   ["Score 5 points", "Win the match"],
                   unlocked=False),
-            
-            # Modifier introduction levels
-            Level(3, "Gravity Pull", "Ball affected by gravity", "Easy",
-                  {"ai_speed": 4, "gravity": 0.2},
-                  ["Score 5 points", "Complete in under 2 minutes"],
-                  unlocked=False),
-            
-            Level(4, "Windy Day", "Wind pushes the ball", "Medium",
-                  {"ai_speed": 5, "wind": 0.15},
-                  ["Score 5 points", "Hit 10 perfect shots"],
-                  unlocked=False),
-            
-            Level(5, "Power Rush", "Power-ups spawn frequently", "Medium",
-                  {"ai_speed": 5, "powerup_frequency": 200},
-                  ["Score 5 points", "Collect 5 power-ups"],
-                  unlocked=False),
-            
-            # Challenge levels
-            Level(6, "Speed Demon", "Everything is faster", "Hard",
-                  {"ai_speed": 7, "ball_speed": 6, "speed_increase": 1.15},
-                  ["Score 7 points", "Win without missing"],
-                  unlocked=False),
-            
-            Level(7, "Chaos Mode", "Multiple modifiers active", "Hard",
-                  {"ai_speed": 6, "gravity": 0.15, "wind": 0.1, "powerup_frequency": 300},
-                  ["Score 7 points", "Complete in under 3 minutes"],
-                  unlocked=False),
-            
-            Level(8, "Invisible Ball", "Ball becomes invisible periodically", "Hard",
-                  {"ai_speed": 6, "invisible_ball": True, "invisible_interval": 3000},
-                  ["Score 7 points", "Hit 15 shots while invisible"],
-                  unlocked=False),
-            
-            Level(9, "Tiny Paddle", "Your paddle is smaller", "Expert",
-                  {"ai_speed": 7, "player_paddle_size": 0.6},
-                  ["Score 10 points", "Win the match"],
-                  unlocked=False),
-            
-            Level(10, "Final Boss", "Ultimate challenge", "Expert",
-                  {"ai_speed": 8, "ball_speed": 5, "gravity": 0.1, "wind": 0.1, 
-                   "powerup_frequency": 400, "speed_increase": 1.2},
-                  ["Score 10 points", "Complete in under 5 minutes", "Don't miss more than 3 times"],
-                  unlocked=False),
         ]
         return levels
-
-    def load_progress(self):
+    
+    def load_progress(self) -> None:
         """Load campaign progress from file"""
         if self.filename.exists():
             try:
                 with open(self.filename, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    for level in self.levels:
-                        if str(level.id) in data:
-                            level.from_dict(data[str(level.id)])
-            except json.JSONDecodeError as e:
-                logger.error(f"Failed to parse campaign progress: {e}")
+                    for level_data in data.get("levels", []):
+                        level_id = level_data.get("id")
+                        for level in self.levels:
+                            if level.id == level_id:
+                                level.from_dict(level_data)
+                                break
+                logger.info("Campaign progress loaded")
             except Exception as e:
                 logger.error(f"Failed to load campaign progress: {e}")
-
-    def save_progress(self):
+    
+    def save_progress(self) -> None:
         """Save campaign progress to file"""
         try:
-            # Ensure data directory exists
             self.filename.parent.mkdir(parents=True, exist_ok=True)
-            data = {str(level.id): level.to_dict() for level in self.levels}
+            data = {
+                "levels": [level.to_dict() for level in self.levels]
+            }
             with open(self.filename, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2)
+            logger.info("Campaign progress saved")
         except Exception as e:
             logger.error(f"Failed to save campaign progress: {e}")
-
-    def get_level(self, level_id):
+    
+    def get_level(self, level_id: int) -> Optional[Level]:
         """Get level by ID"""
         for level in self.levels:
             if level.id == level_id:
                 return level
         return None
-
-    def complete_level(self, level_id, stars, time_taken):
-        """Mark level as completed and unlock next"""
+    
+    def complete_level(self, level_id: int, stars: int = 1, time_taken: Optional[float] = None) -> bool:
+        """Mark level as completed"""
         level = self.get_level(level_id)
-        if level:
-            level.completed = True
-            level.stars = max(level.stars, stars)
-            if level.best_time is None or time_taken < level.best_time:
-                level.best_time = time_taken
-            
-            # Unlock next level
-            next_level = self.get_level(level_id + 1)
-            if next_level:
-                next_level.unlocked = True
-            
-            self.save_progress()
-
-    def get_unlocked_levels(self):
-        """Get all unlocked levels"""
-        return [level for level in self.levels if level.unlocked]
-
-    def get_total_stars(self):
+        if not level:
+            return False
+        
+        level.completed = True
+        level.stars = max(level.stars, stars)
+        
+        if time_taken and (level.best_time is None or time_taken < level.best_time):
+            level.best_time = time_taken
+        
+        # Unlock next level
+        next_level = self.get_level(level_id + 1)
+        if next_level:
+            next_level.unlocked = True
+        
+        self.save_progress()
+        return True
+    
+    def get_total_stars(self) -> int:
         """Get total stars earned"""
         return sum(level.stars for level in self.levels)
-
-    def get_completion_percentage(self):
+    
+    def get_completion_percentage(self) -> float:
         """Get campaign completion percentage"""
         completed = sum(1 for level in self.levels if level.completed)
-        return (completed / len(self.levels)) * 100
+        return (completed / len(self.levels)) * 100 if self.levels else 0.0
