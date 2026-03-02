@@ -147,10 +147,10 @@ class TestPaddle:
         """Test prediction when ball moves away"""
         paddle = Paddle(player_number=2, is_ai=True)
 
-        # Ball moving away from paddle
+        # Ball moving away from paddle (to the left)
         ball_x = WINDOW_WIDTH // 2
         ball_y = WINDOW_HEIGHT // 2
-        ball_vx = -5  # Moving left (away from right paddle)
+        ball_vx = 5  # Moving right (away from right paddle which is at right edge)
         ball_vy = 3
 
         predicted_y = paddle.predict_ball_position(ball_x, ball_y, ball_vx, ball_vy)
