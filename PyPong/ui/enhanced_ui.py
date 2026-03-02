@@ -2,8 +2,8 @@
 Enhanced UI components with animations and effects
 """
 import pygame
-from typing import Optional, List, Tuple, Callable
-from dataclasses import dataclass
+from typing import Optional, List, Tuple, Callable, Dict, Any
+from dataclasses import dataclass, field
 from PyPong.core.constants import Colors
 from PyPong.core.logger import logger
 
@@ -16,15 +16,15 @@ class Animation:
     start_value: float
     end_value: float
     easing: str = "linear"
-    
+
     def get_value(self, current_time: int) -> float:
         """Get current animation value"""
         elapsed = current_time - self.start_time
         if elapsed >= self.duration:
             return self.end_value
-        
+
         progress = elapsed / self.duration
-        
+
         # Apply easing
         if self.easing == "ease_in":
             progress = progress ** 2
@@ -35,9 +35,9 @@ class Animation:
                 progress = 2 * progress ** 2
             else:
                 progress = 1 - 2 * (1 - progress) ** 2
-        
+
         return self.start_value + (self.end_value - self.start_value) * progress
-    
+
     def is_complete(self, current_time: int) -> bool:
         """Check if animation is complete"""
         return current_time - self.start_time >= self.duration
@@ -45,7 +45,7 @@ class Animation:
 
 class ParticleEffect:
     """Particle effect system"""
-    
+
     def __init__(
         self,
         x: float,
