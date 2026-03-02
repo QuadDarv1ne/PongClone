@@ -206,11 +206,9 @@ class GameLoop:
     def _spawn_trail(self) -> None:
         """Создать шлейф мяча"""
         from random import randint
-        if len(self.trails) < MAX_TRAILS:
-            if randint(1, TRAIL_SPAWN_CHANCE) == 1:
-                from PyPong.ui.effects import Trail
-                trail = Trail(self.ball.rect.centerx, self.ball.rect.centery)
-                self.trails.add(trail)
+        if len(self.trails) < MAX_TRAILS and randint(1, TRAIL_SPAWN_CHANCE) == 1:
+            trail = Trail(self.ball.rect.centerx, self.ball.rect.centery)
+            self.trails.add(trail)
     
     def _handle_paddle_collisions(self) -> None:
         """Обработать коллизии с ракетками"""
@@ -282,16 +280,13 @@ class GameLoop:
         elif powerup.type == "shrink_opponent":
             opponent = self.paddle2 if collector == self.paddle1 else self.paddle1
             opponent.resize(50)
-            # Автоматически восстановить размер через 5 секунд
             pygame.time.set_timer(pygame.USEREVENT + 1, 5000, loops=1)
 
     def _create_extra_ball(self) -> None:
         """Создать дополнительный мяч (максимум 2)"""
-        # Ограничиваем количество мячей до 2
         balls = [s for s in self.all_sprites if isinstance(s, Ball)]
         if len(balls) >= 2:
             return
-            
         new_ball = Ball()
         new_ball.rect.center = self.ball.rect.center
         new_ball.velocity_x = -self.ball.velocity_x
@@ -300,17 +295,14 @@ class GameLoop:
         self.all_sprites.add(new_ball)
     
     def _create_particles(self, x: int, y: int, color: tuple) -> None:
-        """Создать частицы с использованием ParticlePool"""
+        """Создать частицы"""
         if isinstance(self.particles, ParticlePool):
-            # Используем оптимизированный пул
             self.particles.emit(x, y, color, PARTICLES_PER_HIT)
-        else:
-            # Fallback для обычного sprite.Group
+        elif len(self.particles) < MAX_PARTICLES:
             from random import randint
-            if len(self.particles) < MAX_PARTICLES:
-                for _ in range(PARTICLES_PER_HIT):
-                    particle = Particle(x, y, color)
-                    self.particles.add(particle)
+            for _ in range(PARTICLES_PER_HIT):
+                particle = Particle(x, y, color)
+                self.particles.add(particle)
     
     def _update_effects(self) -> None:
         """Обновить эффекты"""
