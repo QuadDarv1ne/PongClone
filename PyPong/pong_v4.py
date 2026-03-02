@@ -116,22 +116,25 @@ class PongGame:
     
     def _init_effects(self) -> None:
         """Инициализация эффектов"""
-        self.particles = pygame.sprite.Group()
+        from PyPong.ui.effects import ParticlePool
+        
+        # Используем ParticlePool для оптимизации
+        self.particle_pool = ParticlePool()
         self.trails = pygame.sprite.Group()
         self.shake = ScreenShake()
         self.goal_anim = GoalAnimation()
-        
+
         # Передать эффекты в game_loop и renderer
         self.game_loop.set_effects(
-            self.particles, 
-            self.trails, 
-            self.shake, 
+            self.particle_pool,
+            self.trails,
+            self.shake,
             self.goal_anim
         )
         self.renderer.set_sprite_groups(
             None,  # all_sprites будет установлен в game_loop
             None,  # powerups будет установлен в game_loop
-            self.particles,
+            self.particle_pool,
             self.trails,
         )
     

@@ -2,17 +2,18 @@
 Main game renderer
 """
 import pygame
-from typing import Optional, Any
+from typing import Optional, Any, Union
 
 from PyPong.core.game_state import GameState
 from PyPong.core.config import BLACK
+from PyPong.ui.effects import ParticlePool
 
 
 class Renderer:
     """
     Управляет отрисовкой игры.
     """
-    
+
     def __init__(
         self,
         screen: pygame.Surface,
@@ -26,18 +27,18 @@ class Renderer:
         self.theme = theme
         self.settings = settings
         self.adaptive_screen = adaptive_screen
-        
+
         # Sprite groups
         self.all_sprites: Optional[pygame.sprite.Group] = None
         self.powerups: Optional[pygame.sprite.Group] = None
-        self.particles: Optional[pygame.sprite.Group] = None
+        self.particles: Optional[Union[pygame.sprite.Group, ParticlePool]] = None
         self.trails: Optional[pygame.sprite.Group] = None
     
     def set_sprite_groups(
         self,
         all_sprites: pygame.sprite.Group,
         powerups: pygame.sprite.Group,
-        particles: pygame.sprite.Group,
+        particles: Union[pygame.sprite.Group, ParticlePool],
         trails: pygame.sprite.Group,
     ) -> None:
         """Установить группы спрайтов"""
@@ -72,7 +73,11 @@ class Renderer:
         if self.powerups:
             self.powerups.draw(self.game_surface)
         if self.particles:
-            self.particles.draw(self.game_surface)
+            # Поддержка как sprite.Group, так и ParticlePool
+            if isinstance(self.particles, ParticlePool):
+                self.particles.draw(self.game_surface)
+            else:
+                self.particles.draw(self.game_surface)
         
         # Draw touch controls
         if self.settings.get("touch_controls", False):

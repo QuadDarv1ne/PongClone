@@ -2,7 +2,7 @@
 Main game loop manager
 """
 import pygame
-from typing import Optional, Any, Tuple
+from typing import Optional, Any, Tuple, Union
 
 from PyPong.core.game_state import GameState, GameStateManager
 from PyPong.game.input_handler import InputHandler
@@ -14,7 +14,7 @@ from PyPong.core.config import (
     POWERUP_SPAWN_CHANCE, MAX_PARTICLES, PARTICLES_PER_HIT,
     DIFFICULTY_LEVELS,
 )
-from PyPong.ui.effects import Trail, Particle
+from PyPong.ui.effects import Trail, Particle, ParticlePool
 from PyPong.core.logger import logger, log_exception
 
 
@@ -49,16 +49,16 @@ class GameLoop:
         self.ball: Optional[Ball] = None
         self.all_sprites: Optional[pygame.sprite.Group] = None
         self.powerups: Optional[pygame.sprite.Group] = None
-        
+
         # Effects
-        self.particles: Optional[pygame.sprite.Group] = None
+        self.particles: Optional[Union[pygame.sprite.Group, ParticlePool]] = None
         self.trails: Optional[pygame.sprite.Group] = None
         self.shake: Optional[Any] = None
         self.goal_anim: Optional[Any] = None
     
     def set_effects(
         self,
-        particles: pygame.sprite.Group,
+        particles: Union[pygame.sprite.Group, ParticlePool],
         trails: pygame.sprite.Group,
         shake: Any,
         goal_anim: Any,
@@ -291,18 +291,26 @@ class GameLoop:
         self.all_sprites.add(new_ball)
     
     def _create_particles(self, x: int, y: int, color: tuple) -> None:
-        """Создать частицы"""
-        from random import randint
-        if len(self.particles) < MAX_PARTICLES:
-            for _ in range(PARTICLES_PER_HIT):
-                from PyPong.ui.effects import Particle
-                particle = Particle(x, y, color)
-                self.particles.add(particle)
+        """Создать частицы с использованием ParticlePool"""
+        if isinstance(self.particles, ParticlePool):
+            # Используем оптимизированный пул
+            self.particles.emit(x, y, color, PARTICLES_PER_HIT)
+        else:
+            # Fallback для обычного sprite.Group
+            from random import randint
+            if len(self.particles) < MAX_PARTICLES:
+                for _ in range(PARTICLES_PER_HIT):
+                    particle = Particle(x, y, color)
+                    self.particles.add(particle)
     
     def _update_effects(self) -> None:
         """Обновить эффекты"""
         if self.particles:
-            self.particles.update()
+            # Поддержка как ParticlePool, так и sprite.Group
+            if isinstance(self.particles, ParticlePool):
+                self.particles.update()
+            else:
+                self.particles.update()
         if self.trails:
             self.trails.update()
         if self.shake:
