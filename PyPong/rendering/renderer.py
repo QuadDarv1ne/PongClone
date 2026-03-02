@@ -6,7 +6,6 @@ from typing import Optional, Any, Union
 
 from PyPong.core.game_state import GameState
 from PyPong.core.config import BLACK
-from PyPong.ui.effects import ParticlePool
 
 
 class Renderer:
@@ -31,15 +30,15 @@ class Renderer:
         # Sprite groups
         self.all_sprites: Optional[pygame.sprite.Group] = None
         self.powerups: Optional[pygame.sprite.Group] = None
-        self.particles: Optional[Union[pygame.sprite.Group, ParticlePool]] = None
+        self.particles: Optional[Any] = None
         self.trails: Optional[pygame.sprite.Group] = None
     
     def set_sprite_groups(
         self,
-        all_sprites: pygame.sprite.Group,
-        powerups: pygame.sprite.Group,
-        particles: Union[pygame.sprite.Group, ParticlePool],
-        trails: pygame.sprite.Group,
+        all_sprites: Optional[pygame.sprite.Group],
+        powerups: Optional[pygame.sprite.Group],
+        particles: Optional[Any],
+        trails: Optional[pygame.sprite.Group],
     ) -> None:
         """Установить группы спрайтов"""
         self.all_sprites = all_sprites
@@ -78,11 +77,7 @@ class Renderer:
         if self.powerups:
             self.powerups.draw(self.game_surface)
         if self.particles:
-            # Поддержка как sprite.Group, так и ParticlePool
-            if isinstance(self.particles, ParticlePool):
-                self.particles.draw(self.game_surface)
-            else:
-                self.particles.draw(self.game_surface)
+            self.particles.draw(self.game_surface)
         
         # Draw touch controls
         if self.settings.get("touch_controls", False):
