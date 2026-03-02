@@ -2,9 +2,9 @@
 Arena system with obstacles and variations
 """
 import pygame
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict, Any
 from random import randint, choice
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from PyPong.core.constants import ArenaType, Colors
 from PyPong.core.logger import logger
 
@@ -18,31 +18,31 @@ class Obstacle:
     health: int = 1
     moving: bool = False
     velocity: Tuple[float, float] = (0, 0)
-    
+
     def draw(self, screen: pygame.Surface) -> None:
         """Draw obstacle"""
         pygame.draw.rect(screen, self.color, self.rect)
         pygame.draw.rect(screen, Colors.WHITE.to_tuple(), self.rect, 2)
-        
+
         # Health indicator for destructible obstacles
         if self.destructible and self.health > 1:
             font = pygame.font.SysFont("Helvetica", 16)
             text = font.render(str(self.health), True, Colors.WHITE.to_tuple())
             text_rect = text.get_rect(center=self.rect.center)
             screen.blit(text, text_rect)
-    
+
     def update(self, arena_bounds: pygame.Rect) -> None:
         """Update obstacle position"""
         if self.moving:
             self.rect.x += self.velocity[0]
             self.rect.y += self.velocity[1]
-            
+
             # Bounce off walls
             if self.rect.left <= arena_bounds.left or self.rect.right >= arena_bounds.right:
                 self.velocity = (-self.velocity[0], self.velocity[1])
             if self.rect.top <= arena_bounds.top or self.rect.bottom >= arena_bounds.bottom:
                 self.velocity = (self.velocity[0], -self.velocity[1])
-    
+
     def hit(self) -> bool:
         """Hit obstacle, returns True if destroyed"""
         if self.destructible:
