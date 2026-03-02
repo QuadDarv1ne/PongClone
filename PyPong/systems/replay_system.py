@@ -181,17 +181,17 @@ class ReplayRecorder:
 
 class ReplayPlayer:
     """Plays back recorded replays"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.playing = False
         self.frames: List[GameFrame] = []
         self.metadata: Optional[ReplayMetadata] = None
         self.current_frame = 0
         self.playback_speed = 1.0
         self.paused = False
-        
+
         logger.debug("Replay player initialized")
-    
+
     @log_exception
     def load_replay(self, filepath: str) -> bool:
         """Load replay from file"""
@@ -279,14 +279,14 @@ class ReplayPlayer:
 
 class ReplayManager:
     """Manages replay recording and playback"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.recorder = ReplayRecorder()
         self.player = ReplayPlayer()
         self.auto_save = True
-        
+
         logger.info("Replay manager initialized")
-    
+
     def list_replays(self) -> List[Dict[str, Any]]:
         """List all saved replays"""
         replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
