@@ -65,12 +65,12 @@ class NetworkProtocol:
 
 class MultiplayerBase(ABC):
     """Base class for multiplayer"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.connection_type: Optional[ConnectionType] = None
         self.connected: bool = False
         self.player_number: int = 1  # 1 or 2
-    
+
     @abstractmethod
     def connect(self, **kwargs) -> bool:
         """Establish connection"""
@@ -104,13 +104,13 @@ class MultiplayerBase(ABC):
 
 class LocalPVP(MultiplayerBase):
     """Local two-player mode (same computer)"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         super().__init__()
         self.connection_type = ConnectionType.LOCAL_PVP
         self.connected = True
         self.player_number = 1
-    
+
     def connect(self, **kwargs) -> bool:
         """No connection needed for local"""
         self.connected = True
