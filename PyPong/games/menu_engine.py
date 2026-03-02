@@ -25,18 +25,18 @@ class GameWithMenu(GameEngine):
     """
     Extended GameEngine with beautiful menu system
     """
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         # Initialize localization first
         init_localization('en')
-        
+
         super().__init__()
-        
+
         # Menu state
         self.state = GameState.MENU
-        self.main_menu: MainMenu = None
-        self.settings_menu: SettingsMenu = None
-        
+        self.main_menu: Optional[MainMenu] = None
+        self.settings_menu: Optional[SettingsMenu] = None
+
         # Initialize menus
         self._init_menus()
         
