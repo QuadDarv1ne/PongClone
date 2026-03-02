@@ -10,7 +10,7 @@ class InputHandler:
     Обрабатывает ввод пользователя для игры.
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.input_state: Dict[str, bool] = {
             "up1": False,
             "down1": False,

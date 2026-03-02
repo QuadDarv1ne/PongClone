@@ -13,7 +13,7 @@ class CollisionManager:
     Управляет коллизиями между игровыми объектами.
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.last_collision_time = 0
     
     def check_paddle_collision(
