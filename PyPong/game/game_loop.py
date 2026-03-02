@@ -282,9 +282,16 @@ class GameLoop:
         elif powerup.type == "shrink_opponent":
             opponent = self.paddle2 if collector == self.paddle1 else self.paddle1
             opponent.resize(50)
-    
+            # Автоматически восстановить размер через 5 секунд
+            pygame.time.set_timer(pygame.USEREVENT + 1, 5000, loops=1)
+
     def _create_extra_ball(self) -> None:
-        """Создать дополнительный мяч"""
+        """Создать дополнительный мяч (максимум 2)"""
+        # Ограничиваем количество мячей до 2
+        balls = [s for s in self.all_sprites if isinstance(s, Ball)]
+        if len(balls) >= 2:
+            return
+            
         new_ball = Ball()
         new_ball.rect.center = self.ball.rect.center
         new_ball.velocity_x = -self.ball.velocity_x
