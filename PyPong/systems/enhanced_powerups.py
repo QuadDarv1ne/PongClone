@@ -2,7 +2,7 @@
 Enhanced power-up system with new types
 """
 import pygame
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, List
 from random import randint, choice
 from dataclasses import dataclass
 from PyPong.core.constants import PowerUpType, Balance, Colors
@@ -22,8 +22,8 @@ class PowerUpConfig:
 
 class PowerUpRegistry:
     """Registry of all power-up types"""
-    
-    CONFIGS = {
+
+    CONFIGS: Dict[PowerUpType, PowerUpConfig] = {
         PowerUpType.SPEED_BOOST: PowerUpConfig(
             PowerUpType.SPEED_BOOST,
             Colors.GREEN.to_tuple(),
@@ -231,16 +231,16 @@ class EnhancedPowerUp(pygame.sprite.Sprite):
 
 class ComboSystem:
     """Tracks combos and multipliers"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.combo_count = 0
         self.last_hit_time = 0
         self.combo_timeout = Balance.COMBO_TIMEOUT_MS
         self.multiplier = 1.0
         self.max_combo = 0
-        
+
         logger.debug("Combo system initialized")
-    
+
     def register_hit(self) -> Tuple[int, float]:
         """Register a paddle hit"""
         current_time = pygame.time.get_ticks()
