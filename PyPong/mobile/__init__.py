@@ -9,6 +9,7 @@ from PyPong.mobile.responsive_ui import (
     AdaptiveText,
     GridLayout,
 )
+from PyPong.mobile.touch_controls import TouchControls, AdaptiveScreen
 
 __all__ = [
     'ResponsiveLayout',
@@ -17,4 +18,6 @@ __all__ = [
     'AdaptiveButton',
     'AdaptiveText',
     'GridLayout',
+    'TouchControls',
+    'AdaptiveScreen',
 ]

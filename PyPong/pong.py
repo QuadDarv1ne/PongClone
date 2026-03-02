@@ -25,7 +25,7 @@ from PyPong.ui.ui import PowerUpIndicator, FPSCounter, SettingsMenu
 from PyPong.content.tournament import Tournament
 from PyPong.ui.themes import get_theme
 from PyPong.gamepad import GamepadManager
-import PyPong.mobile as mobile_module
+from PyPong import mobile as mobile_module
 from PyPong.core.logger import logger, log_exception
 from PyPong.ui.localization import init_localization, get_localization
 from PyPong.ui.accessibility import get_accessibility_manager
