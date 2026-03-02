@@ -6,7 +6,7 @@ import pygame
 from random import randint, uniform
 from typing import Optional, List, Tuple
 from PyPong.core.config import (
-    WHITE, WINDOW_WIDTH, WINDOW_HEIGHT,
+    WHITE, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_NAME,
     MAX_PARTICLES, PARTICLES_PER_HIT,
 )
 

@@ -1,39 +1,39 @@
 {
   "daily": [
     {
-      "id": "daily_0_20260301",
-      "name": "Perfect Defense",
-      "description": "Win a game without missing 5 times",
+      "id": "daily_0_20260302",
+      "name": "Win Streak",
+      "description": "Win 3 games in a row",
       "type": "daily",
-      "target": 5,
-      "progress": 0,
-      "completed": false,
-      "reward": 150,
-      "expires_at": "2026-03-02T00:00:00",
-      "claimed": false
-    },
-    {
-      "id": "daily_1_20260301",
-      "name": "Power Collector",
-      "description": "Collect 6 power-ups",
-      "type": "daily",
-      "target": 6,
+      "target": 3,
       "progress": 0,
       "completed": false,
       "reward": 100,
-      "expires_at": "2026-03-02T00:00:00",
+      "expires_at": "2026-03-03T00:00:00",
       "claimed": false
     },
     {
-      "id": "daily_2_20260301",
-      "name": "Comeback King",
-      "description": "Win after being down by 4 points",
+      "id": "daily_1_20260302",
+      "name": "Score Master",
+      "description": "Score 22 total points",
+      "type": "daily",
+      "target": 22,
+      "progress": 0,
+      "completed": false,
+      "reward": 100,
+      "expires_at": "2026-03-03T00:00:00",
+      "claimed": false
+    },
+    {
+      "id": "daily_2_20260302",
+      "name": "Win Streak",
+      "description": "Win 4 games in a row",
       "type": "daily",
       "target": 4,
       "progress": 0,
       "completed": false,
-      "reward": 200,
-      "expires_at": "2026-03-02T00:00:00",
+      "reward": 100,
+      "expires_at": "2026-03-03T00:00:00",
       "claimed": false
     }
   ],
