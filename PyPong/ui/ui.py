@@ -1,13 +1,38 @@
+"""UI components for the game"""
 import pygame
-from PyPong.core.config import *
+from typing import Any, Dict, List, Optional, Tuple, Union
+from PyPong.core.config import (
+    WHITE, BLACK, GRAY, LIGHT_BLUE, RED, GREEN, YELLOW,
+    FONT_NAME, WINDOW_WIDTH, WINDOW_HEIGHT,
+)
+from PyPong.core.entities import Paddle, PowerUp
+from PyPong.systems.settings import Settings
+
 
 class PowerUpIndicator:
-    def __init__(self):
+    """Индикатор активных power-up"""
+    
+    def __init__(self) -> None:
         self.font = pygame.font.SysFont(FONT_NAME, 24)
         self.small_font = pygame.font.SysFont(FONT_NAME, 18)
-
-    def draw(self, screen, powerups, paddle1, paddle2):
+    
+    def draw(
+        self, 
+        screen: pygame.Surface, 
+        powerups: pygame.sprite.Group,
+        paddle1: Paddle, 
+        paddle2: Paddle
+    ) -> None:
+        """Отрисовать индикаторы power-up"""
         y_offset = 150
+        
+        name_map: Dict[str, str] = {
+            "speed_boost": "Speed Boost",
+            "large_paddle": "Large Paddle",
+            "slow_ball": "Slow Ball",
+            "multi_ball": "Multi Ball",
+            "shrink_opponent": "Shrink Opponent"
+        }
         
         for powerup in powerups:
             if powerup.active:
@@ -20,50 +45,50 @@ class PowerUpIndicator:
                 pygame.draw.rect(screen, WHITE, bg_rect, 2)
                 
                 # Power-up name
-                name_map = {
-                    "speed_boost": "Speed Boost",
-                    "large_paddle": "Large Paddle",
-                    "slow_ball": "Slow Ball",
-                    "multi_ball": "Multi Ball",
-                    "shrink_opponent": "Shrink Opponent"
-                }
-                name = self.font.render(name_map.get(powerup.type, "Power-Up"), True, WHITE)
+                name = self.font.render(
+                    name_map.get(powerup.type, "Power-Up"), 
+                    True, WHITE
+                )
                 screen.blit(name, (x_pos + 10, y_offset + 5))
                 
                 # Timer bar
                 elapsed = pygame.time.get_ticks() - powerup.start_time
                 duration = powerup.TYPES[powerup.type]["duration"]
-                progress = 1 - (elapsed / duration)
+                progress = 1.0 - (elapsed / duration)
                 
                 bar_width = 180
                 bar_height = 10
-                bar_x = x_pos + 10
-                bar_y = y_offset + 32
                 
-                pygame.draw.rect(screen, (60, 60, 60), (bar_x, bar_y, bar_width, bar_height))
-                pygame.draw.rect(screen, GREEN, (bar_x, bar_y, int(bar_width * progress), bar_height))
+                pygame.draw.rect(screen, (60, 60, 60), (x_pos + 10, y_offset + 32, bar_width, bar_height))
+                pygame.draw.rect(screen, GREEN, (x_pos + 10, y_offset + 32, int(bar_width * progress), bar_height))
                 
                 y_offset += 60
 
-class FPSCounter:
-    def __init__(self):
-        self.font = pygame.font.SysFont(FONT_NAME, 20)
-        self.clock = pygame.time.Clock()
 
-    def draw(self, screen, clock):
+class FPSCounter:
+    """Счётчик FPS"""
+    
+    def __init__(self) -> None:
+        self.font = pygame.font.SysFont(FONT_NAME, 20)
+    
+    def draw(self, screen: pygame.Surface, clock: pygame.time.Clock) -> None:
+        """Отрисовать FPS"""
         fps = int(clock.get_fps())
         color = GREEN if fps >= 55 else YELLOW if fps >= 30 else RED
         fps_text = self.font.render(f"FPS: {fps}", True, color)
         screen.blit(fps_text, (WINDOW_WIDTH - 100, 10))
 
+
 class SettingsMenu:
-    def __init__(self, screen, settings):
+    """Меню настроек"""
+    
+    def __init__(self, screen: pygame.Surface, settings: Settings) -> None:
         self.screen = screen
         self.settings = settings
         self.font = pygame.font.SysFont(FONT_NAME, 36)
         self.small_font = pygame.font.SysFont(FONT_NAME, 28)
         self.selected = 0
-        self.options = [
+        self.options: List[str] = [
             "music_volume",
             "sfx_volume",
             "show_fps",
@@ -72,91 +97,78 @@ class SettingsMenu:
             "theme",
             "back"
         ]
-
-    def draw(self):
+    
+    def draw(self) -> None:
+        """Отрисовать меню настроек"""
         self.screen.fill(GRAY)
         
         title = self.font.render("Settings", True, WHITE)
         self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 100)))
         
-        y = 200
         for i, option in enumerate(self.options):
             color = YELLOW if i == self.selected else WHITE
+            display_name = option.replace("_", " ").title()
             
-            if option == "music_volume":
-                vol = int(self.settings.get("music_volume", 0.5) * 100)
-                text = f"Music Volume: {vol}%"
-            elif option == "sfx_volume":
-                vol = int(self.settings.get("sfx_volume", 0.7) * 100)
-                text = f"SFX Volume: {vol}%"
-            elif option == "show_fps":
-                val = "ON" if self.settings.get("show_fps", False) else "OFF"
-                text = f"Show FPS: {val}"
-            elif option == "fullscreen":
-                val = "ON" if self.settings.get("fullscreen", False) else "OFF"
-                text = f"Fullscreen: {val}"
-            elif option == "touch_controls":
-                val = "ON" if self.settings.get("touch_controls", False) else "OFF"
-                text = f"Touch Controls: {val}"
-            elif option == "theme":
-                theme = self.settings.get("theme", "classic").title()
-                text = f"Theme: {theme}"
-            elif option == "back":
-                text = "Back to Menu"
+            # Get current value
+            if option != "back":
+                value = self.settings.get(option, "N/A")
+                if isinstance(value, float):
+                    value = f"{value:.2f}"
+                text = f"{display_name}: {value}"
+            else:
+                text = display_name
             
-            rendered = self.small_font.render(text, True, color)
-            self.screen.blit(rendered, rendered.get_rect(center=(WINDOW_WIDTH // 2, y)))
-            y += 60
+            text_surface = self.small_font.render(text, True, color)
+            self.screen.blit(
+                text_surface, 
+                text_surface.get_rect(center=(WINDOW_WIDTH // 2, 180 + i * 50))
+            )
+    
+    def handle_input(self, event: pygame.event.Event) -> Optional[str]:
+        """
+        Обработать ввод в меню настроек.
         
-        hint = self.small_font.render("Arrow Keys: Navigate | Left/Right: Adjust | Enter: Select", True, WHITE)
-        self.screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50)))
-
-    def handle_input(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                self.selected = (self.selected - 1) % len(self.options)
-            elif event.key == pygame.K_DOWN:
-                self.selected = (self.selected + 1) % len(self.options)
-            elif event.key == pygame.K_LEFT:
-                self.adjust_value(-1)
-            elif event.key == pygame.K_RIGHT:
-                self.adjust_value(1)
-            elif event.key == pygame.K_RETURN:
-                if self.options[self.selected] == "back":
-                    return "back"
-            elif event.key == pygame.K_ESCAPE:
-                return "back"
+        Args:
+            event: Событие pygame
+            
+        Returns:
+            str или None: "back" если нажат ESC, иначе None
+        """
+        if event.type != pygame.KEYDOWN:
+            return None
+        
+        if event.key == pygame.K_ESCAPE:
+            return "back"
+        
+        if event.key == pygame.K_UP:
+            self.selected = (self.selected - 1) % len(self.options)
+        elif event.key == pygame.K_DOWN:
+            self.selected = (self.selected + 1) % len(self.options)
+        elif event.key == pygame.K_LEFT:
+            self._adjust_value(-1)
+        elif event.key == pygame.K_RIGHT:
+            self._adjust_value(1)
+        elif event.key == pygame.K_RETURN and self.options[self.selected] == "back":
+            return "back"
+        
         return None
-
-    def adjust_value(self, direction):
+    
+    def _adjust_value(self, direction: int) -> None:
+        """Изменить значение выбранной настройки"""
         option = self.options[self.selected]
         
-        if option == "music_volume":
-            current = self.settings.get("music_volume", 0.5)
-            new_val = max(0, min(1, current + direction * 0.1))
-            self.settings.set("music_volume", new_val)
-            pygame.mixer.music.set_volume(new_val)
+        if option == "back":
+            return
         
-        elif option == "sfx_volume":
-            current = self.settings.get("sfx_volume", 0.7)
-            new_val = max(0, min(1, current + direction * 0.1))
-            self.settings.set("sfx_volume", new_val)
+        current = self.settings.get(option)
         
-        elif option == "show_fps":
-            current = self.settings.get("show_fps", False)
-            self.settings.set("show_fps", not current)
-        
-        elif option == "fullscreen":
-            current = self.settings.get("fullscreen", False)
-            self.settings.set("fullscreen", not current)
-        
-        elif option == "touch_controls":
-            current = self.settings.get("touch_controls", False)
-            self.settings.set("touch_controls", not current)
-        
+        if option in ["music_volume", "sfx_volume"]:
+            new_value = max(0.0, min(1.0, current + direction * 0.1))
+            self.settings.set(option, round(new_value, 1))
+        elif option in ["show_fps", "fullscreen", "touch_controls"]:
+            self.settings.set(option, not current)
         elif option == "theme":
-            themes = ["classic", "neon", "retro", "ocean"]
-            current = self.settings.get("theme", "classic")
-            idx = themes.index(current) if current in themes else 0
-            new_idx = (idx + direction) % len(themes)
-            self.settings.set("theme", themes[new_idx])
+            themes = ["classic", "dark", "neon", "retro", "ocean"]
+            current_idx = themes.index(current) if current in themes else 0
+            new_idx = (current_idx + direction) % len(themes)
+            self.settings.set(option, themes[new_idx])

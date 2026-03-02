@@ -1,16 +1,31 @@
-from PyPong.core.config import *
+"""UI themes for game visualization"""
+from typing import Dict, Optional, Tuple
+from PyPong.core.config import (
+    WHITE, BLACK, GRAY, LIGHT_BLUE, RED, GREEN, YELLOW,
+)
+
 
 class Theme:
-    def __init__(self, name, colors):
+    """
+    Тема оформления игры.
+    """
+    
+    def __init__(
+        self, 
+        name: str, 
+        colors: Dict[str, Tuple[int, int, int]]
+    ) -> None:
         self.name = name
-        self.bg_color = colors["bg"]
-        self.fg_color = colors["fg"]
-        self.paddle1_color = colors["paddle1"]
-        self.paddle2_color = colors["paddle2"]
-        self.ball_color = colors["ball"]
-        self.accent_color = colors["accent"]
+        self.bg_color: Tuple[int, int, int] = colors["bg"]
+        self.fg_color: Tuple[int, int, int] = colors["fg"]
+        self.paddle1_color: Tuple[int, int, int] = colors["paddle1"]
+        self.paddle2_color: Tuple[int, int, int] = colors["paddle2"]
+        self.ball_color: Tuple[int, int, int] = colors["ball"]
+        self.accent_color: Tuple[int, int, int] = colors["accent"]
 
-THEMES = {
+
+# Предопределённые темы
+THEMES: Dict[str, Theme] = {
     "classic": Theme("Classic", {
         "bg": GRAY,
         "fg": WHITE,
@@ -53,5 +68,20 @@ THEMES = {
     })
 }
 
-def get_theme(name):
+
+def get_theme(name: str) -> Theme:
+    """
+    Получить тему по названию.
+    
+    Args:
+        name: Название темы
+        
+    Returns:
+        Theme: Объект темы (classic по умолчанию)
+    """
     return THEMES.get(name, THEMES["classic"])
+
+
+def get_available_themes() -> list:
+    """Получить список доступных тем"""
+    return list(THEMES.keys())
