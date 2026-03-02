@@ -14,22 +14,25 @@ if str(current_dir.parent) not in sys.path:
 
 class TestPongGameInitialization:
     """Тесты инициализации PongGame"""
-    
+
     def test_pong_game_creation(self, mock_pygame):
         """Создание игры"""
-        from PyPong.pong_v4 import PongGame
-        
+        from PyPong.pong import PongGame
+
         # Мокируем зависимости
-        with patch('PyPong.pong_v4.Settings') as mock_settings, \
-             patch('PyPong.pong_v4.GameStateManager') as mock_gsm, \
-             patch('PyPong.pong_v4.AudioManager') as mock_audio, \
-             patch('PyPong.pong_v4.StatsManager') as mock_stats, \
-             patch('PyPong.pong_v4.Tournament') as mock_tournament, \
-             patch('PyPong.pong_v4.GamepadManager') as mock_gamepad, \
-             patch('PyPong.pong_v4.TouchControls') as mock_touch, \
-             patch('PyPong.pong_v4.SettingsMenu') as mock_menu, \
-             patch('PyPong.pong_v4.AdaptiveScreen') as mock_screen, \
-             patch('PyPong.pong_v4.get_theme') as mock_theme:
+        with patch('PyPong.pong.Settings') as mock_settings, \
+             patch('PyPong.pong.GameStateManager') as mock_gsm, \
+             patch('PyPong.pong.AudioManager') as mock_audio, \
+             patch('PyPong.pong.StatsManager') as mock_stats, \
+             patch('PyPong.pong.Tournament') as mock_tournament, \
+             patch('PyPong.pong.GamepadManager') as mock_gamepad, \
+             patch('PyPong.pong.mobile_module') as mock_mobile, \
+             patch('PyPong.pong.SettingsMenu') as mock_menu, \
+             patch('PyPong.pong.get_theme') as mock_theme:
+            
+            # Setup mobile mocks
+            mock_mobile.TouchControls = MagicMock()
+            mock_mobile.AdaptiveScreen = MagicMock()
             
             # Настройка моков
             mock_settings.return_value.get = MagicMock(return_value=False)
@@ -53,18 +56,21 @@ class TestPongGameInitialization:
     
     def test_pong_game_shutdown(self, mock_pygame):
         """Корректное завершение работы"""
-        from PyPong.pong_v4 import PongGame
-        
-        with patch('PyPong.pong_v4.Settings') as mock_settings, \
-             patch('PyPong.pong_v4.GameStateManager') as mock_gsm, \
-             patch('PyPong.pong_v4.AudioManager') as mock_audio, \
-             patch('PyPong.pong_v4.StatsManager') as mock_stats, \
-             patch('PyPong.pong_v4.Tournament') as mock_tournament, \
-             patch('PyPong.pong_v4.GamepadManager') as mock_gamepad, \
-             patch('PyPong.pong_v4.TouchControls') as mock_touch, \
-             patch('PyPong.pong_v4.SettingsMenu') as mock_menu, \
-             patch('PyPong.pong_v4.AdaptiveScreen') as mock_screen, \
-             patch('PyPong.pong_v4.get_theme') as mock_theme:
+        from PyPong.pong import PongGame
+
+        with patch('PyPong.pong.Settings') as mock_settings, \
+             patch('PyPong.pong.GameStateManager') as mock_gsm, \
+             patch('PyPong.pong.AudioManager') as mock_audio, \
+             patch('PyPong.pong.StatsManager') as mock_stats, \
+             patch('PyPong.pong.Tournament') as mock_tournament, \
+             patch('PyPong.pong.GamepadManager') as mock_gamepad, \
+             patch('PyPong.pong.mobile_module') as mock_mobile, \
+             patch('PyPong.pong.SettingsMenu') as mock_menu, \
+             patch('PyPong.pong.get_theme') as mock_theme:
+            
+            # Setup mobile mocks
+            mock_mobile.TouchControls = MagicMock()
+            mock_mobile.AdaptiveScreen = MagicMock()
             
             mock_settings.return_value.get = MagicMock(return_value=False)
             mock_settings.return_value.set = MagicMock()
