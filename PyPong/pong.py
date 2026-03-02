@@ -180,35 +180,25 @@ class PongGame:
         try:
             import platform
             import os
-            
+
             system = platform.system().lower()
-            
+
             # Android detection
             if system == 'linux':
                 try:
-                    # Check for Android in /proc/version
                     with open('/proc/version', 'r') as f:
                         if 'android' in f.read().lower():
                             return True
                 except (IOError, OSError):
                     pass
-                
-                # Check for Android environment variables
                 if os.environ.get('ANDROID_ROOT') or os.environ.get('ANDROID_DATA'):
                     return True
-            
-            # iOS detection (if pygame-ce supports it in future)
-            if system == 'darwin':
-                # Check if running on iOS (not macOS)
+            # iOS detection
+            elif system == 'darwin':
                 machine = platform.machine().lower()
                 if 'iphone' in machine or 'ipad' in machine:
                     return True
-            
-            # Check for touch screen on Windows/Linux tablets
-            if hasattr(pygame, 'FINGERDOWN'):
-                # If pygame supports touch events, assume mobile/tablet
-                return True
-            
+
             return False
         except Exception as e:
             logger.warning(f"Platform detection failed: {e}")
