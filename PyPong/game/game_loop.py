@@ -2,17 +2,20 @@
 Main game loop manager
 """
 import pygame
-from typing import Optional, Dict, Any
+from typing import Optional, Any, Tuple
 
 from PyPong.core.game_state import GameState, GameStateManager
 from PyPong.game.input_handler import InputHandler
 from PyPong.game.collision_manager import CollisionManager
 from PyPong.core.entities import Paddle, Ball, PowerUp
 from PyPong.core.config import (
-    WINDOW_WIDTH, WINDOW_HEIGHT, FPS,
+    WINDOW_WIDTH, WINDOW_HEIGHT,
     MAX_TRAILS, TRAIL_SPAWN_CHANCE,
     POWERUP_SPAWN_CHANCE, MAX_PARTICLES, PARTICLES_PER_HIT,
+    DIFFICULTY_LEVELS,
 )
+from PyPong.ui.effects import Trail, Particle
+from PyPong.core.logger import logger, log_exception
 
 
 class GameLoop:
