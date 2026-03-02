@@ -115,8 +115,8 @@ class Paddle(pygame.sprite.Sprite):
 
 class Ball(pygame.sprite.Sprite):
     """Game ball with physics"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         super().__init__()
         self.image = pygame.Surface([BALL_SIZE, BALL_SIZE])
         self.image.fill(WHITE)
@@ -198,7 +198,7 @@ class PowerUp(pygame.sprite.Sprite):
         "shrink_opponent": {"color": (255, 165, 0), "duration": POWERUP_DURATION},
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.type = choice(list(self.TYPES.keys()))
         self.image = pygame.Surface([20, 20])
