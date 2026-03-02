@@ -361,11 +361,11 @@ class Button:
 
 class NotificationManager:
     """Manages multiple notifications"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.notifications: List[AchievementNotification] = []
         self.particles: List[ParticleEffect] = []
-    
+
     def add_achievement(self, name: str, points: int) -> None:
         """Add achievement notification"""
         notification = AchievementNotification(name, points)
