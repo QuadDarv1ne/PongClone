@@ -47,12 +47,12 @@ class TestGameStateManager:
     """Тесты для GameStateManager"""
     
     @pytest.fixture
-    def mock_screen(self):
-        """Создать мок экрана"""
-        return MagicMock()
+    def mock_screen(self, mock_pygame):
+        """Создать реальный экран для тестов"""
+        return mock_pygame['screen']
     
     @pytest.fixture
-    def state_manager(self, mock_screen, mock_pygame):
+    def state_manager(self, mock_screen):
         """Создать GameStateManager для тестов"""
         from PyPong.core.game_state import GameStateManager
         
@@ -130,7 +130,7 @@ class TestGameStateTransitions:
         """Создать GameStateManager для тестов"""
         from PyPong.core.game_state import GameStateManager
         
-        mock_screen = MagicMock()
+        mock_screen = mock_pygame['screen']
         return GameStateManager(mock_screen)
     
     def test_menu_to_mode_select(self, state_manager):

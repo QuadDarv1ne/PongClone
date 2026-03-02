@@ -17,6 +17,7 @@ class TestPaddle:
     
     def test_paddle_creation(self, mock_pygame):
         """Создание ракетки"""
+        import pygame
         from PyPong.core.entities import Paddle
         
         paddle = Paddle(player_number=1, is_ai=False)
@@ -107,6 +108,7 @@ class TestBall:
     
     def test_ball_reset(self, mock_pygame):
         """Сброс мяча в центр"""
+        import pygame
         from PyPong.core.entities import Ball
         from PyPong.core.config import WINDOW_WIDTH, WINDOW_HEIGHT
         

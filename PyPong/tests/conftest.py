@@ -16,57 +16,20 @@ if str(current_dir.parent) not in sys.path:
 def mock_pygame():
     """
     Фикстура для мокирования pygame.
-    Предотвращает реальную инициализацию pygame в тестах.
+    Инициализирует pygame для корректной работы тестов.
     """
-    with patch('pygame.init') as mock_init, \
-         patch('pygame.quit') as mock_quit, \
-         patch('pygame.display.set_mode') as mock_set_mode, \
-         patch('pygame.display.set_caption') as mock_caption, \
-         patch('pygame.time.Clock') as mock_clock, \
-         patch('pygame.font.SysFont') as mock_font, \
-         patch('pygame.mixer.init') as mock_mixer_init, \
-         patch('pygame.mixer.music.load') as mock_music_load, \
-         patch('pygame.mixer.Sound') as mock_sound, \
-         patch('pygame.Surface') as mock_surface, \
-         patch('pygame.Rect') as mock_rect, \
-         patch('pygame.sprite.Group') as mock_group:
-        
-        # Настройка моков
-        mock_surface_instance = MagicMock()
-        mock_surface_instance.get_rect.return_value = MagicMock()
-        mock_surface.return_value = mock_surface_instance
-        
-        mock_rect_instance = MagicMock()
-        mock_rect_instance.clamp_ip = MagicMock()
-        mock_rect.return_value = mock_rect_instance
-        
-        mock_group_instance = MagicMock()
-        mock_group_instance.__len__ = MagicMock(return_value=0)
-        mock_group_instance.__iter__ = MagicMock(return_value=iter([]))
-        mock_group.return_value = mock_group_instance
-        
-        mock_font_instance = MagicMock()
-        mock_font_instance.render = MagicMock(return_value=MagicMock())
-        mock_font.return_value = mock_font_instance
-        
-        mock_clock_instance = MagicMock()
-        mock_clock_instance.tick = MagicMock()
-        mock_clock.return_value = mock_clock_instance
-        
-        yield {
-            'init': mock_init,
-            'quit': mock_quit,
-            'set_mode': mock_set_mode,
-            'caption': mock_caption,
-            'clock': mock_clock,
-            'font': mock_font,
-            'mixer_init': mock_mixer_init,
-            'music_load': mock_music_load,
-            'sound': mock_sound,
-            'surface': mock_surface,
-            'rect': mock_rect,
-            'group': mock_group,
-        }
+    import pygame
+    pygame.init()
+    
+    # Create a real display surface for tests
+    screen = pygame.Surface((1024, 720))
+    
+    yield {
+        'screen': screen,
+        'initialized': True,
+    }
+    
+    pygame.quit()
 
 
 @pytest.fixture
