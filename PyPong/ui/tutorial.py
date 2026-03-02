@@ -24,21 +24,21 @@ class TutorialStep:
 
 class TutorialManager:
     """Manages interactive tutorial"""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.active = False
         self.current_step = 0
         self.steps: List[TutorialStep] = []
         self.completed_steps: List[str] = []
         self.start_time = 0
         self.step_start_time = 0
-        
+
         self.font = pygame.font.SysFont("Helvetica", 24)
         self.title_font = pygame.font.SysFont("Helvetica", 32, bold=True)
-        
+
         self._create_tutorial_steps()
         logger.info("Tutorial manager initialized")
-    
+
     def _create_tutorial_steps(self) -> None:
         """Create tutorial steps"""
         self.steps = [
