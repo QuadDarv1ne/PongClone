@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from PyPong.core.event_bus import GameEvent, get_event_bus
 from PyPong.core.logger import log_exception, logger
 
 
@@ -15,6 +16,29 @@ class StatsManager:
     def __init__(self, filename: str = "stats.json") -> None:
         self.filename = Path(__file__).parent.parent / "data" / filename
         self.stats: Dict[str, Any] = self.load_stats()
+        
+        # Subscribe to event bus
+        self.event_bus = get_event_bus()
+        self._subscribe_to_events()
+
+    def _subscribe_to_events(self) -> None:
+        """Subscribe to relevant game events"""
+        self.event_bus.subscribe(GameEvent.GAME_OVER, self._on_game_over)
+        self.event_bus.subscribe(GameEvent.GOAL_SCORED, self._on_goal_scored)
+        logger.debug("StatsManager subscribed to game events")
+
+    def _on_game_over(self, data: Dict[str, Any]) -> None:
+        """Handle game over event - record game stats"""
+        winner = data.get("winner")
+        player1_score = data.get("player1_score", 0)
+        player2_score = data.get("player2_score", 0)
+        
+        if winner is not None:
+            self.record_game(winner, player1_score, player2_score)
+
+    def _on_goal_scored(self, data: Dict[str, Any]) -> None:
+        """Handle goal scored event - track total goals"""
+        self.stats["total_goals"] = self.stats.get("total_goals", 0) + 1
 
     def load_stats(self) -> Dict[str, Any]:
         """Загрузить статистику из файла"""
@@ -63,7 +87,6 @@ class StatsManager:
 
         self.stats["highest_score"] = max(self.stats["highest_score"], player1_score, player2_score)
 
-        self.stats["total_goals"] += player1_score + player2_score
         self.stats["last_played"] = datetime.now().isoformat()
 
         self.save_stats()

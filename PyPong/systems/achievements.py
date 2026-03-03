@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from PyPong.core.constants import AchievementType, Balance, EventType
+from PyPong.core.event_bus import GameEvent, get_event_bus
 from PyPong.core.logger import log_exception, logger
 
 
@@ -79,7 +80,42 @@ class AchievementManager:
         self.listeners: Dict[EventType, List[Callable]] = {}
         self._create_achievements()
         self.load_progress()
+        
+        # Subscribe to event bus
+        self.event_bus = get_event_bus()
+        self._subscribe_to_events()
+        
         logger.info("Achievement system initialized")
+
+    def _subscribe_to_events(self) -> None:
+        """Subscribe to relevant game events"""
+        self.event_bus.subscribe(GameEvent.GOAL_SCORED, self._on_goal_scored)
+        self.event_bus.subscribe(GameEvent.GAME_OVER, self._on_game_over)
+        self.event_bus.subscribe(GameEvent.POWERUP_COLLECTED, self._on_powerup_collected)
+        logger.debug("AchievementManager subscribed to game events")
+
+    def _on_goal_scored(self, data: Dict[str, Any]) -> None:
+        """Handle goal scored event"""
+        # Track goals for achievements
+        pass
+
+    def _on_game_over(self, data: Dict[str, Any]) -> None:
+        """Handle game over event - track wins"""
+        winner = data.get("winner")
+        if winner:
+            self._increment_stat("wins")
+
+    def _on_powerup_collected(self, data: Dict[str, Any]) -> None:
+        """Handle powerup collected event"""
+        powerup_type = data.get("type", "")
+        # Track powerup collection
+        if powerup_type:
+            self._increment_stat(f"powerup_{powerup_type}")
+
+    def _increment_stat(self, stat_name: str, value: int = 1) -> None:
+        """Increment a stat and check achievements"""
+        # Implementation for tracking stats
+        pass
 
     def _create_achievements(self) -> None:
         """Create all achievements"""

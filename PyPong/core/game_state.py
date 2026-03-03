@@ -20,6 +20,7 @@ from PyPong.core.config import (
     WINNING_SCORE,
     YELLOW,
 )
+from PyPong.core.event_bus import GameEvent, get_event_bus
 from PyPong.ui.localization import t
 
 if TYPE_CHECKING:
@@ -61,6 +62,9 @@ class GameStateManager:
         self.game_mode = "ai"
         self.tournament_mode = False
 
+        # Event bus
+        self.event_bus = get_event_bus()
+
         # Fonts
         self.title_font = pygame.font.SysFont(FONT_NAME, 72)
         self.menu_font = pygame.font.SysFont(FONT_NAME, 40)
@@ -86,9 +90,22 @@ class GameStateManager:
         if self.player1_score >= WINNING_SCORE:
             self.winner = 1
             self.state = GameState.GAME_OVER
+            self._publish_game_over()
         elif self.player2_score >= WINNING_SCORE:
             self.winner = 2
             self.state = GameState.GAME_OVER
+            self._publish_game_over()
+
+    def _publish_game_over(self) -> None:
+        """Publish game over event with stats"""
+        self.event_bus.publish(
+            GameEvent.GAME_OVER,
+            {
+                "winner": self.winner,
+                "player1_score": self.player1_score,
+                "player2_score": self.player2_score,
+            },
+        )
 
     def set_difficulty(self, difficulty: str) -> None:
         """Установить сложность"""
