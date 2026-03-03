@@ -1,6 +1,7 @@
 """
 Optimized entities with caching and performance improvements
 """
+# pylint: disable=undefined-variable
 import math
 from functools import lru_cache
 from random import choice, randint

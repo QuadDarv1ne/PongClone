@@ -1,6 +1,7 @@
 """
 Classic game mode - basic pong gameplay
 """
+# pylint: disable=undefined-variable
 import pygame
 
 from PyPong.core.config import (  # pylint: disable=no-name-in-module
