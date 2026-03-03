@@ -4,9 +4,6 @@ Game constants using Enums for better type safety
 from enum import Enum, IntEnum
 from typing import NamedTuple
 
-# Existing config imports
-from .config import *
-
 
 class PowerUpType(Enum):
     """Power-up types"""

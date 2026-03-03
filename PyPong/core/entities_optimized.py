@@ -8,7 +8,18 @@ from typing import Any, Dict, Optional, Tuple
 
 import pygame
 
-from PyPong.core.config import *
+from PyPong.core.config import (
+    BALL_INITIAL_SPEED,
+    BALL_SIZE,
+    DIFFICULTY_LEVELS,
+    PADDLE_HEIGHT,
+    PADDLE_OFFSET,
+    PADDLE_SPEED,
+    PADDLE_WIDTH,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+)
 
 # Pre-create commonly used surfaces for better performance
 _PADDLE_SURFACES: Dict[Tuple[int, Tuple[int, int, int]], pygame.Surface] = {}
