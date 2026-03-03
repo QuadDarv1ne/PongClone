@@ -5,7 +5,7 @@ from random import choice, randint
 
 import pygame
 
-from PyPong.core.config import (
+from PyPong.core.config import (  # type: ignore[attr-defined]
     BLACK,
     DIFFICULTY_LEVELS,
     FONT_NAME,

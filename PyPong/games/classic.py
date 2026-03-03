@@ -3,7 +3,7 @@ Classic game mode - basic pong gameplay
 """
 import pygame
 
-from PyPong.core.config import (
+from PyPong.core.config import (  # type: ignore[attr-defined]
     BLACK,
     DIFFICULTY_LEVELS,
     FONT_NAME,
