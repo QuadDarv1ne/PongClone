@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pygame
 
-from PyPong.core.config import *
+from PyPong.core.config import FONT_NAME, GREEN, WINDOW_HEIGHT, WINDOW_WIDTH, YELLOW
 
 
 class TouchControls:
@@ -20,9 +20,6 @@ class TouchControls:
         """Create touch zones optimized for different screen sizes"""
         # Left side for player 1, right side for player 2
         zone_width = self.screen_width // 2
-
-        # Add padding for better touch experience
-        padding = int(self.screen_height * 0.05)
 
         return {
             "p1_up": pygame.Rect(0, 0, zone_width, self.screen_height // 2),
@@ -95,8 +92,7 @@ class TouchControls:
 
         surface.blit(overlay, (0, 0))
 
-        # Draw labels with adaptive font size
-        font_size = max(16, int(self.screen_height * 0.025))
+        # Draw labels
         p1_up_text = self.font.render("↑", True, color_p1)
         p1_down_text = self.font.render("↓", True, color_p1)
         p2_up_text = self.font.render("↑", True, color_p2)

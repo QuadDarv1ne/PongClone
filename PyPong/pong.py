@@ -4,7 +4,6 @@ Enhanced Pong v4 - Main game module with modular architecture
 from typing import Any, Dict, Optional
 
 import pygame
-from pygame.locals import *
 
 from PyPong import mobile as mobile_module
 from PyPong.content.tournament import Tournament
@@ -34,6 +33,13 @@ from PyPong.ui.accessibility import get_accessibility_manager
 from PyPong.ui.localization import get_localization, init_localization
 from PyPong.ui.themes import get_theme
 from PyPong.ui.ui import FPSCounter, PowerUpIndicator, SettingsMenu
+
+# pygame constants
+K_ESCAPE = pygame.K_ESCAPE
+K_RETURN = pygame.K_RETURN
+KEYDOWN = pygame.KEYDOWN
+KEYUP = pygame.KEYUP
+QUIT = pygame.QUIT
 
 
 class PongGame:
