@@ -2,9 +2,24 @@
 Multiplayer game mode
 """
 import pygame
-from pygame.locals import *
 
-from PyPong.core.config import *
+from PyPong.core.config import (
+    DARK_GRAY,
+    FONT_NAME,
+    GREEN,
+    KEYDOWN,
+    KEYUP,
+    K_ESCAPE,
+    K_a,
+    K_DOWN,
+    K_UP,
+    K_z,
+    QUIT,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+    YELLOW,
+)
 from PyPong.core.entities import Ball, Paddle
 from PyPong.games.base import GameMode, GameModeType
 from PyPong.systems.multiplayer import (
@@ -231,7 +246,6 @@ class MultiplayerMode(GameMode):
 
     def _draw_connecting(self):
         """Draw connection screen"""
-        loc = get_localization()
         font_big = pygame.font.SysFont(FONT_NAME, 48)
         font_small = pygame.font.SysFont(FONT_NAME, 24)
 
