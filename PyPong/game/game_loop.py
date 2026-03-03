@@ -294,7 +294,7 @@ class GameLoop:
         elif powerup.type == "shrink_opponent":
             opponent = self.paddle2 if collector == self.paddle1 else self.paddle1
             opponent.resize(50)
-            pygame.time.set_timer(pygame.USEREVENT + 1, 5000, loops=1)
+            pygame.time.set_timer(pygame.USEREVENT + 1, 5000, loops=1)  # type: ignore[attr-defined]
 
     def _create_extra_ball(self) -> None:
         """Создать дополнительный мяч (максимум 2)"""
