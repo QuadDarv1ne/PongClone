@@ -294,7 +294,6 @@ class HapticFeedback:
 
             PythonActivity = autoclass("org.kivy.android.PythonActivity")
             Context = autoclass("android.content.Context")
-            Vibrator = autoclass("android.os.Vibrator")
 
             activity = PythonActivity.mActivity
             vibrator = activity.getSystemService(Context.VIBRATOR_SERVICE)

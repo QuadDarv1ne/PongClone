@@ -269,18 +269,15 @@ class OptimizedRenderer:
         state_manager.draw_net()
         state_manager.draw_score()
 
-        # Get screen rect for culling
-        screen_rect = self.game_surface.get_rect()
-
         # Draw sprites with dirty rect tracking
         if self.trails:
-            dirty_rects = self.dirty_renderer.render_sprites_optimized(self.trails, background)
+            self.dirty_renderer.render_sprites_optimized(self.trails, background)
 
         if self.all_sprites:
-            dirty_rects = self.dirty_renderer.render_sprites_optimized(self.all_sprites, background)
+            self.dirty_renderer.render_sprites_optimized(self.all_sprites, background)
 
         if self.powerups:
-            dirty_rects = self.dirty_renderer.render_sprites_optimized(self.powerups, background)
+            self.dirty_renderer.render_sprites_optimized(self.powerups, background)
 
         if self.particles:
             self.particles.draw(self.game_surface)

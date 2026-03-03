@@ -37,6 +37,14 @@ from PyPong.ui.ui import FPSCounter, PowerUpIndicator, SettingsMenu
 # pygame constants
 K_ESCAPE = pygame.K_ESCAPE
 K_RETURN = pygame.K_RETURN
+K_s = pygame.K_s
+K_o = pygame.K_o
+K_F1 = pygame.K_F1
+K_1 = pygame.K_1
+K_2 = pygame.K_2
+K_3 = pygame.K_3
+K_4 = pygame.K_4
+K_t = pygame.K_t
 KEYDOWN = pygame.KEYDOWN
 KEYUP = pygame.KEYUP
 QUIT = pygame.QUIT
@@ -398,13 +406,13 @@ class PongGame:
                             self.particle_pool,
                             self.trails,
                         )
-                        logger.info(f"Game objects initialized successfully")
+                        logger.info("Game objects initialized successfully")
                     except Exception as e:
                         logger.error(f"Error initializing game objects: {e}", exc_info=True)
                         self.state_manager.state = GameState.MENU
                         return
                 else:
-                    logger.debug(f"Game already initialized")
+                    logger.debug("Game already initialized")
 
                 try:
                     self.game_loop.update()

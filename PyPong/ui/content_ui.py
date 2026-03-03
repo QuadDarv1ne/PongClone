@@ -1,7 +1,7 @@
 """UI components for campaign, challenges, and mini-games"""
 import pygame
 
-from PyPong.core.config import *
+from PyPong.core.config import FONT_NAME, GRAY, WHITE, WINDOW_HEIGHT, WINDOW_WIDTH, YELLOW
 
 
 class CampaignUI:
