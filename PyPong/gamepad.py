@@ -31,7 +31,7 @@ class GamepadManager:
                 self.joysticks.append(joystick)
                 self._connected_players[i + 1] = i
                 logger.info(f"Gamepad connected: {joystick.get_name()} (ID={i})")
-            except pygame.error as e:
+            except pygame.error as e:  # type: ignore[attr-defined]
                 logger.warning(f"Failed to initialize gamepad {i}: {e}")
 
         logger.info(f"Total gamepads detected: {len(self.joysticks)}")
@@ -63,7 +63,7 @@ class GamepadManager:
             down = axis_y > deadzone or joystick.get_button(12)
 
             return {"up": up, "down": down}
-        except pygame.error as e:
+        except pygame.error as e:  # type: ignore[attr-defined]
             logger.error(f"Error reading gamepad input: {e}")
             return {"up": False, "down": False}
 
