@@ -174,7 +174,6 @@ class Menu:
 
         # Draw particles
         for p in self.bg_particles:
-            alpha = 50 + int(math.sin(self.anim_time + p["x"]) * 30)
             pygame.draw.circle(self.screen, p["color"], (int(p["x"]), int(p["y"])), p["size"])
 
     def _draw_title(self):
