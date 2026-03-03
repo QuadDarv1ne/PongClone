@@ -139,7 +139,7 @@ class Config:
                 value = env.get(env_key, cast_type=cast_type)
                 if value is not None:
                     self.set(config_key, value)
-        except Exception as e:
+        except Exception:
             # If env config fails, just use file/defaults
             pass
 

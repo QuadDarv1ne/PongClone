@@ -4,9 +4,27 @@ Arcade game mode - with power-ups and AI
 from random import choice, randint
 
 import pygame
-from pygame.locals import *
 
-from PyPong.core.config import *
+from PyPong.core.config import (
+    BLACK,
+    DIFFICULTY_LEVELS,
+    FONT_NAME,
+    GRAY,
+    GREEN,
+    KEYDOWN,
+    KEYUP,
+    K_ESCAPE,
+    K_a,
+    K_DOWN,
+    K_UP,
+    K_z,
+    POWERUP_SPAWN_CHANCE,
+    QUIT,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+    YELLOW,
+)
 from PyPong.core.entities import Ball, Paddle, PowerUp
 
 from .base import GameMode, GameModeType
