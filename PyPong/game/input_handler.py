@@ -3,22 +3,7 @@ Input handler for game events
 """
 from typing import Callable, Dict, Optional
 
-from pygame.locals import (
-    K_1,
-    K_2,
-    K_3,
-    K_4,
-    K_DOWN,
-    K_ESCAPE,
-    K_F1,
-    K_RETURN,
-    K_UP,
-    K_a,
-    K_o,
-    K_s,
-    K_t,
-    K_z,
-)
+import pygame
 
 from PyPong.core.game_state import GameState
 
@@ -91,14 +76,14 @@ class InputHandler:
             tuple: (new_state, should_quit, action_data)
         """
         # ESC handling
-        if key == K_ESCAPE:
+        if key == pygame.K_ESCAPE:
             new_state = self._escape_transitions.get(current_state)
             if new_state is None:
                 return (current_state, True, {})  # Quit
             return (new_state, False, {})
 
         # ENTER handling
-        if key == K_RETURN:
+        if key == pygame.K_RETURN:
             new_state = self._enter_transitions.get(current_state)
             if new_state:
                 action_data = {
@@ -111,11 +96,11 @@ class InputHandler:
 
         # Menu shortcuts
         if current_state == GameState.MENU:
-            if key == K_s:
+            if key == pygame.K_s:
                 return (GameState.STATS, False, {})
-            elif key == K_o:
+            elif key == pygame.K_o:
                 return (GameState.SETTINGS, False, {})
-            elif key == K_F1:
+            elif key == pygame.K_F1:
                 return (GameState.HELP, False, {})
 
         # Mode select keys
@@ -142,15 +127,15 @@ class InputHandler:
         """Обработать клавиши выбора режима"""
         action_data = {}
 
-        if key == K_1:
+        if key == pygame.K_1:
             action_data["game_mode"] = "ai"
-        elif key == K_2:
+        elif key == pygame.K_2:
             action_data["game_mode"] = "pvp"
-        elif key == K_3:
+        elif key == pygame.K_3:
             action_data["difficulty"] = "Easy"
-        elif key == K_4:
+        elif key == pygame.K_4:
             action_data["difficulty"] = "Medium"
-        elif key == K_t:
+        elif key == pygame.K_t:
             action_data["toggle_tournament"] = True
 
         return (GameState.MODE_SELECT, False, action_data)
@@ -158,10 +143,10 @@ class InputHandler:
     def _handle_movement_input(self, key: int, is_pressed: bool) -> tuple:
         """Обработать ввод движения"""
         key_map = {
-            K_a: "up1",
-            K_z: "down1",
-            K_UP: "up2",
-            K_DOWN: "down2",
+            pygame.K_a: "up1",
+            pygame.K_z: "down1",
+            pygame.K_UP: "up2",
+            pygame.K_DOWN: "down2",
         }
 
         if key in key_map:
