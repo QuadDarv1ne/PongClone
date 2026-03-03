@@ -2,9 +2,23 @@
 Classic game mode - basic pong gameplay
 """
 import pygame
-from pygame.locals import *
 
-from PyPong.core.config import *
+from PyPong.core.config import (
+    BLACK,
+    DIFFICULTY_LEVELS,
+    FONT_NAME,
+    KEYDOWN,
+    KEYUP,
+    K_ESCAPE,
+    K_a,
+    K_DOWN,
+    K_UP,
+    K_z,
+    QUIT,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+)
 from PyPong.core.entities import Ball, Paddle
 
 from .base import GameMode, GameModeType
