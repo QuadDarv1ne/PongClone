@@ -2,10 +2,11 @@
 Main menu integration with GameEngine
 """
 from enum import Enum
+from typing import Optional
 
 import pygame
 
-from PyPong.core.config import *
+from PyPong.core.config import FONT_NAME, FPS, WHITE, WINDOW_HEIGHT, WINDOW_WIDTH
 from PyPong.games.base import GameModeType
 from PyPong.games.engine import GameEngine
 from PyPong.ui.localization import get_localization, init_localization

@@ -6,7 +6,14 @@ from typing import Any, Dict, Optional, Type
 import pygame
 from pygame.event import Event
 
-from PyPong.core.config import *
+from PyPong.core.config import (
+    FONT_NAME,
+    FPS,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+    WINNING_SCORE,
+)
 from PyPong.games.arcade import ArcadeMode
 from PyPong.games.base import GameMode, GameModeType
 from PyPong.games.classic import ClassicMode

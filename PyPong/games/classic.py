@@ -7,6 +7,7 @@ from PyPong.core.config import (
     BLACK,
     DIFFICULTY_LEVELS,
     FONT_NAME,
+    GRAY,
     KEYDOWN,
     KEYUP,
     K_ESCAPE,
