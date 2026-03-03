@@ -1,13 +1,24 @@
 """
 Game state management with state machine pattern
 """
-from typing import Optional, TYPE_CHECKING
-import pygame
 from enum import Enum
+from typing import TYPE_CHECKING, Optional
+
+import pygame
+
 from PyPong.core.config import (
-    WHITE, BLACK, GRAY, LIGHT_BLUE, RED, GREEN, YELLOW,
-    FONT_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, WINNING_SCORE,
+    BLACK,
     DIFFICULTY_LEVELS,
+    FONT_NAME,
+    GRAY,
+    GREEN,
+    LIGHT_BLUE,
+    RED,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+    WINNING_SCORE,
+    YELLOW,
 )
 from PyPong.ui.localization import t
 
@@ -17,6 +28,7 @@ if TYPE_CHECKING:
 
 class GameState(Enum):
     """Enumeration of all game states"""
+
     MENU = 1
     MODE_SELECT = 2
     PLAYING = 3
@@ -37,12 +49,8 @@ class GameState(Enum):
 
 class GameStateManager:
     """Manages game state transitions and rendering"""
-    
-    def __init__(
-        self, 
-        screen: pygame.Surface, 
-        game_surface: Optional[pygame.Surface] = None
-    ):
+
+    def __init__(self, screen: pygame.Surface, game_surface: Optional[pygame.Surface] = None):
         self.screen = screen
         self.game_surface = game_surface if game_surface else screen
         self.state = GameState.MENU
@@ -58,7 +66,7 @@ class GameStateManager:
         self.menu_font = pygame.font.SysFont(FONT_NAME, 40)
         self.score_font = pygame.font.SysFont(FONT_NAME, 120)
         self.small_font = pygame.font.SysFont(FONT_NAME, 30)
-        
+
         # Пре-рендер сетки для производительности
         self._net_surface = self._create_net_surface()
 
@@ -96,10 +104,7 @@ class GameStateManager:
         campaign = self.small_font.render(t("menu.campaign"), True, YELLOW)
         challenges = self.small_font.render(t("menu.challenges"), True, GREEN)
         minigames = self.small_font.render(t("menu.minigames"), True, LIGHT_BLUE)
-        stats_text = self.small_font.render(
-            f"{t('menu.stats')} | {t('menu.settings')} | {t('menu.help')}",
-            True, WHITE
-        )
+        stats_text = self.small_font.render(f"{t('menu.stats')} | {t('menu.settings')} | {t('menu.help')}", True, WHITE)
 
         self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 180)))
         self.game_surface.blit(start, start.get_rect(center=(WINDOW_WIDTH // 2, 300)))
@@ -115,10 +120,10 @@ class GameStateManager:
         title = self.title_font.render(t("mode.select_title"), True, WHITE)
         ai_text = self.menu_font.render(t("mode.ai"), True, YELLOW if self.game_mode == "ai" else WHITE)
         pvp_text = self.menu_font.render(t("mode.pvp"), True, YELLOW if self.game_mode == "pvp" else WHITE)
-        
+
         tournament_key = "mode.tournament_on" if self.tournament_mode else "mode.tournament_off"
         tournament_text = self.small_font.render(t(tournament_key), True, GREEN if self.tournament_mode else WHITE)
-        
+
         diff_text = self.small_font.render(t("mode.difficulty").format(self.difficulty), True, WHITE)
         controls_ai = self.small_font.render(t("mode.controls_ai"), True, WHITE)
         controls_pvp = self.small_font.render(t("mode.controls_pvp"), True, WHITE)
@@ -166,10 +171,7 @@ class GameStateManager:
 
     def draw_score(self) -> None:
         """Отрисовать счёт"""
-        score_text = self.score_font.render(
-            f"{self.player1_score}   {self.player2_score}", 
-            True, WHITE
-        )
+        score_text = self.score_font.render(f"{self.player1_score}   {self.player2_score}", True, WHITE)
         self.game_surface.blit(score_text, score_text.get_rect(centerx=WINDOW_WIDTH // 2, y=10))
 
     def _create_net_surface(self) -> pygame.Surface:
@@ -188,11 +190,19 @@ class GameStateManager:
         self.game_surface.fill(GRAY)
 
         title = self.title_font.render(t("stats.title"), True, WHITE)
-        games = self.menu_font.render(t("stats.games_played").format(stats_manager.stats['games_played']), True, WHITE)
-        p1_wins = self.menu_font.render(t("stats.player1_wins").format(stats_manager.stats['player1_wins']), True, WHITE)
-        p2_wins = self.menu_font.render(t("stats.player2_wins").format(stats_manager.stats['player2_wins']), True, WHITE)
-        high_score = self.menu_font.render(t("stats.highest_score").format(stats_manager.stats['highest_score']), True, WHITE)
-        total_goals = self.menu_font.render(t("stats.total_goals").format(stats_manager.stats['total_goals']), True, WHITE)
+        games = self.menu_font.render(t("stats.games_played").format(stats_manager.stats["games_played"]), True, WHITE)
+        p1_wins = self.menu_font.render(
+            t("stats.player1_wins").format(stats_manager.stats["player1_wins"]), True, WHITE
+        )
+        p2_wins = self.menu_font.render(
+            t("stats.player2_wins").format(stats_manager.stats["player2_wins"]), True, WHITE
+        )
+        high_score = self.menu_font.render(
+            t("stats.highest_score").format(stats_manager.stats["highest_score"]), True, WHITE
+        )
+        total_goals = self.menu_font.render(
+            t("stats.total_goals").format(stats_manager.stats["total_goals"]), True, WHITE
+        )
         back = self.small_font.render(t("stats.back"), True, WHITE)
 
         self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 100)))

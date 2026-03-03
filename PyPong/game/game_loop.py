@@ -1,28 +1,32 @@
 """
 Main game loop manager
 """
-import pygame
-from typing import Optional, Any, Tuple, Union
+from typing import Any, Optional, Union
 
-from PyPong.core.game_state import GameState, GameStateManager
-from PyPong.game.input_handler import InputHandler
-from PyPong.game.collision_manager import CollisionManager
-from PyPong.core.entities import Paddle, Ball, PowerUp
+import pygame
+
 from PyPong.core.config import (
-    WINDOW_WIDTH, WINDOW_HEIGHT,
-    MAX_TRAILS, TRAIL_SPAWN_CHANCE,
-    POWERUP_SPAWN_CHANCE, MAX_PARTICLES, PARTICLES_PER_HIT,
     DIFFICULTY_LEVELS,
+    MAX_PARTICLES,
+    MAX_TRAILS,
+    PARTICLES_PER_HIT,
+    TRAIL_SPAWN_CHANCE,
+    WINDOW_WIDTH,
 )
-from PyPong.ui.effects import Trail, Particle, ParticlePool
-from PyPong.core.logger import logger, log_exception
+from PyPong.core.entities import Ball, Paddle, PowerUp
+from PyPong.core.entity_pools import get_ball_pool, get_powerup_pool
+from PyPong.core.game_state import GameState, GameStateManager
+from PyPong.core.logger import logger
+from PyPong.game.collision_manager import CollisionManager
+from PyPong.game.input_handler import InputHandler
+from PyPong.ui.effects import Particle, ParticlePool, Trail
 
 
 class GameLoop:
     """
     Управляет основным игровым циклом.
     """
-    
+
     def __init__(
         self,
         state_manager: GameStateManager,
@@ -42,7 +46,7 @@ class GameLoop:
         self.theme = theme
         self.gamepad = gamepad
         self.touch = touch
-        
+
         # Game objects
         self.paddle1: Optional[Paddle] = None
         self.paddle2: Optional[Paddle] = None
@@ -55,7 +59,7 @@ class GameLoop:
         self.trails: Optional[pygame.sprite.Group] = None
         self.shake: Optional[Any] = None
         self.goal_anim: Optional[Any] = None
-    
+
     def set_effects(
         self,
         particles: Union[pygame.sprite.Group, ParticlePool],
@@ -68,38 +72,48 @@ class GameLoop:
         self.trails = trails
         self.shake = shake
         self.goal_anim = goal_anim
-    
+
     def init_game_objects(self) -> None:
         """Инициализировать игровые объекты"""
         is_ai = self.state_manager.game_mode == "ai"
-        
+
         self.paddle1 = Paddle(1, is_ai=False, color=self.theme.paddle1_color)
         self.paddle2 = Paddle(2, is_ai=is_ai, color=self.theme.paddle2_color)
-        self.ball = Ball()
+
+        # Use entity pool for ball
+        self.ball = get_ball_pool().acquire()
         self.ball.image.fill(self.theme.ball_color)
-        
-        self.all_sprites = pygame.sprite.Group(
-            self.paddle1, 
-            self.paddle2, 
-            self.ball
-        )
+
+        self.all_sprites = pygame.sprite.Group(self.paddle1, self.paddle2, self.ball)
         self.powerups = pygame.sprite.Group()
-        
+
         # Set AI difficulty
         if is_ai:
             difficulty = self.state_manager.difficulty
-            from PyPong.core.config import DIFFICULTY_LEVELS
             self.paddle2.set_speed(DIFFICULTY_LEVELS[difficulty]["ai_speed"])
-        
+
         # Reset input state
         self.input_handler.reset_input()
-    
+
     def cleanup_game_objects(self) -> None:
         """Очистить игровые объекты"""
+        # Return balls to pool
         if self.all_sprites:
+            ball_pool = get_ball_pool()
+            powerup_pool = get_powerup_pool()
+            for sprite in list(self.all_sprites.sprites()):
+                if isinstance(sprite, Ball):
+                    ball_pool.release(sprite)
+                elif isinstance(sprite, PowerUp):
+                    powerup_pool.release(sprite)
             self.all_sprites.empty()
+
         if self.powerups:
+            powerup_pool = get_powerup_pool()
+            for powerup in list(self.powerups.sprites()):
+                powerup_pool.release(powerup)
             self.powerups.empty()
+
         if self.particles:
             if isinstance(self.particles, ParticlePool):
                 self.particles.clear()
@@ -112,7 +126,7 @@ class GameLoop:
         self.all_sprites = None
         self.powerups = None
         self.particles = None
-    
+
     def update(self) -> None:
         """
         Обновить игровую логику.
@@ -120,130 +134,121 @@ class GameLoop:
         """
         if self.state_manager.state != GameState.PLAYING:
             return
-        
+
         self._update_paddles()
         self._update_ball()
         self._update_effects()
-    
+
     def _update_paddles(self) -> None:
         """Обновить движение ракеток"""
         # Apply touch input
         if self.settings.get("touch_controls", False):
             self._apply_touch_input()
-        
+
         # Apply gamepad input
         self._apply_gamepad_input()
-        
+
         # Move paddle 1
         input_state = self.input_handler.get_input_state()
         self.paddle1.move(input_state["up1"], input_state["down1"])
-        
+
         # Move paddle 2
         if self.state_manager.game_mode == "ai":
             predicted_y = self.paddle2.predict_ball_position(
-                self.ball.rect.centerx,
-                self.ball.rect.centery,
-                self.ball.velocity_x,
-                self.ball.velocity_y
+                self.ball.rect.centerx, self.ball.rect.centery, self.ball.velocity_x, self.ball.velocity_y
             )
             self.paddle2.move(False, False, predicted_y)
         else:
             self.paddle2.move(input_state["up2"], input_state["down2"])
-    
+
     def _apply_touch_input(self) -> None:
         """Применить сенсорный ввод"""
         touch_input1 = self.touch.get_input(1)
         input_state = self.input_handler.get_input_state()
         input_state["up1"] = input_state["up1"] or touch_input1["up"]
         input_state["down1"] = input_state["down1"] or touch_input1["down"]
-        
+
         if self.state_manager.game_mode == "pvp":
             touch_input2 = self.touch.get_input(2)
             input_state["up2"] = input_state["up2"] or touch_input2["up"]
             input_state["down2"] = input_state["down2"] or touch_input2["down"]
-        
+
         # Update input handler state
         for key, value in input_state.items():
             self.input_handler.set_input(key, value)
-    
+
     def _apply_gamepad_input(self) -> None:
         """Применить ввод с геймпада"""
         input_state = self.input_handler.get_input_state()
-        
+
         if self.gamepad.has_gamepad(1):
             gp_input = self.gamepad.get_input(1)
             input_state["up1"] = input_state["up1"] or gp_input["up"]
             input_state["down1"] = input_state["down1"] or gp_input["down"]
-        
+
         if self.gamepad.has_gamepad(2) and self.state_manager.game_mode == "pvp":
             gp_input = self.gamepad.get_input(2)
             input_state["up2"] = input_state["up2"] or gp_input["up"]
             input_state["down2"] = input_state["down2"] or gp_input["down"]
-        
+
         for key, value in input_state.items():
             self.input_handler.set_input(key, value)
-    
+
     def _update_ball(self) -> None:
         """Обновить мяч и обработки коллизий"""
         # Move ball
         self.ball.move()
-        
+
         # Create trail
         self._spawn_trail()
-        
+
         # Wall collision
         self.ball.bounce_wall()
-        
+
         # Paddle collisions
         self._handle_paddle_collisions()
-        
+
         # Check scoring
         self._check_scoring()
-        
+
         # Power-up collisions
         self._handle_powerup_collisions()
-    
+
     def _spawn_trail(self) -> None:
         """Создать шлейф мяча"""
         from random import randint
+
         if len(self.trails) < MAX_TRAILS and randint(1, TRAIL_SPAWN_CHANCE) == 1:
-            trail = Trail(self.ball.rect.centerx, self.ball.rect.centery)
+            trail = Trail(int(self.ball.rect.centerx), int(self.ball.rect.centery))
             self.trails.add(trail)
-    
+
     def _handle_paddle_collisions(self) -> None:
         """Обработать коллизии с ракетками"""
         for paddle in [self.paddle1, self.paddle2]:
             if self.collision_manager.check_paddle_collision(self.ball, paddle):
-                should_play_sound, _ = self.collision_manager.handle_paddle_collision(
-                    self.ball, 
-                    paddle
-                )
-                
+                should_play_sound, _ = self.collision_manager.handle_paddle_collision(self.ball, paddle)
+
                 if should_play_sound:
                     self.audio.play_sound("beep")
-                    self._create_particles(
-                        self.ball.rect.centerx, 
-                        self.ball.rect.centery, 
-                        self.theme.accent_color
-                    )
+                    self._create_particles(self.ball.rect.centerx, self.ball.rect.centery, self.theme.accent_color)
                     intensity = self.collision_manager.get_shake_intensity(is_goal=False)
                     self.shake.start(*intensity)
-    
+
     def _check_scoring(self) -> None:
         """Проверить забитый гол"""
         scorer = self.collision_manager.check_score(self.ball, WINDOW_WIDTH)
-        
+
         if scorer:
             self.state_manager.add_score(scorer)
             self.audio.play_sound("score")
             self.goal_anim.start(scorer)
-            
+
             intensity = self.collision_manager.get_shake_intensity(is_goal=True)
             self.shake.start(*intensity)
-            
+
             if self.state_manager.state == GameState.PLAYING:
                 self.ball.reset_ball()
-    
+
     def _handle_powerup_collisions(self) -> None:
         """Обработать коллизии с power-up"""
         for powerup in self.powerups:
@@ -252,27 +257,19 @@ class GameLoop:
                 if self.collision_manager.check_powerup_collision(powerup, paddle):
                     powerup.activate(paddle)
                     self.audio.play_sound("powerup")
-                    self._create_particles(
-                        powerup.rect.centerx, 
-                        powerup.rect.centery, 
-                        self.theme.accent_color
-                    )
+                    self._create_particles(powerup.rect.centerx, powerup.rect.centery, self.theme.accent_color)
                     self._handle_powerup_effect(powerup, paddle)
-            
+
             # Collision with ball (for slow_ball)
             if self.collision_manager.check_ball_powerup_collision(powerup, self.ball):
                 powerup.apply_to_ball(self.ball)
                 self.audio.play_sound("powerup")
-                self._create_particles(
-                    powerup.rect.centerx, 
-                    powerup.rect.centery, 
-                    self.theme.accent_color
-                )
+                self._create_particles(powerup.rect.centerx, powerup.rect.centery, self.theme.accent_color)
                 powerup.deactivate()
-        
+
         # Update powerups
         self.powerups.update()
-    
+
     def _handle_powerup_effect(self, powerup: PowerUp, collector: Paddle) -> None:
         """Обработать эффект power-up"""
         if powerup.type == "multi_ball":
@@ -287,23 +284,25 @@ class GameLoop:
         balls = [s for s in self.all_sprites if isinstance(s, Ball)]
         if len(balls) >= 2:
             return
-        new_ball = Ball()
+        # Use entity pool for extra ball
+        new_ball = get_ball_pool().acquire()
         new_ball.rect.center = self.ball.rect.center
         new_ball.velocity_x = -self.ball.velocity_x
         new_ball.velocity_y = self.ball.velocity_y
         new_ball.image.fill(self.theme.ball_color)
         self.all_sprites.add(new_ball)
-    
-    def _create_particles(self, x: int, y: int, color: tuple) -> None:
+
+    def _create_particles(self, x: float, y: float, color: tuple) -> None:
         """Создать частицы"""
         if isinstance(self.particles, ParticlePool):
-            self.particles.emit(x, y, color, PARTICLES_PER_HIT)
+            self.particles.emit(int(x), int(y), color, PARTICLES_PER_HIT)
         elif len(self.particles) < MAX_PARTICLES:
             from random import randint
+
             for _ in range(PARTICLES_PER_HIT):
-                particle = Particle(x, y, color)
+                particle = Particle(int(x), int(y), color)
                 self.particles.add(particle)
-    
+
     def _update_effects(self) -> None:
         """Обновить эффекты"""
         if self.particles:
@@ -314,3 +313,36 @@ class GameLoop:
             self.shake.update()
         if self.goal_anim:
             self.goal_anim.update()
+
+    def spawn_powerup(self, x: Optional[int] = None, y: Optional[int] = None) -> Optional[PowerUp]:
+        """
+        Spawn a power-up from the pool
+
+        Args:
+            x: X position (random if not specified)
+            y: Y position (random if not specified)
+
+        Returns:
+            PowerUp instance or None if pool is exhausted
+        """
+        from random import randint
+
+        from PyPong.core.config import WINDOW_HEIGHT, WINDOW_WIDTH
+
+        powerup = get_powerup_pool().acquire()
+        if powerup:
+            # Set position
+            if x is None:
+                x = randint(WINDOW_WIDTH // 4, 3 * WINDOW_WIDTH // 4)
+            if y is None:
+                y = randint(50, WINDOW_HEIGHT - 50)
+            powerup.rect.center = (x, y)
+
+            # Add to sprite groups
+            if self.powerups:
+                self.powerups.add(powerup)
+            if self.all_sprites:
+                self.all_sprites.add(powerup)
+
+            logger.debug(f"PowerUp spawned at ({x}, {y})")
+        return powerup

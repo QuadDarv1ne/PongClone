@@ -132,5 +132,12 @@
   
   "controls.navigate": "Навигация",
   "controls.select": "Выбор",
-  "controls.back": "Назад"
+  "controls.back": "Назад",
+
+  "tutorial.welcome": "Добро пожаловать в Понг!",
+  "tutorial.objective": "Цель игры - первым набрать 11 очков",
+  "tutorial.controls": "Игрок 1: A/Z для движения вверх/вниз",
+  "tutorial.powerups": "Собирай бонусы для получения преимущества",
+  "tutorial.combo": "Забивай подряд для увеличения комбо!",
+  "tutorial.complete": "Поздравляем! Ты готов к игре!"
 }

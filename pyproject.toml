@@ -139,6 +139,11 @@ exclude_lines = [
 exclude_dirs = ["tests", "archive"]
 skips = ["B101", "B601"]
 
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203", "W503", "F403", "F405", "F401", "E402"]
+exclude = ["archive", "tests", "build", "dist", ".git", "__pycache__"]
+
 [tool.pydocstyle]
 convention = "google"
 add_ignore = ["D100", "D104", "D105", "D107"]

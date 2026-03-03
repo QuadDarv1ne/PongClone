@@ -1,6 +1,9 @@
-import pygame
 from typing import Optional
+
+import pygame
+
 from PyPong.core.config import *
+
 
 class Tournament:
     def __init__(self) -> None:
@@ -23,9 +26,9 @@ class Tournament:
             self.player1_wins += 1
         else:
             self.player2_wins += 1
-        
+
         self.current_game += 1
-        
+
         # Check tournament winner
         target = 2 if self.mode == "best_of_3" else 3
         if self.player1_wins >= target:
@@ -47,15 +50,12 @@ class Tournament:
 
     def draw_winner_screen(self, screen):
         screen.fill(GRAY)
-        
+
         title = self.font.render("TOURNAMENT COMPLETE!", True, WHITE)
         winner_text = self.font.render(f"Player {self.winner} Wins the Tournament!", True, YELLOW)
-        score_text = self.small_font.render(
-            f"Final Score: {self.player1_wins} - {self.player2_wins}", 
-            True, WHITE
-        )
+        score_text = self.small_font.render(f"Final Score: {self.player1_wins} - {self.player2_wins}", True, WHITE)
         restart = self.small_font.render("Press ENTER to return to menu", True, WHITE)
-        
+
         screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 200)))
         screen.blit(winner_text, winner_text.get_rect(center=(WINDOW_WIDTH // 2, 300)))
         screen.blit(score_text, score_text.get_rect(center=(WINDOW_WIDTH // 2, 400)))

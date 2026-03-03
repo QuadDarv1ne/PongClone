@@ -1,14 +1,24 @@
 """UI components for the game"""
-import pygame
 from typing import Any, Dict, List, Optional, Tuple, Union
+
+import pygame
+
 from PyPong.core.config import (
-    WHITE, BLACK, GRAY, LIGHT_BLUE, RED, GREEN, YELLOW,
-    FONT_NAME, WINDOW_WIDTH, WINDOW_HEIGHT,
+    BLACK,
+    FONT_NAME,
+    GRAY,
+    GREEN,
+    LIGHT_BLUE,
+    RED,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+    YELLOW,
 )
 from PyPong.core.entities import Paddle, PowerUp
-from PyPong.systems.settings import Settings
-from PyPong.ui.localization import t, get_current_language, cycle_language
 from PyPong.core.logger import logger
+from PyPong.systems.settings import Settings
+from PyPong.ui.localization import cycle_language, get_current_language, t
 
 
 class PowerUpIndicator:
@@ -18,13 +28,7 @@ class PowerUpIndicator:
         self.font = pygame.font.SysFont(FONT_NAME, 24)
         self.small_font = pygame.font.SysFont(FONT_NAME, 18)
 
-    def draw(
-        self,
-        screen: pygame.Surface,
-        powerups: pygame.sprite.Group,
-        paddle1: Paddle,
-        paddle2: Paddle
-    ) -> None:
+    def draw(self, screen: pygame.Surface, powerups: pygame.sprite.Group, paddle1: Paddle, paddle2: Paddle) -> None:
         """Отрисовать индикаторы power-up"""
         y_offset = 150
 
@@ -34,7 +38,7 @@ class PowerUpIndicator:
             "large_paddle": t("powerup.large_paddle"),
             "slow_ball": t("powerup.slow_ball"),
             "multi_ball": t("powerup.multi_ball"),
-            "shrink_opponent": t("powerup.shrink_opponent")
+            "shrink_opponent": t("powerup.shrink_opponent"),
         }
 
         for powerup in powerups:
@@ -48,10 +52,7 @@ class PowerUpIndicator:
                 pygame.draw.rect(screen, WHITE, bg_rect, 2)
 
                 # Power-up name
-                name = self.font.render(
-                    name_map.get(powerup.type, "Power-Up"),
-                    True, WHITE
-                )
+                name = self.font.render(name_map.get(powerup.type, "Power-Up"), True, WHITE)
                 screen.blit(name, (x_pos + 10, y_offset + 5))
 
                 # Timer bar
@@ -70,10 +71,10 @@ class PowerUpIndicator:
 
 class FPSCounter:
     """Счётчик FPS"""
-    
+
     def __init__(self) -> None:
         self.font = pygame.font.SysFont(FONT_NAME, 20)
-    
+
     def draw(self, screen: pygame.Surface, clock: pygame.time.Clock) -> None:
         """Отрисовать FPS"""
         fps = int(clock.get_fps())
@@ -94,7 +95,7 @@ class SettingsMenu:
         "touch_controls": "settings.touch_controls",
         "theme": "settings.theme",
         "language": "settings.language",
-        "back": "settings.back"
+        "back": "settings.back",
     }
 
     def __init__(self, screen: pygame.Surface, settings: Settings) -> None:
@@ -111,7 +112,7 @@ class SettingsMenu:
             "touch_controls",
             "theme",
             "language",
-            "back"
+            "back",
         ]
 
     def draw(self) -> None:
@@ -123,12 +124,12 @@ class SettingsMenu:
 
         for i, option in enumerate(self.options):
             color = YELLOW if i == self.selected else WHITE
-            
+
             if option != "back":
                 # Get translated display name
                 display_name = t(self.OPTION_KEYS.get(option, option))
                 value = self.settings.get(option, "N/A")
-                
+
                 # Format value based on option type
                 if option in ["music_volume", "sfx_volume"]:
                     value = f"{value:.0%}"
@@ -138,17 +139,14 @@ class SettingsMenu:
                     value = value.title()
                 elif option == "language":
                     value = get_current_language().upper()
-                
+
                 text = f"{display_name}: {value}"
             else:
                 text = t(self.OPTION_KEYS[option])
 
             text_surface = self.small_font.render(text, True, color)
-            self.screen.blit(
-                text_surface,
-                text_surface.get_rect(center=(WINDOW_WIDTH // 2, 180 + i * 50))
-            )
-    
+            self.screen.blit(text_surface, text_surface.get_rect(center=(WINDOW_WIDTH // 2, 180 + i * 50)))
+
     def handle_input(self, event: pygame.event.Event) -> Optional[str]:
         """
         Обработать ввод в меню настроек.

@@ -6,5 +6,5 @@
   "show_fps": true,
   "fullscreen": false,
   "theme": "neon",
-  "touch_controls": false
+  "touch_controls": true
 }

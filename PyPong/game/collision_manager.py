@@ -1,8 +1,10 @@
 """Collision manager for game physics"""
 from typing import Optional, Tuple
+
 import pygame
-from PyPong.core.entities import Paddle, Ball, PowerUp
-from PyPong.core.config import SHAKE_INTENSITY_NORMAL, SHAKE_INTENSITY_GOAL
+
+from PyPong.core.config import SHAKE_INTENSITY_GOAL, SHAKE_INTENSITY_NORMAL
+from PyPong.core.entities import Ball, Paddle, PowerUp
 
 
 class CollisionManager:
@@ -28,13 +30,13 @@ class CollisionManager:
 
     def check_powerup_collision(self, powerup: PowerUp, paddle: Paddle) -> bool:
         """Проверить коллизию power-up с ракеткой."""
-        return not (powerup.active or powerup.affected_paddle is not None) and \
-               pygame.sprite.collide_rect(powerup, paddle)
+        return not (powerup.active or powerup.affected_paddle is not None) and pygame.sprite.collide_rect(
+            powerup, paddle
+        )
 
     def check_ball_powerup_collision(self, powerup: PowerUp, ball: Ball) -> bool:
         """Проверить коллизию power-up с мячом (для slow_ball)."""
-        return powerup.active and powerup.type == "slow_ball" and \
-               pygame.sprite.collide_rect(powerup, ball)
+        return powerup.active and powerup.type == "slow_ball" and pygame.sprite.collide_rect(powerup, ball)
 
     def check_score(self, ball: Ball, window_width: int) -> Optional[int]:
         """Проверить забитый гол."""

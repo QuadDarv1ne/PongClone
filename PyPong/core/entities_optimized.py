@@ -3,12 +3,12 @@ Optimized entities with caching and performance improvements
 """
 import math
 from functools import lru_cache
-from typing import Optional, Tuple, Dict, Any
+from random import choice, randint
+from typing import Any, Dict, Optional, Tuple
+
 import pygame
-from random import randint, choice
 
 from PyPong.core.config import *
-
 
 # Pre-create commonly used surfaces for better performance
 _PADDLE_SURFACES: Dict[Tuple[int, Tuple[int, int, int]], pygame.Surface] = {}
@@ -36,12 +36,10 @@ def _get_ball_surface() -> pygame.Surface:
 
 class Paddle(pygame.sprite.Sprite):
     """Optimized Paddle class with caching"""
-    
-    __slots__ = ('player_number', 'is_ai', 'color', 'width', 'height', 
-                 'speed', 'image', 'rect', 'original_height')
-    
-    def __init__(self, player_number: int, is_ai: bool = False, 
-                 color: Tuple[int, int, int] = WHITE):
+
+    __slots__ = ("player_number", "is_ai", "color", "width", "height", "speed", "image", "rect", "original_height")
+
+    def __init__(self, player_number: int, is_ai: bool = False, color: Tuple[int, int, int] = WHITE):
         super().__init__()
         self.player_number = player_number
         self.is_ai = is_ai
@@ -49,7 +47,7 @@ class Paddle(pygame.sprite.Sprite):
         self.width = PADDLE_WIDTH
         self.height = PADDLE_HEIGHT
         self.speed = PADDLE_SPEED if not is_ai else DIFFICULTY_LEVELS["Medium"]["ai_speed"]
-        
+
         # Use cached surface
         self.image = _get_paddle_surface(self.width, self.height, color)
         self.rect = self.image.get_rect()
@@ -80,8 +78,9 @@ class Paddle(pygame.sprite.Sprite):
         self.rect.clamp_ip(pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
 
     @lru_cache(maxsize=128)
-    def predict_ball_position(self, ball_x: float, ball_y: float, 
-                              ball_velocity_x: float, ball_velocity_y: float) -> float:
+    def predict_ball_position(
+        self, ball_x: float, ball_y: float, ball_velocity_x: float, ball_velocity_y: float
+    ) -> float:
         """Predict ball Y position when it reaches paddle (cached)"""
         if self.player_number == 1 and ball_velocity_x < 0:
             return ball_y
@@ -95,8 +94,7 @@ class Paddle(pygame.sprite.Sprite):
         # Optimized simulation (fewer iterations)
         step = abs(ball_velocity_x)
         while True:
-            if (self.player_number == 2 and sim_x >= target_x) or \
-               (self.player_number == 1 and sim_x <= target_x):
+            if (self.player_number == 2 and sim_x >= target_x) or (self.player_number == 1 and sim_x <= target_x):
                 return sim_y
 
             sim_x += ball_velocity_x
@@ -126,9 +124,9 @@ class Paddle(pygame.sprite.Sprite):
 
 class Ball(pygame.sprite.Sprite):
     """Optimized Ball class with caching"""
-    
-    __slots__ = ('image', 'rect', 'velocity_x', 'velocity_y', 'speed')
-    
+
+    __slots__ = ("image", "rect", "velocity_x", "velocity_y", "speed")
+
     def __init__(self) -> None:
         super().__init__()
         self.image = _get_ball_surface()
@@ -191,7 +189,7 @@ class Ball(pygame.sprite.Sprite):
 
 class PowerUp(pygame.sprite.Sprite):
     """Optimized PowerUp with cached surfaces"""
-    
+
     TYPES: Dict[str, Dict[str, Any]] = {
         "speed_boost": {"color": GREEN, "duration": POWERUP_DURATION},
         "large_paddle": {"color": YELLOW, "duration": POWERUP_DURATION},
@@ -199,10 +197,10 @@ class PowerUp(pygame.sprite.Sprite):
         "multi_ball": {"color": RED, "duration": 0},
         "shrink_opponent": {"color": (255, 165, 0), "duration": POWERUP_DURATION},
     }
-    
+
     # Cache surfaces by type
     _SURFACES: Dict[str, pygame.Surface] = {}
-    
+
     @classmethod
     def _get_surface(cls, ptype: str) -> pygame.Surface:
         if ptype not in cls._SURFACES:
@@ -210,16 +208,13 @@ class PowerUp(pygame.sprite.Sprite):
             surf.fill(cls.TYPES[ptype]["color"])
             cls._SURFACES[ptype] = surf
         return cls._SURFACES[ptype]
-    
+
     def __init__(self) -> None:
         super().__init__()
         self.type = choice(list(self.TYPES.keys()))
         self.image = self._get_surface(self.type)
         self.rect = self.image.get_rect()
-        self.rect.center = (
-            randint(WINDOW_WIDTH // 4, 3 * WINDOW_WIDTH // 4),
-            randint(50, WINDOW_HEIGHT - 50)
-        )
+        self.rect.center = (randint(WINDOW_WIDTH // 4, 3 * WINDOW_WIDTH // 4), randint(50, WINDOW_HEIGHT - 50))
         self.active = False
         self.start_time = 0
         self.affected_paddle: Optional[Paddle] = None

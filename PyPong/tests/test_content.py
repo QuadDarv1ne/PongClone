@@ -12,10 +12,11 @@ if str(parent_dir) not in sys.path:
     sys.path.insert(0, str(parent_dir))
 
 # Fix Windows console encoding
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
 
 
 def test_campaign():
@@ -23,21 +24,21 @@ def test_campaign():
     print("Testing Campaign System...")
     try:
         from PyPong.content.campaign import CampaignManager
-        
+
         campaign = CampaignManager()
         print(f"✓ Campaign initialized with {len(campaign.levels)} levels")
-        
+
         unlocked = campaign.get_unlocked_levels()
         print(f"✓ {len(unlocked)} levels unlocked")
-        
+
         # Test level completion
         campaign.complete_level(1, 3, 45.5)
         print("✓ Level completion works")
-        
+
         stars = campaign.get_total_stars()
         completion = campaign.get_completion_percentage()
         print(f"✓ Progress tracking: {completion:.0f}% complete, {stars} stars")
-        
+
         return True
     except Exception as e:
         print(f"✗ Campaign test failed: {e}")
@@ -49,21 +50,21 @@ def test_challenges():
     print("\nTesting Challenges System...")
     try:
         from PyPong.content.challenges import ChallengeManager
-        
+
         challenges = ChallengeManager()
         print("✓ Challenges initialized")
-        
+
         challenges.refresh_challenges()
         active = challenges.get_active_challenges()
         print(f"✓ {len(active['daily'])} daily challenges")
         print(f"✓ {len(active['weekly'])} weekly challenges")
-        
+
         # Test progress update
-        if active['daily']:
-            challenge = active['daily'][0]
-            challenges.update_challenge('total_score', 5)
+        if active["daily"]:
+            challenge = active["daily"][0]
+            challenges.update_challenge("total_score", 5)
             print("✓ Challenge progress update works")
-        
+
         return True
     except Exception as e:
         print(f"✗ Challenges test failed: {e}")
@@ -74,24 +75,29 @@ def test_modifiers():
     """Test game modifiers"""
     print("\nTesting Modifiers System...")
     try:
-        from PyPong.content.modifiers import (ModifierManager, GravityModifier, WindModifier,
-                              InvisibleBallModifier, SpeedModifier)
-        
+        from PyPong.content.modifiers import (
+            GravityModifier,
+            InvisibleBallModifier,
+            ModifierManager,
+            SpeedModifier,
+            WindModifier,
+        )
+
         manager = ModifierManager()
         print("✓ Modifier manager initialized")
-        
+
         # Add modifiers
         manager.add_modifier(GravityModifier(0.2))
         manager.add_modifier(WindModifier(0.15))
         manager.add_modifier(InvisibleBallModifier())
         manager.add_modifier(SpeedModifier())
-        
+
         active = manager.get_active_modifiers()
         print(f"✓ {len(active)} modifiers active: {', '.join(active)}")
-        
+
         manager.clear_modifiers()
         print("✓ Modifiers cleared")
-        
+
         return True
     except Exception as e:
         print(f"✗ Modifiers test failed: {e}")
@@ -103,24 +109,24 @@ def test_minigames():
     print("\nTesting Mini-games System...")
     try:
         from PyPong.content.minigames import MiniGameManager
-        
+
         manager = MiniGameManager()
         print("✓ Mini-game manager initialized")
-        
+
         available = list(manager.minigames.keys())
         print(f"✓ {len(available)} mini-games available: {', '.join(available)}")
-        
+
         # Test starting a mini-game
-        success = manager.start_minigame('target_practice')
+        success = manager.start_minigame("target_practice")
         if success:
             print("✓ Mini-game started successfully")
-            
+
             current = manager.get_current_minigame()
             print(f"✓ Current mini-game: {current.name}")
-            
+
             manager.stop_minigame()
             print("✓ Mini-game stopped")
-        
+
         return True
     except Exception as e:
         print(f"✗ Mini-games test failed: {e}")
@@ -133,8 +139,9 @@ def test_ui():
     try:
         # Just check imports
         from PyPong.ui.content_ui import CampaignUI, ChallengesUI, MiniGameUI
+
         print("✓ All UI components imported successfully")
-        
+
         return True
     except Exception as e:
         print(f"✗ UI test failed: {e}")
@@ -147,20 +154,21 @@ def test_integration():
     try:
         # Check if enhanced game file exists and imports work
         import os
+
         # Look in the PyPong directory
         enhanced_path = Path(__file__).parent.parent / "pong_enhanced.py"
         if enhanced_path.exists():
             print("✓ Enhanced game file exists")
-        
+
             # Try importing (won't run pygame)
             # This just checks syntax
-            with open(enhanced_path, 'r', encoding='utf-8') as f:
+            with open(enhanced_path, "r", encoding="utf-8") as f:
                 code = f.read()
-                compile(code, 'pong_enhanced.py', 'exec')
+                compile(code, "pong_enhanced.py", "exec")
             print("✓ Enhanced game file syntax is valid")
         else:
             print("✓ Enhanced game file not found (optional)")
-        
+
         return True
     except Exception as e:
         print(f"✗ Integration test failed: {e}")
@@ -172,29 +180,22 @@ def main():
     print("=" * 60)
     print("Content Features Test Suite")
     print("=" * 60)
-    
-    tests = [
-        test_campaign,
-        test_challenges,
-        test_modifiers,
-        test_minigames,
-        test_ui,
-        test_integration
-    ]
-    
+
+    tests = [test_campaign, test_challenges, test_modifiers, test_minigames, test_ui, test_integration]
+
     results = []
     for test in tests:
         results.append(test())
-    
+
     print("\n" + "=" * 60)
     print("Test Results")
     print("=" * 60)
-    
+
     passed = sum(results)
     total = len(results)
-    
+
     print(f"Passed: {passed}/{total}")
-    
+
     if passed == total:
         print("✓ All tests passed!")
         return 0

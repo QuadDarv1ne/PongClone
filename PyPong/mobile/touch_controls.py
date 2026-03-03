@@ -1,5 +1,7 @@
+from typing import Any, Dict, Tuple
+
 import pygame
-from typing import Dict, Tuple, Any
+
 from PyPong.core.config import *
 
 
@@ -21,7 +23,7 @@ class TouchControls:
             "p1_up": pygame.Rect(0, 0, zone_width, self.screen_height // 2),
             "p1_down": pygame.Rect(0, self.screen_height // 2, zone_width, self.screen_height // 2),
             "p2_up": pygame.Rect(zone_width, 0, zone_width, self.screen_height // 2),
-            "p2_down": pygame.Rect(zone_width, self.screen_height // 2, zone_width, self.screen_height // 2)
+            "p2_down": pygame.Rect(zone_width, self.screen_height // 2, zone_width, self.screen_height // 2),
         }
 
     def update_screen_size(self, width: int, height: int) -> None:
@@ -40,13 +42,13 @@ class TouchControls:
                     self.active_touches[zone_name] = True
         elif event.type == pygame.MOUSEBUTTONUP:
             self.active_touches.clear()
-        elif hasattr(pygame, 'FINGERDOWN') and event.type == pygame.FINGERDOWN:
+        elif hasattr(pygame, "FINGERDOWN") and event.type == pygame.FINGERDOWN:
             x = int(event.x * self.screen_width)
             y = int(event.y * self.screen_height)
             for zone_name, zone_rect in self.touch_zones.items():
                 if zone_rect.collidepoint((x, y)):
                     self.active_touches[zone_name] = True
-        elif hasattr(pygame, 'FINGERUP') and event.type == pygame.FINGERUP:
+        elif hasattr(pygame, "FINGERUP") and event.type == pygame.FINGERUP:
             self.active_touches.clear()
 
     def get_input(self, player) -> Dict[str, bool]:
@@ -103,7 +105,7 @@ class AdaptiveScreen:
         else:
             self.scale_x = width / self.base_width
             self.scale_y = height / self.base_height
-        self._needs_resize = (self.scale_x != 1.0 or self.scale_y != 1.0)
+        self._needs_resize = self.scale_x != 1.0 or self.scale_y != 1.0
 
     def scale_position(self, x: float, y: float) -> Tuple[int, int]:
         """Scale position coordinates"""
@@ -143,5 +145,5 @@ class AdaptiveScreen:
             "current_resolution": (self.current_width, self.current_height),
             "scale": (self.scale_x, self.scale_y),
             "aspect_ratio": self.aspect_ratio,
-            "needs_resize": self._needs_resize
+            "needs_resize": self._needs_resize,
         }

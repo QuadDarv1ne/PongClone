@@ -8,5 +8,5 @@ from .logger import logger
 # from .game_state import GameState, GameStateManager
 
 __all__ = [
-    'logger',
+    "logger",
 ]

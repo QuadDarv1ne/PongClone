@@ -1,13 +1,17 @@
 """Mini-games and variations of Pong"""
-import pygame
 import math
-from typing import List, Optional, Any
-from random import randint, choice
-from PyPong.core.entities import Ball, Paddle
+from random import choice, randint
+from typing import Any, List, Optional
+
+import pygame
+
 from PyPong.core.config import *
+from PyPong.core.entities import Ball, Paddle
+
 
 class MiniGame:
     """Base class for mini-games"""
+
     def __init__(self, name: str, description: str) -> None:
         self.name = name
         self.description = description
@@ -47,6 +51,7 @@ class MiniGame:
 
 class TargetPractice(MiniGame):
     """Hit targets that appear on screen"""
+
     def __init__(self) -> None:
         super().__init__("Target Practice", "Hit as many targets as possible")
         self.targets: List[dict] = []
@@ -62,20 +67,16 @@ class TargetPractice(MiniGame):
     def spawn_target(self):
         """Spawn a new target"""
         target = {
-            'rect': pygame.Rect(
-                randint(100, WINDOW_WIDTH - 100),
-                randint(100, WINDOW_HEIGHT - 100),
-                30, 30
-            ),
-            'color': choice([RED, GREEN, YELLOW, LIGHT_BLUE]),
-            'points': randint(1, 5)
+            "rect": pygame.Rect(randint(100, WINDOW_WIDTH - 100), randint(100, WINDOW_HEIGHT - 100), 30, 30),
+            "color": choice([RED, GREEN, YELLOW, LIGHT_BLUE]),
+            "points": randint(1, 5),
         }
         self.targets.append(target)
 
     def update(self, ball):
         """Update targets and check collisions"""
         current_time = pygame.time.get_ticks()
-        
+
         # Spawn new targets
         if current_time - self.last_spawn > self.target_spawn_interval:
             self.spawn_target()
@@ -83,8 +84,8 @@ class TargetPractice(MiniGame):
 
         # Check collisions
         for target in self.targets[:]:
-            if ball.rect.colliderect(target['rect']):
-                self.score += target['points']
+            if ball.rect.colliderect(target["rect"]):
+                self.score += target["points"]
                 self.targets.remove(target)
                 ball.velocity_x *= -1
                 ball.velocity_y *= -1
@@ -92,12 +93,13 @@ class TargetPractice(MiniGame):
     def draw(self, screen):
         """Draw targets"""
         for target in self.targets:
-            pygame.draw.rect(screen, target['color'], target['rect'])
-            pygame.draw.rect(screen, WHITE, target['rect'], 2)
+            pygame.draw.rect(screen, target["color"], target["rect"])
+            pygame.draw.rect(screen, WHITE, target["rect"], 2)
 
 
 class BreakoutMode(MiniGame):
     """Breakout-style game with bricks"""
+
     def __init__(self) -> None:
         super().__init__("Breakout", "Break all the bricks")
         self.bricks: List[dict] = []
@@ -114,41 +116,41 @@ class BreakoutMode(MiniGame):
         """Create brick layout"""
         self.bricks = []
         colors = [RED, (255, 165, 0), YELLOW, GREEN, LIGHT_BLUE]
-        
+
         offset_x = (WINDOW_WIDTH - (self.cols * self.brick_width)) // 2
         offset_y = 50
 
         for row in range(self.rows):
             for col in range(self.cols):
                 brick = {
-                    'rect': pygame.Rect(
+                    "rect": pygame.Rect(
                         offset_x + col * self.brick_width,
                         offset_y + row * self.brick_height,
                         self.brick_width - 2,
-                        self.brick_height - 2
+                        self.brick_height - 2,
                     ),
-                    'color': colors[row % len(colors)],
-                    'hits': 1
+                    "color": colors[row % len(colors)],
+                    "hits": 1,
                 }
                 self.bricks.append(brick)
 
     def update(self, ball):
         """Update bricks and check collisions"""
         for brick in self.bricks[:]:
-            if ball.rect.colliderect(brick['rect']):
-                brick['hits'] -= 1
-                if brick['hits'] <= 0:
+            if ball.rect.colliderect(brick["rect"]):
+                brick["hits"] -= 1
+                if brick["hits"] <= 0:
                     self.bricks.remove(brick)
                     self.score += 10
-                
+
                 # Bounce ball
                 ball.velocity_y *= -1
 
     def draw(self, screen):
         """Draw bricks"""
         for brick in self.bricks:
-            pygame.draw.rect(screen, brick['color'], brick['rect'])
-            pygame.draw.rect(screen, WHITE, brick['rect'], 1)
+            pygame.draw.rect(screen, brick["color"], brick["rect"])
+            pygame.draw.rect(screen, WHITE, brick["rect"], 1)
 
     def is_complete(self):
         """Complete when all bricks are destroyed"""
@@ -157,6 +159,7 @@ class BreakoutMode(MiniGame):
 
 class SurvivalMode(MiniGame):
     """Survive as long as possible with increasing difficulty"""
+
     def __init__(self) -> None:
         super().__init__("Survival", "Survive as long as possible")
         self.difficulty_increase_interval = 10000  # Every 10 seconds
@@ -171,7 +174,7 @@ class SurvivalMode(MiniGame):
     def update(self, ball):
         """Increase difficulty over time"""
         current_time = pygame.time.get_ticks()
-        
+
         if current_time - self.last_increase > self.difficulty_increase_interval:
             self.current_speed_multiplier += 0.1
             ball.speed *= 1.1
@@ -187,6 +190,7 @@ class SurvivalMode(MiniGame):
 
 class KeepUpMode(MiniGame):
     """Keep the ball in the air without letting it touch the bottom"""
+
     def __init__(self) -> None:
         super().__init__("Keep Up", "Don't let the ball touch the bottom")
         self.time_limit = 60
@@ -215,6 +219,7 @@ class KeepUpMode(MiniGame):
 
 class PrecisionMode(MiniGame):
     """Hit specific zones on the paddle for bonus points"""
+
     def __init__(self) -> None:
         super().__init__("Precision", "Hit the sweet spot for bonus points")
         self.time_limit = 60
@@ -232,7 +237,7 @@ class PrecisionMode(MiniGame):
         """Check hit quality based on position"""
         hit_pos = abs(ball.rect.centery - paddle.rect.centery)
         paddle_height = paddle.height
-        
+
         if hit_pos < paddle_height * 0.15:  # Center 30%
             self.perfect_hits += 1
             self.score += 10
@@ -250,13 +255,9 @@ class PrecisionMode(MiniGame):
         """Draw hit statistics"""
         font = pygame.font.SysFont(FONT_NAME, 24)
         y = 50
-        
-        stats = [
-            f"Perfect: {self.perfect_hits}",
-            f"Good: {self.good_hits}",
-            f"Normal: {self.normal_hits}"
-        ]
-        
+
+        stats = [f"Perfect: {self.perfect_hits}", f"Good: {self.good_hits}", f"Normal: {self.normal_hits}"]
+
         for stat in stats:
             text = font.render(stat, True, WHITE)
             screen.blit(text, (20, y))
@@ -265,13 +266,14 @@ class PrecisionMode(MiniGame):
 
 class MiniGameManager:
     """Manages mini-games"""
+
     def __init__(self) -> None:
         self.minigames = {
-            'target_practice': TargetPractice(),
-            'breakout': BreakoutMode(),
-            'survival': SurvivalMode(),
-            'keep_up': KeepUpMode(),
-            'precision': PrecisionMode()
+            "target_practice": TargetPractice(),
+            "breakout": BreakoutMode(),
+            "survival": SurvivalMode(),
+            "keep_up": KeepUpMode(),
+            "precision": PrecisionMode(),
         }
         self.current_minigame: Optional[MiniGame] = None
 

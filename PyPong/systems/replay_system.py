@@ -1,18 +1,20 @@
 """
 Replay system for recording and playing back games
 """
-import json
 import gzip
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
+import json
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from PyPong.core.logger import logger, log_exception
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+from PyPong.core.logger import log_exception, logger
 
 
 @dataclass
 class GameFrame:
     """Single frame of game state"""
+
     frame_number: int
     timestamp: float
     ball_pos: Tuple[float, float]
@@ -27,13 +29,14 @@ class GameFrame:
         return asdict(self)
 
     @staticmethod
-    def from_dict(data: Dict[str, Any]) -> 'GameFrame':
+    def from_dict(data: Dict[str, Any]) -> "GameFrame":
         return GameFrame(**data)
 
 
 @dataclass
 class ReplayMetadata:
     """Replay metadata"""
+
     replay_id: str
     recorded_at: str
     duration: float
@@ -49,7 +52,7 @@ class ReplayMetadata:
         return asdict(self)
 
     @staticmethod
-    def from_dict(data: Dict[str, Any]) -> 'ReplayMetadata':
+    def from_dict(data: Dict[str, Any]) -> "ReplayMetadata":
         return ReplayMetadata(**data)
 
 
@@ -70,16 +73,16 @@ class ReplayRecorder:
         player1_name: str = "Player 1",
         player2_name: str = "Player 2",
         game_mode: str = "pvp",
-        difficulty: Optional[str] = None
+        difficulty: Optional[str] = None,
     ) -> None:
         """Start recording"""
         self.recording = True
         self.frames = []
         self.frame_count = 0
         self.start_time = datetime.now().timestamp()
-        
+
         replay_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+
         self.metadata = ReplayMetadata(
             replay_id=replay_id,
             recorded_at=datetime.now().isoformat(),
@@ -89,24 +92,18 @@ class ReplayRecorder:
             final_score=(0, 0),
             winner=0,
             game_mode=game_mode,
-            difficulty=difficulty
+            difficulty=difficulty,
         )
-        
+
         logger.info(f"Started recording replay: {replay_id}")
-    
+
     def record_frame(
-        self,
-        ball,
-        paddle1,
-        paddle2,
-        score1: int,
-        score2: int,
-        events: Optional[List[str]] = None
+        self, ball, paddle1, paddle2, score1: int, score2: int, events: Optional[List[str]] = None
     ) -> None:
         """Record a single frame"""
         if not self.recording:
             return
-        
+
         frame = GameFrame(
             frame_number=self.frame_count,
             timestamp=datetime.now().timestamp() - self.start_time,
@@ -116,32 +113,32 @@ class ReplayRecorder:
             paddle2_pos=(paddle2.rect.centerx, paddle2.rect.centery),
             score1=score1,
             score2=score2,
-            events=events or []
+            events=events or [],
         )
-        
+
         self.frames.append(frame)
         self.frame_count += 1
-    
+
     def stop_recording(self, winner: int, final_score: tuple[int, int]) -> str:
         """Stop recording and return replay ID"""
         if not self.recording or not self.metadata:
             return ""
-        
+
         self.recording = False
-        
+
         # Update metadata
         self.metadata.duration = datetime.now().timestamp() - self.start_time
         self.metadata.winner = winner
         self.metadata.final_score = final_score
         self.metadata.total_frames = len(self.frames)
-        
+
         logger.info(
             f"Stopped recording replay: {self.metadata.replay_id} "
             f"({self.metadata.total_frames} frames, {self.metadata.duration:.1f}s)"
         )
-        
+
         return self.metadata.replay_id
-    
+
     @log_exception
     def save_replay(self, filename: Optional[str] = None) -> bool:
         """Save replay to file"""
@@ -150,30 +147,27 @@ class ReplayRecorder:
             return False
 
         # Create replays directory
-        replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
+        replay_dir = Path(__file__).parent.parent / "data" / "replays"
         replay_dir.mkdir(exist_ok=True)
-        
+
         # Generate filename
         if filename is None:
             filename = f"replay_{self.metadata.replay_id}.json.gz"
-        
+
         filepath = replay_dir / filename
-        
+
         try:
             # Prepare data
-            data = {
-                'metadata': self.metadata.to_dict(),
-                'frames': [frame.to_dict() for frame in self.frames]
-            }
-            
+            data = {"metadata": self.metadata.to_dict(), "frames": [frame.to_dict() for frame in self.frames]}
+
             # Compress and save
             json_str = json.dumps(data)
-            with gzip.open(filepath, 'wt', encoding='utf-8') as f:
+            with gzip.open(filepath, "wt", encoding="utf-8") as f:
                 f.write(json_str)
-            
+
             logger.info(f"Replay saved: {filepath}")
             return True
-        
+
         except Exception as e:
             logger.error(f"Failed to save replay: {e}", exc_info=True)
             return False
@@ -200,76 +194,73 @@ class ReplayPlayer:
             if not path.exists():
                 logger.error(f"Replay file not found: {filepath}")
                 return False
-            
+
             # Load and decompress
-            with gzip.open(path, 'rt', encoding='utf-8') as f:
+            with gzip.open(path, "rt", encoding="utf-8") as f:
                 data = json.load(f)
-            
+
             # Parse data
-            self.metadata = ReplayMetadata.from_dict(data['metadata'])
-            self.frames = [GameFrame.from_dict(f) for f in data['frames']]
+            self.metadata = ReplayMetadata.from_dict(data["metadata"])
+            self.frames = [GameFrame.from_dict(f) for f in data["frames"]]
             self.current_frame = 0
-            
-            logger.info(
-                f"Replay loaded: {self.metadata.replay_id} "
-                f"({len(self.frames)} frames)"
-            )
+
+            logger.info(f"Replay loaded: {self.metadata.replay_id} " f"({len(self.frames)} frames)")
             return True
-        
+
         except Exception as e:
             logger.error(f"Failed to load replay: {e}", exc_info=True)
             return False
-    
+
     def start_playback(self) -> bool:
         """Start replay playback"""
         if not self.frames:
             logger.warning("No replay loaded")
             return False
-        
+
         self.playing = True
         self.current_frame = 0
         self.paused = False
-        
+
         logger.info("Started replay playback")
         return True
-    
+
     def stop_playback(self) -> None:
         """Stop replay playback"""
         self.playing = False
         self.current_frame = 0
         logger.info("Stopped replay playback")
-    
+
     def pause(self) -> None:
         """Pause playback"""
         self.paused = True
-    
+
     def resume(self) -> None:
         """Resume playback"""
         self.paused = False
-    
+
     def get_current_frame(self) -> Optional[GameFrame]:
         """Get current frame"""
         if not self.playing or self.paused:
             return None
-        
+
         if self.current_frame >= len(self.frames):
             self.stop_playback()
             return None
-        
+
         frame = self.frames[self.current_frame]
         self.current_frame += int(self.playback_speed)
-        
+
         return frame
-    
+
     def seek(self, frame_number: int) -> None:
         """Seek to specific frame"""
         self.current_frame = max(0, min(frame_number, len(self.frames) - 1))
-    
+
     def set_speed(self, speed: float) -> None:
         """Set playback speed (1.0 = normal)"""
         self.playback_speed = max(0.25, min(4.0, speed))
         logger.debug(f"Playback speed set to {self.playback_speed}x")
-    
+
     def get_progress(self) -> float:
         """Get playback progress (0-1)"""
         if not self.frames:
@@ -289,34 +280,34 @@ class ReplayManager:
 
     def list_replays(self) -> List[Dict[str, Any]]:
         """List all saved replays"""
-        replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
+        replay_dir = Path(__file__).parent.parent / "data" / "replays"
         if not replay_dir.exists():
             return []
-        
+
         replays = []
         for filepath in replay_dir.glob("replay_*.json.gz"):
             try:
                 # Load metadata only
-                with gzip.open(filepath, 'rt', encoding='utf-8') as f:
+                with gzip.open(filepath, "rt", encoding="utf-8") as f:
                     data = json.load(f)
-                
-                metadata = data['metadata']
-                metadata['filepath'] = str(filepath)
+
+                metadata = data["metadata"]
+                metadata["filepath"] = str(filepath)
                 replays.append(metadata)
-            
+
             except Exception as e:
                 logger.error(f"Failed to read replay {filepath}: {e}")
-        
+
         # Sort by date (newest first)
-        replays.sort(key=lambda x: x['recorded_at'], reverse=True)
-        
+        replays.sort(key=lambda x: x["recorded_at"], reverse=True)
+
         return replays
-    
+
     def delete_replay(self, replay_id: str) -> bool:
         """Delete a replay"""
-        replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
+        replay_dir = Path(__file__).parent.parent / "data" / "replays"
         filepath = replay_dir / f"replay_{replay_id}.json.gz"
-        
+
         try:
             if filepath.exists():
                 filepath.unlink()
@@ -324,31 +315,24 @@ class ReplayManager:
                 return True
         except Exception as e:
             logger.error(f"Failed to delete replay: {e}")
-        
+
         return False
-    
+
     def get_replay_stats(self) -> Dict[str, Any]:
         """Get replay statistics"""
         replays = self.list_replays()
-        
+
         if not replays:
-            return {
-                'total_replays': 0,
-                'total_duration': 0,
-                'total_size_mb': 0
-            }
-        
-        total_duration = sum(r['duration'] for r in replays)
-        
+            return {"total_replays": 0, "total_duration": 0, "total_size_mb": 0}
+
+        total_duration = sum(r["duration"] for r in replays)
+
         # Calculate total size
-        replay_dir = Path(__file__).parent.parent / 'data' / 'replays'
-        total_size = sum(
-            f.stat().st_size
-            for f in replay_dir.glob("replay_*.json.gz")
-        )
-        
+        replay_dir = Path(__file__).parent.parent / "data" / "replays"
+        total_size = sum(f.stat().st_size for f in replay_dir.glob("replay_*.json.gz"))
+
         return {
-            'total_replays': len(replays),
-            'total_duration': total_duration,
-            'total_size_mb': total_size / (1024 * 1024)
+            "total_replays": len(replays),
+            "total_duration": total_duration,
+            "total_size_mb": total_size / (1024 * 1024),
         }

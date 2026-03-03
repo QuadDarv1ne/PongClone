@@ -1,34 +1,39 @@
 """
 Enhanced Pong v4 - Main game module with modular architecture
 """
+from typing import Any, Dict, Optional
+
 import pygame
 from pygame.locals import *
-from typing import Optional, Dict, Any
 
-from PyPong.core.env_config import init_env_config, get_env_config
+from PyPong import mobile as mobile_module
+from PyPong.content.tournament import Tournament
 from PyPong.core.config import (
-    WINDOW_WIDTH, WINDOW_HEIGHT, FPS, BLACK,
-    DIFFICULTY_LEVELS, FONT_NAME,
+    BLACK,
+    DIFFICULTY_LEVELS,
+    FONT_NAME,
+    FPS,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
 )
 from PyPong.core.config_extended import config
-from PyPong.core.event_bus import get_event_bus, GameEvent
-from PyPong.core.profiler import get_profiler
+from PyPong.core.env_config import get_env_config, init_env_config
+from PyPong.core.event_bus import GameEvent, get_event_bus
 from PyPong.core.game_state import GameState, GameStateManager
-from PyPong.game.input_handler import InputHandler
+from PyPong.core.logger import log_exception, logger
+from PyPong.core.profiler import get_profiler
 from PyPong.game.collision_manager import CollisionManager
 from PyPong.game.game_loop import GameLoop
+from PyPong.game.input_handler import InputHandler
+from PyPong.gamepad import GamepadManager
 from PyPong.rendering.renderer import Renderer
 from PyPong.systems.audio import AudioManager
-from PyPong.systems.stats import StatsManager
 from PyPong.systems.settings import Settings
-from PyPong.ui.ui import PowerUpIndicator, FPSCounter, SettingsMenu
-from PyPong.content.tournament import Tournament
-from PyPong.ui.themes import get_theme
-from PyPong.gamepad import GamepadManager
-from PyPong import mobile as mobile_module
-from PyPong.core.logger import logger, log_exception
-from PyPong.ui.localization import init_localization, get_localization
+from PyPong.systems.stats import StatsManager
 from PyPong.ui.accessibility import get_accessibility_manager
+from PyPong.ui.localization import get_localization, init_localization
+from PyPong.ui.themes import get_theme
+from PyPong.ui.ui import FPSCounter, PowerUpIndicator, SettingsMenu
 
 
 class PongGame:
@@ -38,16 +43,16 @@ class PongGame:
         # Инициализация конфигурации из .env
         init_env_config()
         self.env = get_env_config()
-        
+
         # Инициализация систем
         self.event_bus = get_event_bus()
         self.profiler = get_profiler()
         self.accessibility = get_accessibility_manager()
-        
+
         # Включить профилирование в debug режиме
-        if self.env.get_bool('DEBUG', False):
+        if self.env.get_bool("DEBUG", False):
             self.profiler.enable()
-        
+
         try:
             pygame.init()
         except pygame.error as e:
@@ -55,9 +60,9 @@ class PongGame:
             raise
 
         # Инициализация локализации (из .env или русский по умолчанию)
-        language = self.env.get('LANGUAGE', 'ru')
+        language = self.env.get("LANGUAGE", "ru")
         init_localization(language)
-        
+
         self._init_settings()
         self._init_display()
         self._init_managers()
@@ -65,13 +70,12 @@ class PongGame:
         self._init_ui()
         self._init_effects()
         self._apply_startup_settings()
-    
+
     def _init_settings(self) -> None:
         """Инициализация настроек"""
         self.settings = Settings()
         self.is_mobile = self._detect_mobile()
 
-    
     def _init_display(self) -> None:
         """Инициализация дисплея"""
         try:
@@ -82,10 +86,7 @@ class PongGame:
             else:
                 flags = pygame.RESIZABLE if self.settings.get("fullscreen", False) else 0
 
-            self.screen = pygame.display.set_mode(
-                (WINDOW_WIDTH, WINDOW_HEIGHT),
-                flags
-            )
+            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), flags)
             self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
             pygame.display.set_caption("Enhanced Pong")
             self.clock = pygame.time.Clock()
@@ -94,7 +95,7 @@ class PongGame:
         except pygame.error as e:
             logger.error(f"Failed to initialize display: {e}")
             raise
-    
+
     def _init_managers(self) -> None:
         """Инициализация менеджеров"""
         try:
@@ -107,12 +108,12 @@ class PongGame:
         except Exception as e:
             logger.error(f"Failed to initialize managers: {e}")
             raise
-    
+
     def _init_modules(self) -> None:
         """Инициализация новых модулей"""
         self.input_handler = InputHandler()
         self.collision_manager = CollisionManager()
-        
+
         self.game_loop = GameLoop(
             state_manager=self.state_manager,
             input_handler=self.input_handler,
@@ -123,7 +124,7 @@ class PongGame:
             gamepad=self.gamepad,
             touch=self.touch,
         )
-        
+
         self.renderer = Renderer(
             screen=self.screen,
             game_surface=self.game_surface,
@@ -131,41 +132,36 @@ class PongGame:
             settings=self.settings,
             adaptive_screen=self.adaptive_screen,
         )
-    
+
     def _init_ui(self) -> None:
         """Инициализация UI"""
         self.settings_menu = SettingsMenu(self.game_surface, self.settings)
         self.powerup_indicator = PowerUpIndicator()
         self.fps_counter = FPSCounter()
-    
+
     def _init_effects(self) -> None:
         """Инициализация эффектов"""
         from PyPong.ui.effects_optimized import OptimizedParticlePool, TrailPool
-        
+
         # Используем оптимизированный пул частиц
-        max_particles = config.get('max_particles', 50)
+        max_particles = config.get("max_particles", 50)
         self.particle_pool = OptimizedParticlePool(max_size=max_particles)
-        
-        max_trails = config.get('max_trails', 20)
+
+        max_trails = config.get("max_trails", 20)
         self.trails = TrailPool(max_size=max_trails)
-        
+
         self.shake = ScreenShake()
         self.goal_anim = GoalAnimation()
 
         # Передать эффекты в game_loop и renderer
-        self.game_loop.set_effects(
-            self.particle_pool,
-            self.trails,
-            self.shake,
-            self.goal_anim
-        )
+        self.game_loop.set_effects(self.particle_pool, self.trails, self.shake, self.goal_anim)
         self.renderer.set_sprite_groups(
             None,  # all_sprites будет установлен в game_loop
             None,  # powerups будет установлен в game_loop
             self.particle_pool,
             self.trails,
         )
-    
+
     def _apply_startup_settings(self) -> None:
         """Применить настройки при запуске"""
         try:
@@ -173,84 +169,81 @@ class PongGame:
             self._apply_theme()
         except Exception as e:
             logger.error(f"Failed to apply settings: {e}")
-    
+
     @log_exception
     def _detect_mobile(self) -> bool:
         """Detect if running on mobile platform"""
         try:
-            import platform
             import os
+            import platform
 
             system = platform.system().lower()
 
             # Android detection
-            if system == 'linux':
+            if system == "linux":
                 try:
-                    with open('/proc/version', 'r') as f:
-                        if 'android' in f.read().lower():
+                    with open("/proc/version", "r") as f:
+                        if "android" in f.read().lower():
                             return True
                 except (IOError, OSError):
                     pass
-                if os.environ.get('ANDROID_ROOT') or os.environ.get('ANDROID_DATA'):
+                if os.environ.get("ANDROID_ROOT") or os.environ.get("ANDROID_DATA"):
                     return True
             # iOS detection
-            elif system == 'darwin':
+            elif system == "darwin":
                 machine = platform.machine().lower()
-                if 'iphone' in machine or 'ipad' in machine:
+                if "iphone" in machine or "ipad" in machine:
                     return True
 
             return False
         except Exception as e:
             logger.warning(f"Platform detection failed: {e}")
             return False
-    
+
     @log_exception
     def _apply_settings(self) -> None:
         """Применить настройки аудио и дисплея"""
         pygame.mixer.music.set_volume(self.settings.get("music_volume", 0.5))
         for sound in self.audio.sounds.values():
             sound.set_volume(self.settings.get("sfx_volume", 0.7))
-    
+
     @log_exception
     def _apply_theme(self) -> None:
         """Применить тему"""
-        if hasattr(self, 'game_loop'):
+        if hasattr(self, "game_loop"):
             self.game_loop.theme = self.theme
-    
+
     @log_exception
     def handle_events(self) -> bool:
         """Обработать события pygame"""
         for event in pygame.event.get():
             if event.type == QUIT:
                 return False
-            
+
             # Handle window resize
             if event.type == pygame.VIDEORESIZE:
                 if not self.is_mobile:
                     self.adaptive_screen.update_resolution(event.w, event.h)
-                    self.screen = pygame.display.set_mode(
-                        (event.w, event.h), 
-                        pygame.RESIZABLE
-                    )
+                    self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
                     self.renderer.screen = self.screen
                     # Update touch controls for new screen size
                     if self.settings.get("touch_controls", False):
                         self.touch.update_screen_size(event.w, event.h)
-            
+
             # Handle touch/mouse events
             if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
                 if self.settings.get("touch_controls", False) or self.is_mobile:
                     self.touch.handle_touch(event)
-            
+
             # Handle native touch events (FINGERDOWN, FINGERUP)
-            if hasattr(pygame, 'FINGERDOWN') and event.type == pygame.FINGERDOWN:
+            if hasattr(pygame, "FINGERDOWN") and event.type == pygame.FINGERDOWN:
                 if self.settings.get("touch_controls", False) or self.is_mobile:
                     self.touch.handle_touch(event)
-            
-            if hasattr(pygame, 'FINGERUP') and event.type == pygame.FINGERUP:
+
+            if hasattr(pygame, "FINGERUP") and event.type == pygame.FINGERUP:
                 if self.settings.get("touch_controls", False) or self.is_mobile:
                     self.touch.handle_touch(event)
-            
+
             # Settings menu
             if self.state_manager.state == GameState.SETTINGS:
                 result = self.settings_menu.handle_input(event)
@@ -258,15 +251,15 @@ class PongGame:
                     self.state_manager.state = GameState.MENU
                     self._apply_settings()
                 continue
-            
+
             # Keyboard events
             if event.type == KEYDOWN:
                 self._handle_keydown(event.key)
             elif event.type == KEYUP:
                 self._handle_keyup(event.key)
-        
+
         return True
-    
+
     @log_exception
     def _handle_keydown(self, key: int) -> None:
         """Обработать нажатие клавиши"""
@@ -280,12 +273,12 @@ class PongGame:
             self._handle_mode_select_keys(key)
         else:
             self.input_handler.handle_keydown(key, self.state_manager.state)
-    
+
     @log_exception
     def _handle_keyup(self, key: int) -> None:
         """Обработать отпускание клавиши"""
         self.input_handler.handle_keyup(key, self.state_manager.state)
-    
+
     @log_exception
     def _handle_escape(self) -> None:
         """Обработать нажатие ESC"""
@@ -307,7 +300,7 @@ class PongGame:
         elif state == GameState.MENU:
             logger.info("ESC pressed in MENU, exiting game")
             raise SystemExit()
-    
+
     @log_exception
     def _handle_enter(self) -> None:
         """Обработать нажатие ENTER"""
@@ -329,7 +322,7 @@ class PongGame:
                     self.game_loop.cleanup_game_objects()
                 self.audio.play_music()
                 # Публикуем событие начала игры
-                self.event_bus.publish(GameEvent.GAME_START, {'mode': self.state_manager.game_mode})
+                self.event_bus.publish(GameEvent.GAME_START, {"mode": self.state_manager.game_mode})
             elif new_state == GameState.MENU:
                 if state == GameState.GAME_OVER:
                     self.game_loop.cleanup_game_objects()
@@ -338,7 +331,7 @@ class PongGame:
                     self.event_bus.publish(GameEvent.GAME_OVER)
                 elif state == GameState.TOURNAMENT_COMPLETE:
                     self.tournament.reset()
-    
+
     @log_exception
     def _handle_menu_keys(self, key: int) -> None:
         """Обработать клавиши меню"""
@@ -348,50 +341,50 @@ class PongGame:
             self.state_manager.state = GameState.SETTINGS
         elif key == K_F1:
             self.state_manager.state = GameState.HELP
-    
+
     @log_exception
     def _handle_mode_select_keys(self, key: int) -> None:
         """Обработать клавиши выбора режима"""
         if self.state_manager.state != GameState.MODE_SELECT:
             return
-        
+
         action_data = {}
         if key == K_1:
-            action_data['game_mode'] = 'ai'
+            action_data["game_mode"] = "ai"
         elif key == K_2:
-            action_data['game_mode'] = 'pvp'
+            action_data["game_mode"] = "pvp"
         elif key == K_3:
-            action_data['difficulty'] = 'Easy'
+            action_data["difficulty"] = "Easy"
         elif key == K_4:
-            action_data['difficulty'] = 'Medium'
+            action_data["difficulty"] = "Medium"
         elif key == K_t:
             self.state_manager.tournament_mode = not self.state_manager.tournament_mode
             if self.state_manager.tournament_mode:
                 self.tournament.reset()
-                action_data['difficulty'] = 'Hard'
-        
+                action_data["difficulty"] = "Hard"
+
         # Применить изменения
-        if 'game_mode' in action_data:
-            self.state_manager.game_mode = action_data['game_mode']
-        if 'difficulty' in action_data:
-            self.state_manager.set_difficulty(action_data['difficulty'])
-    
+        if "game_mode" in action_data:
+            self.state_manager.game_mode = action_data["game_mode"]
+        if "difficulty" in action_data:
+            self.state_manager.set_difficulty(action_data["difficulty"])
+
     @log_exception
     def update_game(self) -> None:
         """Обновить игру"""
         if self.state_manager.state == GameState.PLAYING:
-            with self.profiler.profile_section('game_update'):
+            with self.profiler.profile_section("game_update"):
                 if self.game_loop.all_sprites is None:
                     try:
                         logger.info("Initializing game objects...")
                         self.game_loop.init_game_objects()
-                        
+
                         # Проверка успешной инициализации
                         if self.game_loop.all_sprites is None:
                             logger.error("Failed to initialize game objects: all_sprites is still None")
                             self.state_manager.state = GameState.MENU
                             return
-                        
+
                         # Обновить sprite groups в renderer
                         self.renderer.set_sprite_groups(
                             self.game_loop.all_sprites,
@@ -412,7 +405,7 @@ class PongGame:
                 except Exception as e:
                     logger.error(f"Error updating game loop: {e}", exc_info=True)
                     self.state_manager.state = GameState.MENU
-    
+
     @log_exception
     def draw(self) -> None:
         """Отрисовать кадр"""
@@ -424,7 +417,7 @@ class PongGame:
             stats_manager=self.stats,
             tournament=self.tournament,
         )
-    
+
     @log_exception
     def run(self) -> None:
         """Запустить игровой цикл"""
@@ -447,7 +440,7 @@ class PongGame:
             logger.error(f"Game loop error: {e}", exc_info=True)
         finally:
             self.shutdown()
-    
+
     @log_exception
     def shutdown(self) -> None:
         """Корректное завершение работы"""
@@ -455,7 +448,7 @@ class PongGame:
             # Вывести статистику профилирования
             if self.profiler._enabled:
                 self.profiler.print_timing_report()
-            
+
             self.settings.force_save()
             self.audio.stop_music()
             self.game_loop.cleanup_game_objects()
@@ -467,7 +460,7 @@ class PongGame:
                     pygame.quit()
             except Exception:
                 pass
-    
+
     def __del__(self) -> None:
         """Гарантировать очистку ресурсов"""
         try:
@@ -478,8 +471,7 @@ class PongGame:
 
 
 # Import effects at the end to avoid circular imports
-from PyPong.ui.effects import ScreenShake, GoalAnimation
-
+from PyPong.ui.effects import GoalAnimation, ScreenShake
 
 if __name__ == "__main__":
     game = PongGame()

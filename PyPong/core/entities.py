@@ -2,28 +2,38 @@
 Game entities: Paddle, Ball, PowerUp
 """
 import math
-from typing import Optional, Tuple, Dict, Any
+from random import choice, randint
+from typing import Any, Dict, Optional, Tuple
+
 import pygame
-from random import randint, choice
+
 from PyPong.core.config import (
-    WHITE, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_OFFSET,
-    WINDOW_WIDTH, WINDOW_HEIGHT, BALL_SIZE, BALL_INITIAL_SPEED,
-    BALL_SPEED_INCREASE, MAX_BALL_SPEED, POWERUP_DURATION,
-    DIFFICULTY_LEVELS, GREEN, YELLOW, LIGHT_BLUE, RED,
+    BALL_INITIAL_SPEED,
+    BALL_SIZE,
+    BALL_SPEED_INCREASE,
+    DIFFICULTY_LEVELS,
+    GREEN,
+    LIGHT_BLUE,
+    MAX_BALL_SPEED,
+    PADDLE_HEIGHT,
+    PADDLE_OFFSET,
+    PADDLE_SPEED,
+    PADDLE_WIDTH,
+    POWERUP_DURATION,
+    RED,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+    YELLOW,
 )
 
 
 class Paddle(pygame.sprite.Sprite):
     """Player or AI paddle"""
-    
+
     DEAD_ZONE = 5  # Мёртвая зона для AI
 
-    def __init__(
-        self,
-        player_number: int,
-        is_ai: bool = False,
-        color: Tuple[int, int, int] = WHITE
-    ):
+    def __init__(self, player_number: int, is_ai: bool = False, color: Tuple[int, int, int] = WHITE):
         super().__init__()
         self.player_number = player_number
         self.is_ai = is_ai
@@ -53,7 +63,9 @@ class Paddle(pygame.sprite.Sprite):
                 self.rect.y += self.speed
         self.rect.clamp_ip(pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
 
-    def predict_ball_position(self, ball_x: float, ball_y: float, ball_velocity_x: float, ball_velocity_y: float) -> float:
+    def predict_ball_position(
+        self, ball_x: float, ball_y: float, ball_velocity_x: float, ball_velocity_y: float
+    ) -> float:
         """Предсказать Y-позицию мяча, когда он достигнет ракетки AI"""
         # Если мяч летит не к нам, возвращаем текущую позицию
         if self.player_number == 1 and ball_velocity_x < 0:
@@ -77,7 +89,7 @@ class Paddle(pygame.sprite.Sprite):
         # Шаг симуляции
         while steps < max_steps:
             steps += 1
-            
+
             # Проверяем, достиг ли мяч ракетки
             if self.player_number == 2 and sim_x >= target_x:
                 return sim_y
@@ -176,7 +188,7 @@ class Ball(pygame.sprite.Sprite):
 
 class PowerUp(pygame.sprite.Sprite):
     """Power-up with various effects"""
-    
+
     TYPES: Dict[str, Dict[str, Any]] = {
         "speed_boost": {"color": GREEN, "duration": POWERUP_DURATION},
         "large_paddle": {"color": YELLOW, "duration": POWERUP_DURATION},
@@ -191,10 +203,7 @@ class PowerUp(pygame.sprite.Sprite):
         self.image = pygame.Surface([20, 20])
         self.image.fill(self.TYPES[self.type]["color"])
         self.rect = self.image.get_rect()
-        self.rect.center = (
-            randint(WINDOW_WIDTH // 4, 3 * WINDOW_WIDTH // 4),
-            randint(50, WINDOW_HEIGHT - 50)
-        )
+        self.rect.center = (randint(WINDOW_WIDTH // 4, 3 * WINDOW_WIDTH // 4), randint(50, WINDOW_HEIGHT - 50))
         self.active = False
         self.start_time = 0
         self.affected_paddle: Optional[Paddle] = None

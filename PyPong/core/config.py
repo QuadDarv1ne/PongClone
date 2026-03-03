@@ -102,7 +102,7 @@ SHAKE_INTENSITY_GOAL = (15, 15)
 # Power-up settings
 POWERUP_TYPES = [
     "speed_boost",
-    "large_paddle", 
+    "large_paddle",
     "slow_ball",
     "multi_ball",
     "shrink_opponent",
