@@ -5,7 +5,16 @@ from typing import Any, List, Optional
 
 import pygame
 
-from PyPong.core.config import *
+from PyPong.core.config import (
+    FONT_NAME,
+    GREEN,
+    LIGHT_BLUE,
+    RED,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+    YELLOW,
+)
 from PyPong.core.entities import Ball, Paddle
 
 

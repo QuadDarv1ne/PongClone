@@ -2,7 +2,7 @@ from typing import Optional
 
 import pygame
 
-from PyPong.core.config import *
+from PyPong.core.config import FONT_NAME, WHITE, WINDOW_HEIGHT, WINDOW_WIDTH
 
 
 class Tournament:
