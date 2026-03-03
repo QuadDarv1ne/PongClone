@@ -88,7 +88,6 @@ class ParticleEffect:
         """Draw particles"""
         for particle in self.particles:
             alpha = int(255 * (particle["life"] / particle["max_life"]))
-            color = (*particle["color"], alpha)
 
             # Create surface with alpha
             surf = pygame.Surface((particle["size"], particle["size"]))

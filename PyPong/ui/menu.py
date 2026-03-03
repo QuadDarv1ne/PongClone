@@ -175,7 +175,6 @@ class Menu:
         # Draw particles
         for p in self.bg_particles:
             alpha = 50 + int(math.sin(self.anim_time + p["x"]) * 30)
-            color = (*p["color"], alpha)
             pygame.draw.circle(self.screen, p["color"], (int(p["x"]), int(p["y"])), p["size"])
 
     def _draw_title(self):
@@ -187,9 +186,6 @@ class Menu:
         title_font = pygame.font.SysFont("arial", 72, bold=True)
 
         # Animated title with glow
-        pulse = math.sin(self.anim_time * 2) * 0.1 + 1
-
-        # Glow effect
         glow_color = (100, 150, 255)
         for offset in range(3, 0, -1):
             glow_text = title_font.render(title, True, glow_color)
@@ -207,7 +203,6 @@ class Menu:
         if not self.items:
             return
 
-        menu_font = pygame.font.SysFont("arial", 36)
         shortcut_font = pygame.font.SysFont("arial", 24)
 
         start_y = 250
@@ -227,8 +222,7 @@ class Menu:
             is_selected = i == self.selected_index
             if is_selected:
                 # Pulsing effect
-                pulse = math.sin(self.anim_time * 4) * 0.2 + 1
-                scale = pulse
+                scale = math.sin(self.anim_time * 4) * 0.2 + 1
                 color = (255, 215, 0)  # Gold
             else:
                 scale = 0.9
@@ -321,7 +315,7 @@ def test_menu():
     # Initialize localization
     from PyPong.ui.localization import init_localization
 
-    loc = init_localization("en")
+    init_localization("en")
 
     # Create menu
     menu = MainMenu(screen)
