@@ -1,5 +1,5 @@
 """Collision manager for game physics"""
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import pygame
 
@@ -11,7 +11,7 @@ class CollisionManager:
     """Управляет коллизиями между игровыми объектами."""
 
     def __init__(self) -> None:
-        self.last_collision_time = 0
+        self.last_collision_time: float = 0
 
     def check_paddle_collision(self, ball: Ball, paddle: Paddle) -> bool:
         """Проверить коллизию мяча с ракеткой."""
@@ -49,3 +49,13 @@ class CollisionManager:
     def get_shake_intensity(self, is_goal: bool) -> Tuple[int, int]:
         """Получить интенсивность тряски экрана."""
         return SHAKE_INTENSITY_GOAL if is_goal else SHAKE_INTENSITY_NORMAL
+
+    def check_multi_ball_collisions(
+        self, balls: List[Ball], paddle: Paddle
+    ) -> List[Tuple[Ball, bool]]:
+        """Проверить коллизии нескольких мячей с ракеткой."""
+        collisions = []
+        for ball in balls:
+            is_collision = self.check_paddle_collision(ball, paddle)
+            collisions.append((ball, is_collision))
+        return collisions

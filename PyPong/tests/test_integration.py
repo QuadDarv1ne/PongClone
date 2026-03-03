@@ -157,6 +157,31 @@ class TestCollisionManager:
         assert normal != goal
         assert goal[0] > normal[0]
 
+    def test_check_multi_ball_collisions(self, mock_pygame):
+        """Проверка коллизий нескольких мячей"""
+        from PyPong.core.entities import Ball, Paddle
+        from PyPong.game.collision_manager import CollisionManager
+
+        manager = CollisionManager()
+        paddle = Paddle(1, is_ai=False)
+        ball1 = Ball()
+        ball2 = Ball()
+
+        # Установим позиции для коллизии
+        ball1.rect.center = paddle.rect.center
+        ball1.velocity_x = -5  # Летит к ракетке 1
+
+        # Установим позиции без коллизии
+        ball2.rect.centerx = paddle.rect.centerx + 100
+        ball2.velocity_x = 5
+
+        balls = [ball1, ball2]
+        collisions = manager.check_multi_ball_collisions(balls, paddle)
+
+        assert len(collisions) == 2
+        assert collisions[0] == (ball1, True)
+        assert collisions[1] == (ball2, False)
+
 
 class TestAudioManagerFallback:
     """Тесты AudioManager с отсутствующими файлами"""
