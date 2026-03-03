@@ -3,7 +3,7 @@ Multiplayer game mode
 """
 import pygame
 
-from PyPong.core.config import (  # type: ignore[attr-defined]
+from PyPong.core.config import (  # pylint: disable=no-name-in-module
     DARK_GRAY,
     FONT_NAME,
     GREEN,
