@@ -1,6 +1,7 @@
 """
 Optimized entities with caching and performance improvements
 """
+# pylint: disable=undefined-variable
 import math
 from functools import lru_cache
 from random import choice, randint
@@ -11,14 +12,21 @@ import pygame
 from PyPong.core.config import (
     BALL_INITIAL_SPEED,
     BALL_SIZE,
+    BALL_SPEED_INCREASE,
     DIFFICULTY_LEVELS,
+    GREEN,
+    LIGHT_BLUE,
+    MAX_BALL_SPEED,
     PADDLE_HEIGHT,
     PADDLE_OFFSET,
     PADDLE_SPEED,
     PADDLE_WIDTH,
+    POWERUP_DURATION,
+    RED,
     WHITE,
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
+    YELLOW,
 )
 
 # Pre-create commonly used surfaces for better performance

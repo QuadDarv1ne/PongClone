@@ -1,6 +1,7 @@
 """
 Enhanced Pong v4 - Main game module with modular architecture
 """
+# pylint: disable=undefined-variable
 from typing import Any, Dict, Optional
 
 import pygame
