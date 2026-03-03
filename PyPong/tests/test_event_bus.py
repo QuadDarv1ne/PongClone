@@ -48,7 +48,6 @@ class TestEventBus:
 
     def test_unsubscribe(self):
         """Test unsubscribing from events"""
-
         def callback(data):
             self.callback_called = True
 
@@ -131,3 +130,72 @@ class TestEventBus:
 
         assert self.event_bus.get_listener_count(GameEvent.GOAL_SCORED) == 0
         assert self.event_bus.get_listener_count(GameEvent.GAME_START) == 1
+
+
+class TestStatsManagerWithEventBus:
+    """Test StatsManager Event Bus integration"""
+
+    def setup_method(self):
+        """Setup test fixtures"""
+        from PyPong.core.event_bus import reset_event_bus
+        from PyPong.systems.stats import StatsManager
+
+        reset_event_bus()
+        self.stats = StatsManager()
+
+    def test_stats_records_game_on_game_over(self):
+        """Test that stats records game when GAME_OVER event is published"""
+        from PyPong.core.event_bus import get_event_bus, GameEvent
+
+        initial_games = self.stats.stats.get("games_played", 0)
+
+        event_bus = get_event_bus()
+        event_bus.publish(GameEvent.GAME_OVER, {
+            "winner": 1,
+            "player1_score": 5,
+            "player2_score": 3
+        })
+
+        # Reload stats from file
+        self.stats.stats = self.stats.load_stats()
+
+        assert self.stats.stats["games_played"] == initial_games + 1
+        assert self.stats.stats["player1_wins"] >= 1
+
+    def test_stats_tracks_goals(self):
+        """Test that stats tracks goals from GOAL_SCORED events"""
+        from PyPong.core.event_bus import get_event_bus, GameEvent
+
+        initial_goals = self.stats.stats.get("total_goals", 0)
+
+        event_bus = get_event_bus()
+        event_bus.publish(GameEvent.GOAL_SCORED, {"player": 1})
+        event_bus.publish(GameEvent.GOAL_SCORED, {"player": 2})
+
+        # Reload stats from file
+        self.stats.stats = self.stats.load_stats()
+
+        assert self.stats.stats["total_goals"] >= initial_goals + 2
+
+
+class TestAchievementsWithEventBus:
+    """Test AchievementManager Event Bus integration"""
+
+    def setup_method(self):
+        """Setup test fixtures"""
+        from PyPong.core.event_bus import reset_event_bus
+        from PyPong.systems.achievements import AchievementManager
+
+        reset_event_bus()
+        self.achievements = AchievementManager()
+
+    def test_achievements_subscribes_to_events(self):
+        """Test that AchievementManager subscribes to game events"""
+        from PyPong.core.event_bus import get_event_bus, GameEvent
+
+        event_bus = get_event_bus()
+
+        # Check that listeners are registered
+        assert event_bus.get_listener_count(GameEvent.GAME_OVER) >= 1
+        assert event_bus.get_listener_count(GameEvent.GOAL_SCORED) >= 1
+        assert event_bus.get_listener_count(GameEvent.POWERUP_COLLECTED) >= 1
