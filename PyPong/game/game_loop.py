@@ -1,6 +1,7 @@
 """
 Main game loop manager
 """
+from random import randint
 from typing import Any, Optional, Union
 
 import pygame
@@ -11,6 +12,7 @@ from PyPong.core.config import (
     MAX_TRAILS,
     PARTICLES_PER_HIT,
     TRAIL_SPAWN_CHANCE,
+    WINDOW_HEIGHT,
     WINDOW_WIDTH,
 )
 from PyPong.core.entities import Ball, Paddle, PowerUp
@@ -216,8 +218,6 @@ class GameLoop:
 
     def _spawn_trail(self) -> None:
         """Создать шлейф мяча"""
-        from random import randint
-
         if len(self.trails) < MAX_TRAILS and randint(1, TRAIL_SPAWN_CHANCE) == 1:
             trail = Trail(int(self.ball.rect.centerx), int(self.ball.rect.centery))
             self.trails.add(trail)
@@ -297,8 +297,6 @@ class GameLoop:
         if isinstance(self.particles, ParticlePool):
             self.particles.emit(int(x), int(y), color, PARTICLES_PER_HIT)
         elif len(self.particles) < MAX_PARTICLES:
-            from random import randint
-
             for _ in range(PARTICLES_PER_HIT):
                 particle = Particle(int(x), int(y), color)
                 self.particles.add(particle)
@@ -325,10 +323,6 @@ class GameLoop:
         Returns:
             PowerUp instance or None if pool is exhausted
         """
-        from random import randint
-
-        from PyPong.core.config import WINDOW_HEIGHT, WINDOW_WIDTH
-
         powerup = get_powerup_pool().acquire()
         if powerup:
             # Set position
