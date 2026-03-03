@@ -24,7 +24,7 @@ class AudioManager:
     def __init__(self) -> None:
         try:
             pygame.mixer.init()
-        except pygame.error as e:
+        except pygame.error as e:  # type: ignore[attr-defined]
             logger.warning(f"Audio system initialization failed: {e}")
             self._audio_available = False
             return
@@ -70,7 +70,7 @@ class AudioManager:
                 pygame.mixer.music.load(str(self.music_path))
                 self.music_loaded = True
                 logger.debug(f"Music loaded: {self.music_path}")
-            except pygame.error as e:
+            except pygame.error as e:  # type: ignore[attr-defined]
                 logger.error(f"Failed to load music: {e}")
                 self._fallback_mode = True
         else:
@@ -85,7 +85,7 @@ class AudioManager:
             try:
                 self.sounds[name] = pygame.mixer.Sound(str(sound_path))
                 logger.debug(f"Sound loaded: {name}")
-            except pygame.error as e:
+            except pygame.error as e:  # type: ignore[attr-defined]
                 logger.error(f"Failed to load sound '{name}': {e}")
                 self._create_fallback_sound(name)
         else:
@@ -98,7 +98,7 @@ class AudioManager:
             # Пустой звук (тишина)
             self.sounds[name] = pygame.mixer.Sound(buffer=bytes(1024))
             self._fallback_mode = True
-        except pygame.error as e:
+        except pygame.error as e:  # type: ignore[attr-defined]
             logger.error(f"Failed to create fallback sound '{name}': {e}")
 
     @log_exception
@@ -110,7 +110,7 @@ class AudioManager:
         if self.music_loaded:
             try:
                 pygame.mixer.music.play(loops)
-            except pygame.error as e:
+            except pygame.error as e:  # type: ignore[attr-defined]
                 logger.error(f"Failed to play music: {e}")
 
     @log_exception
@@ -128,7 +128,7 @@ class AudioManager:
         if sound_name in self.sounds:
             try:
                 self.sounds[sound_name].play()
-            except pygame.error as e:
+            except pygame.error as e:  # type: ignore[attr-defined]
                 logger.error(f"Failed to play sound '{sound_name}': {e}")
 
     @log_exception

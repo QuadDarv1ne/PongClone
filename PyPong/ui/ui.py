@@ -1,7 +1,7 @@
 """UI components for the game"""
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import pygame
+import pygame  # type: ignore[attr-defined]
 
 from PyPong.core.config import (
     BLACK,
