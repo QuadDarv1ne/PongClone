@@ -2,6 +2,7 @@
 Beautiful main menu with localization support
 """
 import math
+import random
 from typing import Any, Callable, Dict, List, Optional
 
 import pygame
@@ -77,8 +78,6 @@ class Menu:
 
     def _init_particles(self):
         """Initialize background particles"""
-        import random
-
         for _ in range(30):
             self.bg_particles.append(
                 {

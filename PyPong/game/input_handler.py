@@ -3,6 +3,23 @@ Input handler for game events
 """
 from typing import Callable, Dict, Optional
 
+from pygame.locals import (
+    K_1,
+    K_2,
+    K_3,
+    K_4,
+    K_DOWN,
+    K_ESCAPE,
+    K_F1,
+    K_RETURN,
+    K_UP,
+    K_a,
+    K_o,
+    K_s,
+    K_t,
+    K_z,
+)
+
 from PyPong.core.game_state import GameState
 
 
@@ -73,8 +90,6 @@ class InputHandler:
         Returns:
             tuple: (new_state, should_quit, action_data)
         """
-        from pygame.locals import K_1, K_2, K_3, K_4, K_ESCAPE, K_F1, K_RETURN, K_o, K_s, K_t
-
         # ESC handling
         if key == K_ESCAPE:
             new_state = self._escape_transitions.get(current_state)
@@ -125,8 +140,6 @@ class InputHandler:
 
     def _handle_mode_select_keys(self, key: int) -> tuple:
         """Обработать клавиши выбора режима"""
-        from pygame.locals import K_1, K_2, K_3, K_4, K_t
-
         action_data = {}
 
         if key == K_1:
@@ -144,8 +157,6 @@ class InputHandler:
 
     def _handle_movement_input(self, key: int, is_pressed: bool) -> tuple:
         """Обработать ввод движения"""
-        from pygame.locals import K_DOWN, K_UP, K_a, K_z
-
         key_map = {
             K_a: "up1",
             K_z: "down1",

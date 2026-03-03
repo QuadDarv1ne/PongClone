@@ -77,36 +77,28 @@ class Paddle(pygame.sprite.Sprite):
         if abs(ball_velocity_x) < 0.1:
             return self.rect.centery
 
-        # Симулируем полёт мяча до ракетки
-        sim_x = ball_x
-        sim_y = ball_y
-        sim_vy = ball_velocity_y
+        # Вычисляем расстояние до ракетки
+        target_x = self.rect.centerx
+        dx = target_x - ball_x
 
-        target_x = self.rect.centerx if self.player_number == 2 else self.rect.centerx
-        max_steps = 2000
-        steps = 0
+        # Проверяем, полетит ли мяч к ракетке
+        if self.player_number == 1 and dx < 0:
+            return self.rect.centery
+        if self.player_number == 2 and dx > 0:
+            return self.rect.centery
 
-        # Шаг симуляции
-        while steps < max_steps:
-            steps += 1
+        # Время до достижения ракетки
+        time_to_paddle = abs(dx / ball_velocity_x) if abs(ball_velocity_x) > 0.1 else float('inf')
 
-            # Проверяем, достиг ли мяч ракетки
-            if self.player_number == 2 and sim_x >= target_x:
-                return sim_y
-            if self.player_number == 1 and sim_x <= target_x:
-                return sim_y
+        # Вычисляем Y позицию с учётом отскоков
+        sim_y = ball_y + ball_velocity_y * time_to_paddle
 
-            # Двигаем мяч
-            sim_x += ball_velocity_x
-            sim_y += sim_vy
-
-            # Отскок от стен
-            if sim_y <= 0:
+        # Учитываем отскоки от стен
+        while sim_y < 0 or sim_y > WINDOW_HEIGHT:
+            if sim_y < 0:
                 sim_y = -sim_y
-                sim_vy = -sim_vy
-            elif sim_y >= WINDOW_HEIGHT:
-                sim_y = WINDOW_HEIGHT - (sim_y - WINDOW_HEIGHT)
-                sim_vy = -sim_vy
+            elif sim_y > WINDOW_HEIGHT:
+                sim_y = 2 * WINDOW_HEIGHT - sim_y
 
         return sim_y
 

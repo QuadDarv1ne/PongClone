@@ -1,6 +1,7 @@
 """
 Main game loop manager
 """
+from random import randint
 from typing import Any, Optional, Union
 
 import pygame
@@ -11,10 +12,12 @@ from PyPong.core.config import (
     MAX_TRAILS,
     PARTICLES_PER_HIT,
     TRAIL_SPAWN_CHANCE,
+    WINDOW_HEIGHT,
     WINDOW_WIDTH,
 )
 from PyPong.core.entities import Ball, Paddle, PowerUp
 from PyPong.core.entity_pools import get_ball_pool, get_powerup_pool
+from PyPong.core.event_bus import GameEvent, get_event_bus
 from PyPong.core.game_state import GameState, GameStateManager
 from PyPong.core.logger import logger
 from PyPong.game.collision_manager import CollisionManager
@@ -46,6 +49,9 @@ class GameLoop:
         self.theme = theme
         self.gamepad = gamepad
         self.touch = touch
+
+        # Event bus
+        self.event_bus = get_event_bus()
 
         # Game objects
         self.paddle1: Optional[Paddle] = None
@@ -216,8 +222,6 @@ class GameLoop:
 
     def _spawn_trail(self) -> None:
         """Создать шлейф мяча"""
-        from random import randint
-
         if len(self.trails) < MAX_TRAILS and randint(1, TRAIL_SPAWN_CHANCE) == 1:
             trail = Trail(int(self.ball.rect.centerx), int(self.ball.rect.centery))
             self.trails.add(trail)
@@ -233,6 +237,11 @@ class GameLoop:
                     self._create_particles(self.ball.rect.centerx, self.ball.rect.centery, self.theme.accent_color)
                     intensity = self.collision_manager.get_shake_intensity(is_goal=False)
                     self.shake.start(*intensity)
+                    # Publish event
+                    self.event_bus.publish(
+                        GameEvent.BALL_HIT_PADDLE,
+                        {"paddle": 1 if paddle == self.paddle1 else 2, "ball_pos": self.ball.rect.center},
+                    )
 
     def _check_scoring(self) -> None:
         """Проверить забитый гол"""
@@ -245,6 +254,9 @@ class GameLoop:
 
             intensity = self.collision_manager.get_shake_intensity(is_goal=True)
             self.shake.start(*intensity)
+
+            # Publish event
+            self.event_bus.publish(GameEvent.GOAL_SCORED, {"player": scorer, "score": self.state_manager.scores})
 
             if self.state_manager.state == GameState.PLAYING:
                 self.ball.reset_ball()
@@ -259,6 +271,11 @@ class GameLoop:
                     self.audio.play_sound("powerup")
                     self._create_particles(powerup.rect.centerx, powerup.rect.centery, self.theme.accent_color)
                     self._handle_powerup_effect(powerup, paddle)
+                    # Publish event
+                    self.event_bus.publish(
+                        GameEvent.POWERUP_COLLECTED,
+                        {"type": powerup.type, "player": 1 if paddle == self.paddle1 else 2},
+                    )
 
             # Collision with ball (for slow_ball)
             if self.collision_manager.check_ball_powerup_collision(powerup, self.ball):
@@ -297,8 +314,6 @@ class GameLoop:
         if isinstance(self.particles, ParticlePool):
             self.particles.emit(int(x), int(y), color, PARTICLES_PER_HIT)
         elif len(self.particles) < MAX_PARTICLES:
-            from random import randint
-
             for _ in range(PARTICLES_PER_HIT):
                 particle = Particle(int(x), int(y), color)
                 self.particles.add(particle)
@@ -325,10 +340,6 @@ class GameLoop:
         Returns:
             PowerUp instance or None if pool is exhausted
         """
-        from random import randint
-
-        from PyPong.core.config import WINDOW_HEIGHT, WINDOW_WIDTH
-
         powerup = get_powerup_pool().acquire()
         if powerup:
             # Set position
@@ -343,6 +354,9 @@ class GameLoop:
                 self.powerups.add(powerup)
             if self.all_sprites:
                 self.all_sprites.add(powerup)
+
+            # Publish event
+            self.event_bus.publish(GameEvent.POWERUP_SPAWNED, {"position": (x, y), "type": powerup.type})
 
             logger.debug(f"PowerUp spawned at ({x}, {y})")
         return powerup

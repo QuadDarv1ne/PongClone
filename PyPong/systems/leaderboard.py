@@ -36,7 +36,7 @@ class Leaderboard:
     """
 
     def __init__(self, filename: str = "leaderboard.json", max_entries: int = 100):
-        self.filename = Path("PyPong/data") / filename
+        self.filename = Path(__file__).parent.parent / "data" / filename
         self.max_entries = max_entries
         self.scores: Dict[str, List[HighScore]] = {
             "classic": [],
