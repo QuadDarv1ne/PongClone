@@ -2,7 +2,7 @@ from typing import Any, Dict, Tuple
 
 import pygame
 
-from PyPong.core.config import *
+from PyPong.core.config import FONT_NAME, GREEN, WINDOW_HEIGHT, WINDOW_WIDTH, YELLOW
 
 
 class TouchControls:
