@@ -54,8 +54,8 @@ class PongGame:
             self.profiler.enable()
 
         try:
-            pygame.init()
-        except pygame.error as e:
+            pygame.init()  # type: ignore[attr-defined]
+        except pygame.error as e:  # type: ignore[attr-defined]
             logger.error(f"Failed to initialize pygame: {e}")
             raise
 
@@ -82,9 +82,9 @@ class PongGame:
             if self.is_mobile:
                 self.settings.set("fullscreen", True)
                 self.settings.set("touch_controls", True)
-                flags = pygame.FULLSCREEN
+                flags = pygame.FULLSCREEN  # type: ignore[attr-defined]
             else:
-                flags = pygame.RESIZABLE if self.settings.get("fullscreen", False) else 0
+                flags = pygame.RESIZABLE if self.settings.get("fullscreen", False) else 0  # type: ignore[attr-defined]
 
             self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), flags)
             self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -92,7 +92,7 @@ class PongGame:
             self.clock = pygame.time.Clock()
             self.adaptive_screen = mobile_module.AdaptiveScreen()
             self.theme = get_theme(self.settings.get("theme", "classic"))
-        except pygame.error as e:
+        except pygame.error as e:  # type: ignore[attr-defined]
             logger.error(f"Failed to initialize display: {e}")
             raise
 
@@ -217,30 +217,30 @@ class PongGame:
     def handle_events(self) -> bool:
         """Обработать события pygame"""
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == QUIT:  # type: ignore[attr-defined]
                 return False
 
             # Handle window resize
-            if event.type == pygame.VIDEORESIZE:
+            if event.type == pygame.VIDEORESIZE:  # type: ignore[attr-defined]
                 if not self.is_mobile:
                     self.adaptive_screen.update_resolution(event.w, event.h)
-                    self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+                    self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)  # type: ignore[attr-defined]
                     self.renderer.screen = self.screen
                     # Update touch controls for new screen size
                     if self.settings.get("touch_controls", False):
                         self.touch.update_screen_size(event.w, event.h)
 
             # Handle touch/mouse events
-            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):
+            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP):  # type: ignore[attr-defined]
                 if self.settings.get("touch_controls", False) or self.is_mobile:
                     self.touch.handle_touch(event)
 
             # Handle native touch events (FINGERDOWN, FINGERUP)
-            if hasattr(pygame, "FINGERDOWN") and event.type == pygame.FINGERDOWN:
+            if hasattr(pygame, "FINGERDOWN") and event.type == pygame.FINGERDOWN:  # type: ignore[attr-defined]
                 if self.settings.get("touch_controls", False) or self.is_mobile:
                     self.touch.handle_touch(event)
 
-            if hasattr(pygame, "FINGERUP") and event.type == pygame.FINGERUP:
+            if hasattr(pygame, "FINGERUP") and event.type == pygame.FINGERUP:  # type: ignore[attr-defined]
                 if self.settings.get("touch_controls", False) or self.is_mobile:
                     self.touch.handle_touch(event)
 
@@ -253,9 +253,9 @@ class PongGame:
                 continue
 
             # Keyboard events
-            if event.type == KEYDOWN:
+            if event.type == KEYDOWN:  # type: ignore[attr-defined]
                 self._handle_keydown(event.key)
-            elif event.type == KEYUP:
+            elif event.type == KEYUP:  # type: ignore[attr-defined]
                 self._handle_keyup(event.key)
 
         return True
@@ -263,9 +263,9 @@ class PongGame:
     @log_exception
     def _handle_keydown(self, key: int) -> None:
         """Обработать нажатие клавиши"""
-        if key == K_ESCAPE:
+        if key == K_ESCAPE:  # type: ignore[attr-defined]
             self._handle_escape()
-        elif key == K_RETURN:
+        elif key == K_RETURN:  # type: ignore[attr-defined]
             self._handle_enter()
         elif self.state_manager.state == GameState.MENU:
             self._handle_menu_keys(key)
@@ -335,11 +335,11 @@ class PongGame:
     @log_exception
     def _handle_menu_keys(self, key: int) -> None:
         """Обработать клавиши меню"""
-        if key == K_s:
+        if key == K_s:  # type: ignore[attr-defined]
             self.state_manager.state = GameState.STATS
-        elif key == K_o:
+        elif key == K_o:  # type: ignore[attr-defined]
             self.state_manager.state = GameState.SETTINGS
-        elif key == K_F1:
+        elif key == K_F1:  # type: ignore[attr-defined]
             self.state_manager.state = GameState.HELP
 
     @log_exception
@@ -349,15 +349,15 @@ class PongGame:
             return
 
         action_data = {}
-        if key == K_1:
+        if key == K_1:  # type: ignore[attr-defined]
             action_data["game_mode"] = "ai"
-        elif key == K_2:
+        elif key == K_2:  # type: ignore[attr-defined]
             action_data["game_mode"] = "pvp"
-        elif key == K_3:
+        elif key == K_3:  # type: ignore[attr-defined]
             action_data["difficulty"] = "Easy"
-        elif key == K_4:
+        elif key == K_4:  # type: ignore[attr-defined]
             action_data["difficulty"] = "Medium"
-        elif key == K_t:
+        elif key == K_t:  # type: ignore[attr-defined]
             self.state_manager.tournament_mode = not self.state_manager.tournament_mode
             if self.state_manager.tournament_mode:
                 self.tournament.reset()
@@ -456,16 +456,16 @@ class PongGame:
             logger.error(f"Error during shutdown: {e}")
         finally:
             try:
-                if pygame.get_init():
-                    pygame.quit()
+                if pygame.get_init():  # type: ignore[attr-defined]
+                    pygame.quit()  # type: ignore[attr-defined]
             except Exception:
                 pass
 
     def __del__(self) -> None:
         """Гарантировать очистку ресурсов"""
         try:
-            if pygame.get_init():
-                pygame.quit()
+            if pygame.get_init():  # type: ignore[attr-defined]
+                pygame.quit()  # type: ignore[attr-defined]
         except Exception:
             pass
 

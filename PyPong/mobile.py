@@ -40,17 +40,17 @@ class TouchControls:
 
     def handle_touch(self, event):
         """Handle touch/mouse events"""
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN:  # type: ignore[attr-defined]
             pos = event.pos
             for zone_name, zone_rect in self.touch_zones.items():
                 if zone_rect.collidepoint(pos):
                     self.active_touches[zone_name] = True
 
-        elif event.type == pygame.MOUSEBUTTONUP:
+        elif event.type == pygame.MOUSEBUTTONUP:  # type: ignore[attr-defined]
             self.active_touches.clear()
 
         # Support for pygame FINGERDOWN/FINGERUP events (if available)
-        elif hasattr(pygame, "FINGERDOWN") and event.type == pygame.FINGERDOWN:
+        elif hasattr(pygame, "FINGERDOWN") and event.type == pygame.FINGERDOWN:  # type: ignore[attr-defined]
             # Convert normalized coordinates to screen coordinates
             x = int(event.x * self.screen_width)
             y = int(event.y * self.screen_height)
@@ -59,7 +59,7 @@ class TouchControls:
                 if zone_rect.collidepoint(pos):
                     self.active_touches[zone_name] = True
 
-        elif hasattr(pygame, "FINGERUP") and event.type == pygame.FINGERUP:
+        elif hasattr(pygame, "FINGERUP") and event.type == pygame.FINGERUP:  # type: ignore[attr-defined]
             self.active_touches.clear()
 
     def get_input(self, player):
