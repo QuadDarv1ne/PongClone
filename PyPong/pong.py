@@ -207,6 +207,14 @@ class PongGame:
         pygame.mixer.music.set_volume(self.settings.get("music_volume", 0.5))
         for sound in self.audio.sounds.values():
             sound.set_volume(self.settings.get("sfx_volume", 0.7))
+        self._apply_accessibility_settings()
+
+    @log_exception
+    def _apply_accessibility_settings(self) -> None:
+        """Применить accessibility настройки"""
+        if hasattr(self, "accessibility"):
+            self.accessibility.high_contrast = self.settings.get("high_contrast", False)
+            self.accessibility.large_ui = self.settings.get("large_ui", False)
 
     @log_exception
     def _apply_theme(self) -> None:
