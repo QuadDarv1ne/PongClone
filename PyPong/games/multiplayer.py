@@ -136,7 +136,7 @@ class MultiplayerMode(GameMode):
         # Handle network input
         if isinstance(self.multiplayer, NetworkHost):
             # Host receives input from client
-            remote_input = self.multiplayer.receive_input()
+            remote_input = self.multiplayer.receive_input()  # pylint: disable=assignment-from-none
             if remote_input:
                 # Client controls player 2
                 self.input_state["up2"] = remote_input.get("up", False)
@@ -152,7 +152,7 @@ class MultiplayerMode(GameMode):
             self.multiplayer.send_input(input_data)
 
             # Receive game state from host
-            state = self.multiplayer.receive_game_state()
+            state = self.multiplayer.receive_game_state()  # pylint: disable=assignment-from-none
             if state:
                 self._apply_network_state(state)
                 return  # Skip local update, use network state
