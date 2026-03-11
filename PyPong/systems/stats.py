@@ -39,6 +39,7 @@ class StatsManager:
     def _on_goal_scored(self, data: Dict[str, Any]) -> None:
         """Handle goal scored event - track total goals"""
         self.stats["total_goals"] = self.stats.get("total_goals", 0) + 1
+        self.save_stats()
 
     def load_stats(self) -> Dict[str, Any]:
         """Загрузить статистику из файла"""
