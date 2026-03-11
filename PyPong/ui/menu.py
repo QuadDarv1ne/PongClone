@@ -295,7 +295,7 @@ class MainMenu(Menu):
 
 
 class SettingsMenu(Menu):
-    """Settings menu with language selection"""
+    """Settings menu with language and accessibility selection"""
 
     def __init__(self, screen: Surface):
         super().__init__(screen, "settings.title")
@@ -308,6 +308,24 @@ class SettingsMenu(Menu):
         self.add_item("settings.sfx_volume", lambda: None, "S")
         self.add_item("settings.fullscreen", lambda: None, "F")
         self.add_item("settings.show_fps", lambda: None, "D")
+        self.add_item("settings.accessibility", lambda: None, "A")
+        self.add_item("settings.back", lambda: None, "Esc")
+
+
+class AccessibilityMenu(Menu):
+    """Accessibility settings menu"""
+
+    def __init__(self, screen: Surface):
+        super().__init__(screen, "accessibility.title")
+        self._setup_items()
+
+    def _setup_items(self):
+        """Setup accessibility items"""
+        self.add_item("accessibility.color_blind_mode", lambda: None, "C")
+        self.add_item("accessibility.high_contrast", lambda: None, "H")
+        self.add_item("accessibility.large_ui", lambda: None, "U")
+        self.add_item("accessibility.audio_cues", lambda: None, "O")
+        self.add_item("accessibility.reduce_motion", lambda: None, "R")
         self.add_item("settings.back", lambda: None, "Esc")
 
 
