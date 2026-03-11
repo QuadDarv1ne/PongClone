@@ -10,6 +10,7 @@ from PyPong.core.config import (
     WHITE,
     YELLOW,
 )
+from PyPong.ui.accessibility import get_accessibility_manager
 
 
 class Theme:
@@ -25,6 +26,20 @@ class Theme:
         self.paddle2_color: Tuple[int, int, int] = colors["paddle2"]
         self.ball_color: Tuple[int, int, int] = colors["ball"]
         self.accent_color: Tuple[int, int, int] = colors["accent"]
+
+    def apply_accessibility(self) -> None:
+        """Apply accessibility color adjustments"""
+        accessibility = get_accessibility_manager()
+
+        # Apply color blind mode
+        self.paddle1_color = accessibility.get_color("player1")
+        self.paddle2_color = accessibility.get_color("player2")
+        self.ball_color = accessibility.get_color("ball")
+
+        # Apply high contrast
+        if accessibility.high_contrast:
+            self.bg_color = accessibility._apply_high_contrast(self.bg_color)
+            self.fg_color = accessibility._apply_high_contrast(self.fg_color)
 
 
 # Предопределённые темы
