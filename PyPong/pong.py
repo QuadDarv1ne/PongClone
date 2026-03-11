@@ -107,6 +107,7 @@ class PongGame:
             self.clock = pygame.time.Clock()
             self.adaptive_screen = mobile_module.AdaptiveScreen()
             self.theme = get_theme(self.settings.get("theme", "classic"))
+            self.theme.apply_accessibility()
         except pygame.error as e:  # type: ignore[attr-defined]
             logger.error(f"Failed to initialize display: {e}")
             raise
