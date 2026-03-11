@@ -45,6 +45,10 @@ class Settings:
             "fullscreen": False,
             "theme": "dark",
             "touch_controls": False,
+            "high_contrast": False,
+            "large_ui": False,
+            "reduce_motion": False,
+            "audio_cues": True,
         }
 
     @log_exception
