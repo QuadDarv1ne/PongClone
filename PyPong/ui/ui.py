@@ -95,6 +95,8 @@ class SettingsMenu:
         "touch_controls": "settings.touch_controls",
         "theme": "settings.theme",
         "language": "settings.language",
+        "high_contrast": "accessibility.high_contrast",
+        "large_ui": "accessibility.large_ui",
         "back": "settings.back",
     }
 
@@ -112,6 +114,8 @@ class SettingsMenu:
             "touch_controls",
             "theme",
             "language",
+            "high_contrast",
+            "large_ui",
             "back",
         ]
 
@@ -188,7 +192,7 @@ class SettingsMenu:
         if option in ["music_volume", "sfx_volume"]:
             new_value = max(0.0, min(1.0, current + direction * 0.1))
             self.settings.set(option, round(new_value, 1))
-        elif option in ["show_fps", "fullscreen", "touch_controls"]:
+        elif option in ["show_fps", "fullscreen", "touch_controls", "high_contrast", "large_ui"]:
             self.settings.set(option, not current)
         elif option == "theme":
             themes = ["classic", "dark", "neon", "retro", "ocean"]
