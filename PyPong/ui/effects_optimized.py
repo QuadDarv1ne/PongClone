@@ -213,6 +213,10 @@ class TrailPool:
         """Clear all trails"""
         self.trails.empty()
 
+    def sprites(self) -> List[pygame.sprite.Sprite]:
+        """Get list of trail sprites (for compatibility)"""
+        return self.trails.sprites()
+
 
 class BatchRenderer:
     """
