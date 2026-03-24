@@ -3,7 +3,7 @@ PongClone
 
 [![DOI](https://zenodo.org/badge/592707498.svg)](https://doi.org/10.5281/zenodo.17264332)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0007--7605--539X-green?logo=orcid&logoColor=white)](https://orcid.org/0009-0007-7605-539X)
-[![Tests](https://img.shields.io/badge/tests-13%2F13%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-209%2F209%20passed-brightgreen)]()
 [![Python](https://img.shields.io/badge/python-3.10+-blue)]()
 [![Pygame](https://img.shields.io/badge/pygame--ce-2.4.0+-green)]()
 
@@ -84,7 +84,11 @@ PongClone/
 │   │   ├── entities.py     # Игровые объекты (Paddle, Ball, PowerUp)
 │   │   ├── game_state.py   # Управление состояниями
 │   │   ├── constants.py    # Enum константы
-│   │   └── logger.py       # Система логирования
+│   │   ├── logger.py       # Система логирования
+│   │   ├── event_bus.py    # Шина событий для decoupled коммуникации
+│   │   ├── entity_pools.py # Object pooling для производительности
+│   │   ├── object_pool.py  # Базовая реализация object pool
+│   │   └── profiler.py     # Профилирование производительности
 │   │
 │   ├── systems/            # Игровые системы
 │   │   ├── audio.py        # Аудио менеджер
@@ -104,7 +108,8 @@ PongClone/
 │   │   ├── sound_themes.py # Звуковые темы (4 шт)
 │   │   ├── localization.py # Локализация (7 языков)
 │   │   ├── customization.py # Кастомизация (скины, темы)
-│   │   └── tutorial.py     # Интерактивное обучение
+│   │   ├── tutorial.py     # Интерактивное обучение
+│   │   └── accessibility.py # Accessibility для глухих (VisualIndicator)
 │   │
 │   ├── content/            # Игровой контент
 │   │   ├── campaign.py     # Кампания (10 уровней)
@@ -154,6 +159,10 @@ PongClone/
 - ✅ Обработка ошибок — graceful error handling
 - ✅ Enum константы — type-safe константы
 - ✅ Модульная архитектура
+- ✅ Event Bus — decoupled коммуникация между системами
+- ✅ Object Pooling — оптимизация allocations (Ball, PowerUp, Particle)
+- ✅ Dirty Rect Rendering — рендеринг только измененных областей
+- ✅ Профилирование — встроенный performance profiler
 
 ### 📦 Контент
 - ✅ **Кампания** — 10 уровней с уникальными механиками
@@ -176,6 +185,7 @@ PongClone/
 - ✅ **Кастомизация** — 11 скинов ракеток, 7 мячей, 4 темы корта
 - ✅ **Туториал** — интерактивное обучение
 - ✅ **Локализация** — 🇬🇧 🇷🇺 🇪🇸 🇩🇪 🇫🇷 🇨🇳 🇯🇵
+- ✅ **Accessibility** — визуальные индикаторы для глухих (HIT!, GOAL!, POWERUP!)
 
 ## 📊 Статистика проекта
 
@@ -186,7 +196,7 @@ PongClone/
 | **Строк кода** | ~4000 |
 | **Классов** | 50+ |
 | **Функций** | 200+ |
-| **Тестов** | 13/13 ✅ |
+| **Тестов** | 209/209 ✅ |
 | **Языков** | 7 |
 | **Достижений** | 21 |
 | **Power-up'ов** | 10 |
@@ -253,7 +263,7 @@ python tests/test_all_features.py
 
 **Дата создания:** 18/07/2024
 
-**Последнее обновление:** 01/03/2026
+**Последнее обновление:** 24/03/2026
 
 ## 🙏 Благодарности
 
