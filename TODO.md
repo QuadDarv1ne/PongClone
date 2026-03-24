@@ -104,8 +104,10 @@
 2. Некоторые импорты могут быть сломаны
 3. Мобильная версия требует тестирования
 4. Онлайн функции - только placeholder
-5. VisualIndicator: требует pygame.font для отрисовки (добавлен fallback)
+5. ~~VisualIndicator: требует pygame.font для отрисовки~~ (добавлен fallback 2026-03-24)
 6. OptimizedRenderer: требует тестирования производительности
+7. ~~GameLogger: thread-unsafe singleton~~ (исправлено 2026-03-24)
+8. ~~Missing Tuple import in game_loop~~ (исправлено 2026-03-24)
 
 ## 💡 Идеи для будущего
 
