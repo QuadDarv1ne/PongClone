@@ -27,6 +27,16 @@ pip install pygame-ce>=2.4.0
 
 ### Запуск игры
 
+**Способ 1: Через скрипт запуска (рекомендуется)**
+```bash
+# Windows
+run_game.bat
+
+# Linux/macOS
+./run_game.sh
+```
+
+**Способ 2: Через Python**
 ```bash
 # Из корня проекта
 python -c "from PyPong.pong import PongGame; PongGame().run()"
@@ -34,9 +44,14 @@ python -c "from PyPong.pong import PongGame; PongGame().run()"
 # Или напрямую
 python PyPong/pong.py
 
-# Или из папки PyPong
-cd PyPong
-python pong.py
+# Или как модуль
+python -m PyPong.main
+```
+
+**Способ 3: После установки через pip**
+```bash
+pip install .
+pypong  # Запуск из любой директории
 ```
 
 ### Тестирование
