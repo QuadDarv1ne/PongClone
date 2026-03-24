@@ -34,7 +34,7 @@
 
 ### Производительность
 - [x] Интегрировать OptimizedRenderer с dirty rects
-- [ ] Профилировать игру и найти узкие места (Profiler + OptimizedRenderer stats)
+- [x] Добавить профилирование производительности (Profiler + OptimizedRenderer stats)
 - [ ] Протестировать на слабых устройствах
 - [ ] Добавить FPS benchmark для сравнения оптимизаций
 
