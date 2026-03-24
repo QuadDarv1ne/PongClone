@@ -93,8 +93,9 @@ class GameLoop:
         self.ball = get_ball_pool().acquire()
         self.ball.image.fill(self.theme.ball_color)
 
-        self.all_sprites = pygame.sprite.Group(self.paddle1, self.paddle2, self.ball)
-        self.powerups = pygame.sprite.Group()
+        # Используем RenderUpdates для оптимизации рендеринга
+        self.all_sprites = pygame.sprite.RenderUpdates(self.paddle1, self.paddle2, self.ball)
+        self.powerups = pygame.sprite.RenderUpdates()
 
         # Set AI difficulty
         if is_ai:
