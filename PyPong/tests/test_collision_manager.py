@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, PropertyMock
 
 import pygame
 
-from PyPong.core.collision_manager import CollisionManager
+from PyPong.game.collision_manager import CollisionManager
 from PyPong.core.entities import Ball, Paddle, PowerUp
 
 
