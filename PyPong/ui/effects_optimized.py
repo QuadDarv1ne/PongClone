@@ -217,6 +217,10 @@ class TrailPool:
         """Get list of trail sprites (for compatibility)"""
         return self.trails.sprites()
 
+    def empty(self) -> None:
+        """Empty all trails (for compatibility)"""
+        self.trails.empty()
+
 
 class BatchRenderer:
     """
