@@ -293,6 +293,9 @@ class OptimizedRenderer:
 
         self._frame_count += 1
 
+        # Blit game_surface to screen for display
+        self.screen.blit(self.game_surface, (0, 0))
+
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get rendering performance statistics"""
         if not self._render_times:
