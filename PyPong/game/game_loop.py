@@ -22,6 +22,7 @@ from PyPong.core.game_state import GameState, GameStateManager
 from PyPong.core.logger import logger
 from PyPong.game.collision_manager import CollisionManager
 from PyPong.game.input_handler import InputHandler
+from PyPong.ui.accessibility import VisualIndicator
 from PyPong.ui.effects import Particle, ParticlePool, Trail
 
 
@@ -65,6 +66,7 @@ class GameLoop:
         self.trails: Optional[pygame.sprite.Group] = None
         self.shake: Optional[Any] = None
         self.goal_anim: Optional[Any] = None
+        self.visual_indicators: Optional[VisualIndicator] = None
 
     def set_effects(
         self,
@@ -78,6 +80,7 @@ class GameLoop:
         self.trails = trails
         self.shake = shake
         self.goal_anim = goal_anim
+        self.visual_indicators = VisualIndicator(WINDOW_WIDTH, WINDOW_HEIGHT)
 
     def init_game_objects(self) -> None:
         """Инициализировать игровые объекты"""
@@ -237,6 +240,11 @@ class GameLoop:
                     self._create_particles(self.ball.rect.centerx, self.ball.rect.centery, self.theme.accent_color)
                     intensity = self.collision_manager.get_shake_intensity(is_goal=False)
                     self.shake.start(*intensity)
+
+                    # Visual indicator for deaf/hard of hearing players
+                    if hasattr(self, 'accessibility') and self.accessibility.audio_cues:
+                        self._show_visual_indicator("HIT!", self.ball.rect.center)
+
                     # Publish event
                     self.event_bus.publish(
                         GameEvent.BALL_HIT_PADDLE,
@@ -257,6 +265,12 @@ class GameLoop:
 
             # Publish event
             self.event_bus.publish(GameEvent.GOAL_SCORED, {"player": scorer, "score": self.state_manager.scores})
+
+            # Visual indicator for goal
+            if self.visual_indicators:
+                goal_text = f"GOAL! P{scorer}"
+                goal_pos = (WINDOW_WIDTH // 2 - 50, WINDOW_HEIGHT // 2 - 20)
+                self.visual_indicators.add_indicator(goal_text, goal_pos, color=(0, 255, 0), duration=90)
 
             if self.state_manager.state == GameState.PLAYING:
                 self.ball.reset_ball()
@@ -288,13 +302,31 @@ class GameLoop:
         self.powerups.update()
 
     def _handle_powerup_effect(self, powerup: PowerUp, collector: Paddle) -> None:
-        """Обработать эффект power-up"""
+        """Обработать эффект power-up с визуальным индикатором"""
+        player_num = 1 if collector == self.paddle1 else 2
+
+        # Map powerup types to short display names
+        powerup_names = {
+            "speed_boost": "SPEED!",
+            "large_paddle": "BIG!",
+            "slow_ball": "SLOW!",
+            "multi_ball": "x2 BALLS!",
+            "shrink_opponent": "SHRINK!",
+        }
+
         if powerup.type == "multi_ball":
             self._create_extra_ball()
         elif powerup.type == "shrink_opponent":
             opponent = self.paddle2 if collector == self.paddle1 else self.paddle1
             opponent.resize(50)
             pygame.time.set_timer(pygame.USEREVENT + 1, 5000, loops=1)  # type: ignore[attr-defined]
+
+        # Show visual indicator for powerup collection
+        if self.visual_indicators:
+            display_name = powerup_names.get(powerup.type, powerup.type.upper())
+            indicator_text = f"P{player_num}: {display_name}"
+            x_pos = WINDOW_WIDTH // 4 if player_num == 1 else 3 * WINDOW_WIDTH // 4
+            self.visual_indicators.add_indicator(indicator_text, (x_pos, WINDOW_HEIGHT // 4), color=(255, 255, 0), duration=120)
 
     def _create_extra_ball(self) -> None:
         """Создать дополнительный мяч (максимум 2)"""
@@ -318,6 +350,16 @@ class GameLoop:
                 particle = Particle(int(x), int(y), color)
                 self.particles.add(particle)
 
+    def _show_visual_indicator(self, text: str, position: Tuple[int, int], color: Tuple[int, int, int] = (255, 255, 0)) -> None:
+        """Показать визуальный индикатор для событий"""
+        if self.visual_indicators:
+            self.visual_indicators.add_indicator(text, position, color, duration=60)
+
+    def _update_visual_indicators(self) -> None:
+        """Обновить визуальные индикаторы"""
+        if self.visual_indicators:
+            self.visual_indicators.update()
+
     def _update_effects(self) -> None:
         """Обновить эффекты"""
         if self.particles:
@@ -328,6 +370,8 @@ class GameLoop:
             self.shake.update()
         if self.goal_anim:
             self.goal_anim.update()
+        if self.visual_indicators:
+            self._update_visual_indicators()
 
     def spawn_powerup(self, x: Optional[int] = None, y: Optional[int] = None) -> Optional[PowerUp]:
         """

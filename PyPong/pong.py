@@ -440,6 +440,7 @@ class PongGame:
             settings_menu=self.settings_menu,
             stats_manager=self.stats,
             tournament=self.tournament,
+            visual_indicators=self.game_loop.visual_indicators if hasattr(self.game_loop, 'visual_indicators') else None,
         )
 
     @log_exception
