@@ -14,7 +14,7 @@
 - [x] Созданы расширенные тесты для entities (test_entities_extended.py)
 - [x] Созданы тесты для entity_pools (test_entity_pools.py)
 - [ ] Запустить все тесты и исправить ошибки (pygame не установлен в среде)
-- [ ] Добавить тесты для game_state, collision_manager
+- [x] Добавить тесты для game_state, collision_manager
 - [ ] Достичь 80%+ покрытия кода
 
 ### Документация
