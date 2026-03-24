@@ -127,13 +127,27 @@ class PongGame:
             touch=self.touch,
         )
 
-        self.renderer = Renderer(
-            screen=self.screen,
-            game_surface=self.game_surface,
-            theme=self.theme,
-            settings=self.settings,
-            adaptive_screen=self.adaptive_screen,
-        )
+        # Используем оптимизированный рендерер если включён в настройках
+        use_optimized = self.settings.get("use_dirty_rects", True)
+        if use_optimized:
+            from PyPong.rendering.optimized_renderer import OptimizedRenderer
+            self.renderer = OptimizedRenderer(
+                screen=self.screen,
+                game_surface=self.game_surface,
+                theme=self.theme,
+                settings=self.settings,
+                adaptive_screen=self.adaptive_screen,
+            )
+            logger.info("Using OptimizedRenderer with dirty rect support")
+        else:
+            self.renderer = Renderer(
+                screen=self.screen,
+                game_surface=self.game_surface,
+                theme=self.theme,
+                settings=self.settings,
+                adaptive_screen=self.adaptive_screen,
+            )
+            logger.info("Using standard Renderer")
 
     def _init_ui(self) -> None:
         """Инициализация UI"""
@@ -419,15 +433,28 @@ class PongGame:
     @log_exception
     def draw(self) -> None:
         """Отрисовать кадр"""
-        self.renderer.render(
-            state=self.state_manager.state,
-            state_manager=self.state_manager,
-            shake=self.shake,
-            settings_menu=self.settings_menu,
-            stats_manager=self.stats,
-            tournament=self.tournament,
-            visual_indicators=self.game_loop.visual_indicators if hasattr(self.game_loop, 'visual_indicators') else None,
-        )
+        # Проверяем тип рендерера и используем соответствующий метод
+        from PyPong.rendering.optimized_renderer import OptimizedRenderer
+
+        if isinstance(self.renderer, OptimizedRenderer):
+            # Используем оптимизированный рендеринг
+            self.renderer.render_game_optimized(self.state_manager, self.shake)
+            # Отрисовка визуальных индикаторов
+            if hasattr(self.game_loop, 'visual_indicators') and self.game_loop.visual_indicators:
+                self.game_loop.visual_indicators.draw(self.renderer.game_surface)
+            # Применяем screen effects и обновляем дисплей
+            self.renderer.dirty_renderer.update_display_optimized()
+        else:
+            # Стандартный рендеринг
+            self.renderer.render(
+                state=self.state_manager.state,
+                state_manager=self.state_manager,
+                shake=self.shake,
+                settings_menu=self.settings_menu,
+                stats_manager=self.stats,
+                tournament=self.tournament,
+                visual_indicators=self.game_loop.visual_indicators if hasattr(self.game_loop, 'visual_indicators') else None,
+            )
 
     @log_exception
     def run(self) -> None:
