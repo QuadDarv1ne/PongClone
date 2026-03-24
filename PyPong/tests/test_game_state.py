@@ -1,180 +1,122 @@
-"""
-Tests for game state management
-"""
-import sys
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+"""Tests for GameStateManager"""
+import unittest
+from unittest.mock import MagicMock
 
-import pytest
+import pygame
 
-# Add parent directory to path
-current_dir = Path(__file__).parent.parent
-if str(current_dir.parent) not in sys.path:
-    sys.path.insert(0, str(current_dir.parent))
+from PyPong.core.game_state import GameState, GameStateManager
 
 
-class TestGameState:
-    """Тесты для enum GameState"""
+class TestGameStateManager(unittest.TestCase):
+    """Test game state manager functionality"""
 
-    def test_game_state_enum_exists(self):
-        """Проверка существования enum GameState"""
-        from PyPong.core.game_state import GameState
+    def setUp(self) -> None:
+        """Set up test fixtures"""
+        pygame.init()
+        self.screen = pygame.Surface((1024, 720))
+        self.state_manager = GameStateManager(self.screen)
 
-        assert GameState.MENU is not None
-        assert GameState.PLAYING is not None
-        assert GameState.PAUSED is not None
-        assert GameState.GAME_OVER is not None
+    def tearDown(self) -> None:
+        """Clean up"""
+        pygame.quit()
 
-    def test_game_state_values(self):
-        """Проверка значений GameState"""
-        from PyPong.core.game_state import GameState
+    def test_initial_state(self) -> None:
+        """Test initial game state"""
+        self.assertEqual(self.state_manager.state, GameState.MENU)
+        self.assertEqual(self.state_manager.player1_score, 0)
+        self.assertEqual(self.state_manager.player2_score, 0)
+        self.assertIsNone(self.state_manager.winner)
+        self.assertEqual(self.state_manager.difficulty, "Medium")
+        self.assertEqual(self.state_manager.game_mode, "ai")
+        self.assertFalse(self.state_manager.tournament_mode)
 
-        states = [
-            GameState.MENU,
-            GameState.MODE_SELECT,
-            GameState.PLAYING,
-            GameState.PAUSED,
-            GameState.GAME_OVER,
-            GameState.STATS,
-            GameState.SETTINGS,
-            GameState.HELP,
-        ]
+    def test_reset_scores(self) -> None:
+        """Test score reset"""
+        self.state_manager.player1_score = 3
+        self.state_manager.player2_score = 2
+        self.state_manager.winner = 1
 
-        for state in states:
-            assert state.value > 0
+        self.state_manager.reset_scores()
 
+        self.assertEqual(self.state_manager.player1_score, 0)
+        self.assertEqual(self.state_manager.player2_score, 0)
+        self.assertIsNone(self.state_manager.winner)
 
-class TestGameStateManager:
-    """Тесты для GameStateManager"""
+    def test_add_score_player1(self) -> None:
+        """Test adding score to player 1"""
+        initial_score = self.state_manager.player1_score
+        self.state_manager.add_score(1)
+        self.assertEqual(self.state_manager.player1_score, initial_score + 1)
 
-    @pytest.fixture
-    def mock_screen(self, mock_pygame):
-        """Создать реальный экран для тестов"""
-        return mock_pygame["screen"]
+    def test_add_score_player2(self) -> None:
+        """Test adding score to player 2"""
+        initial_score = self.state_manager.player2_score
+        self.state_manager.add_score(2)
+        self.assertEqual(self.state_manager.player2_score, initial_score + 1)
 
-    @pytest.fixture
-    def state_manager(self, mock_screen):
-        """Создать GameStateManager для тестов"""
-        from PyPong.core.game_state import GameStateManager
+    def test_add_score_winning_score(self) -> None:
+        """Test reaching winning score"""
+        # Set score to one below winning
+        self.state_manager.player1_score = 4
+        self.state_manager.state = GameState.PLAYING
 
-        return GameStateManager(mock_screen)
+        # Add winning score
+        self.state_manager.add_score(1)
 
-    def test_state_manager_creation(self, state_manager):
-        """Создание GameStateManager"""
-        assert state_manager.state.name == "MENU"
-        assert state_manager.player1_score == 0
-        assert state_manager.player2_score == 0
+        self.assertEqual(self.state_manager.winner, 1)
+        self.assertEqual(self.state_manager.state, GameState.GAME_OVER)
 
-    def test_reset_scores(self, state_manager):
-        """Сброс очков"""
-        state_manager.player1_score = 5
-        state_manager.player2_score = 3
+    def test_add_score_winning_score_player2(self) -> None:
+        """Test player 2 reaching winning score"""
+        self.state_manager.player2_score = 4
+        self.state_manager.state = GameState.PLAYING
 
-        state_manager.reset_scores()
+        self.state_manager.add_score(2)
 
-        assert state_manager.player1_score == 0
-        assert state_manager.player2_score == 0
-        assert state_manager.winner is None
+        self.assertEqual(self.state_manager.winner, 2)
+        self.assertEqual(self.state_manager.state, GameState.GAME_OVER)
 
-    def test_add_score_player1(self, state_manager):
-        """Добавление очка игроку 1"""
-        state_manager.add_score(1)
+    def test_set_difficulty(self) -> None:
+        """Test setting difficulty"""
+        self.state_manager.set_difficulty("Hard")
+        self.assertEqual(self.state_manager.difficulty, "Hard")
 
-        assert state_manager.player1_score == 1
+    def test_set_difficulty_invalid(self) -> None:
+        """Test setting invalid difficulty"""
+        self.state_manager.set_difficulty("Invalid")
+        # Should keep previous value
+        self.assertEqual(self.state_manager.difficulty, "Medium")
 
-    def test_add_score_player2(self, state_manager):
-        """Добавление очка игроку 2"""
-        state_manager.add_score(2)
+    def test_state_transitions(self) -> None:
+        """Test state transitions"""
+        # Menu to mode select
+        self.state_manager.state = GameState.MODE_SELECT
+        self.assertEqual(self.state_manager.state, GameState.MODE_SELECT)
 
-        assert state_manager.player2_score == 1
+        # Mode select to playing
+        self.state_manager.state = GameState.PLAYING
+        self.assertEqual(self.state_manager.state, GameState.PLAYING)
 
-    def test_add_score_wins_game(self, state_manager):
-        """Победа при достижении WINNING_SCORE"""
-        from PyPong.core.config import WINNING_SCORE
+        # Playing to paused
+        self.state_manager.state = GameState.PAUSED
+        self.assertEqual(self.state_manager.state, GameState.PAUSED)
 
-        for _ in range(WINNING_SCORE):
-            state_manager.add_score(1)
+        # Paused to playing
+        self.state_manager.state = GameState.PLAYING
+        self.assertEqual(self.state_manager.state, GameState.PLAYING)
 
-        assert state_manager.winner == 1
-        assert state_manager.state.name == "GAME_OVER"
+    def test_net_surface_created(self) -> None:
+        """Test net surface is pre-rendered"""
+        self.assertIsNotNone(self.state_manager._net_surface)
+        self.assertIsInstance(self.state_manager._net_surface, pygame.Surface)
 
-    def test_set_difficulty(self, state_manager):
-        """Установка сложности"""
-        state_manager.set_difficulty("Hard")
-
-        assert state_manager.difficulty == "Hard"
-
-    def test_set_invalid_difficulty(self, state_manager):
-        """Установка невалидной сложности"""
-        initial_difficulty = state_manager.difficulty
-
-        state_manager.set_difficulty("Invalid")
-
-        assert state_manager.difficulty == initial_difficulty
-
-    def test_draw_methods_exist(self, state_manager):
-        """Проверка существования методов отрисовки"""
-        assert hasattr(state_manager, "draw_menu")
-        assert hasattr(state_manager, "draw_mode_select")
-        assert hasattr(state_manager, "draw_pause")
-        assert hasattr(state_manager, "draw_game_over")
-        assert hasattr(state_manager, "draw_score")
-        assert hasattr(state_manager, "draw_stats")
-        assert hasattr(state_manager, "draw_help")
+    def test_fonts_initialized(self) -> None:
+        """Test fonts are initialized"""
+        self.assertIsNotNone(self.state_manager.title_font)
+        self.assertIsNotNone(self.state_manager.menu_font)
+        self.assertIsNotNone(self.state_manager.score_font)
+        self.assertIsNotNone(self.state_manager.small_font)
 
 
-class TestGameStateTransitions:
-    """Тесты для переходов между состояниями"""
-
-    @pytest.fixture
-    def state_manager(self, mock_pygame):
-        """Создать GameStateManager для тестов"""
-        from PyPong.core.game_state import GameStateManager
-
-        mock_screen = mock_pygame["screen"]
-        return GameStateManager(mock_screen)
-
-    def test_menu_to_mode_select(self, state_manager):
-        """Переход из меню в выбор режима"""
-        from PyPong.core.game_state import GameState
-
-        state_manager.state = GameState.MENU
-        state_manager.state = GameState.MODE_SELECT
-
-        assert state_manager.state.name == "MODE_SELECT"
-
-    def test_mode_select_to_playing(self, state_manager):
-        """Переход из выбора режима в игру"""
-        from PyPong.core.game_state import GameState
-
-        state_manager.state = GameState.MODE_SELECT
-        state_manager.state = GameState.PLAYING
-
-        assert state_manager.state.name == "PLAYING"
-
-    def test_playing_to_paused(self, state_manager):
-        """Переход из игры в паузу"""
-        from PyPong.core.game_state import GameState
-
-        state_manager.state = GameState.PLAYING
-        state_manager.state = GameState.PAUSED
-
-        assert state_manager.state.name == "PAUSED"
-
-    def test_paused_to_menu(self, state_manager):
-        """Переход из паузы в меню"""
-        from PyPong.core.game_state import GameState
-
-        state_manager.state = GameState.PAUSED
-        state_manager.state = GameState.MENU
-
-        assert state_manager.state.name == "MENU"
-
-    def test_game_over_to_menu(self, state_manager):
-        """Переход из конца игры в меню"""
-        from PyPong.core.game_state import GameState
-
-        state_manager.state = GameState.GAME_OVER
-        state_manager.state = GameState.MENU
-
-        assert state_manager.state.name == "MENU"
+if __name__ == "__main__":
+    unittest.main()
