@@ -5,7 +5,16 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git checkout:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(pip install:*)",
+      "Bash(pacman:*)",
+      "Bash(python:*)",
+      "Read(//c/Users/maksi/AppData/Local/Programs/Python/**)",
+      "Bash(ls -la /c/Python*/)",
+      "Read(//usr/**)",
+      "Bash(\"C:/Users/maksi/AppData/Local/Programs/Python/Python314/python.exe\" -m pip install pygame-ce 2>&1)",
+      "Bash(ls C:/Users/maksi/AppData/Local/Programs/Python/Python314/*.exe)",
+      "Bash(find C:/Users/maksi/AppData/Local/Programs/Python/Python314/ -name python*.exe)"
     ]
   }
 }
