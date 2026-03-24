@@ -51,13 +51,14 @@ class Renderer:
         """Очистить экран"""
         self.game_surface.fill(self.theme.bg_color)
 
-    def render_game(self, state_manager: Any, shake: Any) -> None:
+    def render_game(self, state_manager: Any, shake: Any, visual_indicators: Any = None) -> None:
         """
         Отрисовать игровой экран.
 
         Args:
             state_manager: Менеджер состояния игры
             shake: ScreenShake эффект
+            visual_indicators: VisualIndicator для отрисовки визуальных подсказок
         """
         self.clear()
 
@@ -80,6 +81,10 @@ class Renderer:
             self.powerups.draw(self.game_surface)
         if self.particles:
             self.particles.draw(self.game_surface)
+
+        # Draw visual indicators for accessibility
+        if visual_indicators:
+            visual_indicators.draw(self.game_surface)
 
         # Draw touch controls
         if self.settings.get("touch_controls", False):
@@ -157,6 +162,7 @@ class Renderer:
         settings_menu: Any = None,
         stats_manager: Any = None,
         tournament: Any = None,
+        visual_indicators: Any = None,
     ) -> None:
         """
         Основной метод отрисовки.
@@ -168,11 +174,12 @@ class Renderer:
             settings_menu: Меню настроек
             stats_manager: Менеджер статистики
             tournament: Турнирный менеджер
+            visual_indicators: VisualIndicator для визуальных подсказок
         """
         renderers = {
             GameState.MENU: lambda: self.render_menu(state_manager),
             GameState.MODE_SELECT: lambda: self.render_mode_select(state_manager),
-            GameState.PLAYING: lambda: self.render_game(state_manager, shake),
+            GameState.PLAYING: lambda: self.render_game(state_manager, shake, visual_indicators),
             GameState.PAUSED: lambda: self.render_pause(state_manager),
             GameState.GAME_OVER: lambda: self.render_game_over(state_manager),
             GameState.STATS: lambda: self.render_stats(state_manager, stats_manager),

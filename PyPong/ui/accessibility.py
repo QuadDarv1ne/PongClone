@@ -2,7 +2,7 @@
 Accessibility features for PyPong
 """
 from enum import Enum, auto
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pygame
 
@@ -226,6 +226,7 @@ class VisualIndicator:
         self.screen_height = screen_height
         self.indicators: List[Dict] = []
         self.max_indicators = 5
+        self.font = pygame.font.SysFont("Helvetica", 24)
 
     def add_indicator(
         self,
@@ -261,8 +262,12 @@ class VisualIndicator:
         # Age indicators and remove expired ones
         self.indicators = [{**ind, "age": ind["age"] + 1} for ind in self.indicators if ind["age"] < ind["duration"]]
 
-    def draw(self, surface: pygame.Surface, font: pygame.font.Font) -> None:
+    def draw(self, surface: pygame.Surface, font: Optional[Any] = None) -> None:
         """Draw all indicators"""
+        # Use provided font or default font
+        if font is None:
+            font = self.font
+
         for ind in self.indicators:
             # Fade out based on age
             alpha = int(255 * (1 - ind["age"] / ind["duration"]))

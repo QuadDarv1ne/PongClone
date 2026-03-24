@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Accessibility Improvements (2026-03-24)
+- **Visual Indicators for Audio Events**: Visual feedback for deaf/hard of hearing players
+  - "HIT!" indicator when ball hits paddle
+  - "GOAL!" indicator with player number
+  - Power-up collection indicators ("SPEED!", "BIG!", "x2 BALLS!", etc.)
+  - Configurable duration and fade-out effects
+  - Auto-positioned indicators near events
+- **VisualIndicator Class**: Manages on-screen text indicators
+  - Maximum 5 simultaneous indicators
+  - Automatic aging and cleanup
+  - Alpha fade-out based on age
+  - Custom colors per event type
+
 #### Core Systems (2026-03-02)
 - **Entity Object Pools**: Specialized pools for Ball and PowerUp entities
   - `BallPool`: Manages ball lifecycle with 80%+ reuse rate
