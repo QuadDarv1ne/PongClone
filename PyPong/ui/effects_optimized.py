@@ -221,6 +221,10 @@ class TrailPool:
         """Empty all trails (for compatibility)"""
         self.trails.empty()
 
+    def __len__(self) -> int:
+        """Return number of active trails (for compatibility)"""
+        return len(self.trails)
+
 
 class BatchRenderer:
     """

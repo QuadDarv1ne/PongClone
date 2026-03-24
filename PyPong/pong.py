@@ -437,12 +437,39 @@ class PongGame:
         from PyPong.rendering.optimized_renderer import OptimizedRenderer
 
         if isinstance(self.renderer, OptimizedRenderer):
-            # Используем оптимизированный рендеринг
-            self.renderer.render_game_optimized(self.state_manager, self.shake)
-            # Отрисовка визуальных индикаторов
-            if hasattr(self.game_loop, 'visual_indicators') and self.game_loop.visual_indicators:
-                self.game_loop.visual_indicators.draw(self.renderer.game_surface)
-            # Применяем screen effects и обновляем дисплей
+            # Оптимизированный рендеринг - рисуем в зависимости от состояния
+            state = self.state_manager.state
+
+            if state == GameState.PLAYING or state == GameState.PAUSED:
+                # Игра - используем оптимизированный рендеринг
+                self.renderer.render_game_optimized(self.state_manager, self.shake)
+                # Отрисовка визуальных индикаторов
+                if hasattr(self.game_loop, 'visual_indicators') and self.game_loop.visual_indicators:
+                    self.game_loop.visual_indicators.draw(self.renderer.game_surface)
+            elif state == GameState.MENU:
+                self.renderer.clear()
+                self.state_manager.draw_menu()
+            elif state == GameState.MODE_SELECT:
+                self.renderer.clear()
+                self.state_manager.draw_mode_select()
+            elif state == GameState.GAME_OVER:
+                self.renderer.clear()
+                self.state_manager.draw_game_over()
+            elif state == GameState.STATS:
+                self.renderer.clear()
+                self.state_manager.draw_stats(self.stats)
+            elif state == GameState.HELP:
+                self.renderer.clear()
+                self.state_manager.draw_help()
+            elif state == GameState.SETTINGS:
+                self.renderer.clear()
+                self.settings_menu.draw()
+            elif state == GameState.TOURNAMENT_COMPLETE:
+                self.renderer.clear()
+                self.tournament.draw_complete()
+
+            # Blit game_surface to screen и обновляем дисплей
+            self.screen.blit(self.renderer.game_surface, (0, 0))
             self.renderer.dirty_renderer.update_display_optimized()
         else:
             # Стандартный рендеринг

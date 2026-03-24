@@ -264,6 +264,8 @@ class OptimizedRenderer:
         # Render background (cached)
         background = self.dirty_renderer.render_background()
         self.game_surface.blit(background, (0, 0))
+        # Mark entire screen as dirty since background was drawn
+        self.dirty_renderer.mark_dirty(self.game_surface.get_rect())
 
         # Draw net and score (these change frequently, so no caching)
         state_manager.draw_net()
@@ -294,7 +296,9 @@ class OptimizedRenderer:
         self._frame_count += 1
 
         # Blit game_surface to screen for display
-        self.screen.blit(self.game_surface, (0, 0))
+        screen_rect = self.screen.blit(self.game_surface, (0, 0))
+        # Mark the blitted area as dirty
+        self.dirty_renderer.mark_dirty(screen_rect)
 
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get rendering performance statistics"""
