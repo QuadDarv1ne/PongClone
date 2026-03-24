@@ -3,6 +3,7 @@ Centralized logging system for the game
 """
 import logging
 import sys
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -11,14 +12,16 @@ from PyPong.core.constants import LogLevel
 
 
 class GameLogger:
-    """Centralized logger for the game"""
+    """Centralized logger for the game (thread-safe singleton)"""
 
     _instance: Optional["GameLogger"] = None
+    _lock = threading.Lock()
 
     def __new__(cls) -> "GameLogger":
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+            return cls._instance
 
     def __init__(self) -> None:
         if hasattr(self, "_initialized"):

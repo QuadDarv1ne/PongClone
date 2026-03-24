@@ -10,6 +10,9 @@ import pygame
 from PyPong.core.config import (
     FONT_NAME,
     MAX_PARTICLES,
+    PARTICLE_GRAVITY,
+    PARTICLE_LIFETIME_MIN,
+    PARTICLE_LIFETIME_MAX,
     PARTICLES_PER_HIT,
     WHITE,
     YELLOW,
@@ -95,7 +98,7 @@ class Particle(pygame.sprite.Sprite):
         self.velocity_x = speed * math.cos(rad)
         self.velocity_y = speed * math.sin(rad)
 
-        self.lifetime = randint(20, 40)
+        self.lifetime = randint(PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX)
         self.age = 0
 
     def activate(self, x: int, y: int, color: Tuple[int, int, int]) -> None:
@@ -111,7 +114,7 @@ class Particle(pygame.sprite.Sprite):
         self.velocity_y = speed * math.sin(rad)
 
         self.age = 0
-        self.lifetime = randint(20, 40)
+        self.lifetime = randint(PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX)
 
     def deactivate(self) -> None:
         """Деактивировать частицу"""
@@ -121,7 +124,7 @@ class Particle(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.velocity_x
         self.rect.y += self.velocity_y
-        self.velocity_y += 0.2  # Gravity
+        self.velocity_y += PARTICLE_GRAVITY
         self.age += 1
 
         if self.age >= self.lifetime:
