@@ -488,6 +488,12 @@ class PongGame:
                 if frame_count % 100 == 0:
                     fps = self.clock.get_fps()
                     logger.debug(f"Frame: {frame_count}, FPS: {fps:.1f}, State: {self.state_manager.state}")
+
+                    # Вывод статистики OptimizedRenderer если используется
+                    if hasattr(self.renderer, 'get_performance_stats'):
+                        stats = self.renderer.get_performance_stats()
+                        if stats:
+                            logger.debug(f"Render avg: {stats.get('avg_render_time_ms', 0):.2f}ms, FPS: {stats.get('fps_estimate', 0):.1f}")
         except Exception as e:
             logger.error(f"Game loop error: {e}", exc_info=True)
         finally:
