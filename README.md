@@ -60,7 +60,28 @@ pypong  # Запуск из любой директории
 # Запуск всех тестов
 cd PyPong
 python tests/test_all_features.py
+
+# Запуск тестов с pytest
+python -m pytest PyPong/tests/ -v
 ```
+
+### Бенчмарк производительности
+
+```bash
+# Запуск FPS бенчмарка
+cd PyPong
+python tests/test_fps_benchmark.py
+
+# Или через pytest
+python -m pytest PyPong/tests/test_fps_benchmark.py -v
+```
+
+Бенчмарк тестирует:
+- Базовый FPS (без эффектов)
+- Производительность с настройками Low/Medium/High
+- Стресс-тест с множеством мячей и частиц
+- Производительность рендеринга
+- Стабильность кадров (frame pacing)
 
 ## 🎮 Управление
 
