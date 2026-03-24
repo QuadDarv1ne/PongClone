@@ -2,7 +2,7 @@
 Main game loop manager
 """
 from random import randint
-from typing import Any, Optional, Union
+from typing import Any, Optional, Tuple, Union
 
 import pygame
 

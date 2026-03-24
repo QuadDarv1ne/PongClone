@@ -226,7 +226,7 @@ class VisualIndicator:
         self.screen_height = screen_height
         self.indicators: List[Dict] = []
         self.max_indicators = 5
-        self.font = pygame.font.SysFont("Helvetica", 24)
+        self.font = pygame.font.SysFont("Helvetica,Arial,DejaVu Sans", 24)
 
     def add_indicator(
         self,

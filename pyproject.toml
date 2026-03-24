@@ -30,6 +30,12 @@ dependencies = [
     "pygame-ce>=2.4.0,<3.0.0",
 ]
 
+[project.scripts]
+pypong = "PyPong.pong:main"
+
+[tool.setuptools.package-data]
+PyPong = ["assets/**/*", "locales/*.json", "data/*.json"]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0,<9.0.0",
