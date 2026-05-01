@@ -1,29 +1,18 @@
-"""
-Unified game engine that manages all game modes
-"""
-from typing import Any, Dict, Optional, Type
-
+""" Unified game engine that manages all game modes """
 import pygame
 from pygame.event import Event
+from typing import Optional, Dict, Any, Type
 
-from PyPong.core.config import (
-    FONT_NAME,
-    FPS,
-    WHITE,
-    WINDOW_HEIGHT,
-    WINDOW_WIDTH,
-    WINNING_SCORE,
-)
-from PyPong.games.arcade import ArcadeMode
+from PyPong.core.config import FONT_NAME, FPS, WHITE, WINDOW_HEIGHT, WINDOW_WIDTH, WINNING_SCORE
+
 from PyPong.games.base import GameMode, GameModeType
 from PyPong.games.classic import ClassicMode
+from PyPong.games.arcade import ArcadeMode
 from PyPong.games.multiplayer import MultiplayerMode
 
 
 class GameEngine:
-    """
-    Main game engine that handles game modes and main loop
-    """
+    """Main game engine that handles game modes and main loop"""
 
     def __init__(self) -> None:
         pygame.init()
@@ -35,14 +24,14 @@ class GameEngine:
 
         # Settings
         self.settings: Dict[str, Any] = {
-            "winning_score": WINNING_SCORE,
-            "ai_enabled": True,
-            "ai_difficulty": "Medium",
-            "show_fps": False,
+            'winning_score': WINNING_SCORE,
+            'ai_enabled': True,
+            'ai_difficulty': 'Medium',
+            'show_fps': False,
             # Multiplayer settings
-            "connection_type": "local",  # local, host, client
-            "host": "localhost",
-            "port": 9999,
+            'connection_type': 'local',  # local, host, client
+            'host': 'localhost',
+            'port': 9999,
         }
 
         # Game mode management
@@ -64,11 +53,11 @@ class GameEngine:
             mode_class = self.available_modes[mode_type]
             self.current_mode = mode_class(self.screen, self.settings)
 
-    def set_multiplayer(self, connection_type: str, host: str = "localhost", port: int = 9999) -> None:
+    def set_multiplayer(self, connection_type: str, host: str = 'localhost', port: int = 9999) -> None:
         """Configure multiplayer and switch to multiplayer mode"""
-        self.settings["connection_type"] = connection_type
-        self.settings["host"] = host
-        self.settings["port"] = port
+        self.settings['connection_type'] = connection_type
+        self.settings['host'] = host
+        self.settings['port'] = port
         self.set_mode(GameModeType.MULTIPLAYER)
 
     def update_settings(self, key: str, value: Any) -> None:
@@ -93,19 +82,16 @@ class GameEngine:
                 elif event.key == pygame.K_2:
                     self.set_mode(GameModeType.ARCADE)
                     return True
-                elif event.key == pygame.K_3:
-                    # Local PVP
-                    self.settings["connection_type"] = "local"
+                elif event.key == pygame.K_3:  # Local PVP
+                    self.settings['connection_type'] = 'local'
                     self.set_mode(GameModeType.MULTIPLAYER)
                     return True
-                elif event.key == pygame.K_4:
-                    # Host network game
-                    self.settings["connection_type"] = "host"
+                elif event.key == pygame.K_4:  # Host network game
+                    self.settings['connection_type'] = 'host'
                     self.set_mode(GameModeType.MULTIPLAYER)
                     return True
-                elif event.key == pygame.K_5:
-                    # Join network game (uses default host)
-                    self.settings["connection_type"] = "client"
+                elif event.key == pygame.K_5:  # Join network game (uses default host)
+                    self.settings['connection_type'] = 'client'
                     self.set_mode(GameModeType.MULTIPLAYER)
                     return True
 
@@ -116,17 +102,17 @@ class GameEngine:
 
                 # Toggle FPS
                 elif event.key == pygame.K_F3:
-                    self.update_settings("show_fps", not self.settings["show_fps"])
+                    self.update_settings('show_fps', not self.settings['show_fps'])
 
                 # Difficulty selection (when not playing)
                 elif event.key in (pygame.K_3, pygame.K_4, pygame.K_5):
                     if self.current_mode and not self.current_mode.is_active:
                         if event.key == pygame.K_3:
-                            self.update_settings("ai_difficulty", "Easy")
+                            self.update_settings('ai_difficulty', 'Easy')
                         elif event.key == pygame.K_4:
-                            self.update_settings("ai_difficulty", "Medium")
+                            self.update_settings('ai_difficulty', 'Medium')
                         elif event.key == pygame.K_5:
-                            self.update_settings("ai_difficulty", "Hard")
+                            self.update_settings('ai_difficulty', 'Hard')
 
             # Pass events to current mode
             if self.current_mode:
@@ -147,7 +133,7 @@ class GameEngine:
             self.current_mode.draw()
 
         # FPS counter
-        if self.settings.get("show_fps", False):
+        if self.settings.get('show_fps', False):
             font = pygame.font.SysFont(FONT_NAME, 20)
             fps = int(self.clock.get_fps())
             fps_text = font.render(f"FPS: {fps}", True, WHITE)
@@ -173,11 +159,10 @@ class GameEngine:
 
         pygame.quit()
 
-
-def main() -> None:
-    """Entry point"""
-    engine = GameEngine()
-    engine.run()
+    def main() -> None:
+        """Entry point"""
+        engine = GameEngine()
+        engine.run()
 
 
 if __name__ == "__main__":

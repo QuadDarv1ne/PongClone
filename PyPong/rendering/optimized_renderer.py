@@ -1,18 +1,15 @@
-"""
-Optimized renderer with dirty rect rendering and caching
-"""
-from typing import Any, Dict, List, Optional, Tuple
-
+"""Optimized renderer with dirty rect rendering and caching"""
 import pygame
+from typing import Optional, Any, List, Tuple, Dict
+import time
 
-from PyPong.core.config import BLACK
 from PyPong.core.game_state import GameState
+from PyPong.core.config import BLACK
 from PyPong.core.logger import logger
 
 
 class DirtyRectRenderer:
-    """
-    Optimized renderer using dirty rectangles.
+    """Optimized renderer using dirty rectangles.
     Only redraws changed areas instead of full screen.
     """
 
@@ -68,10 +65,7 @@ class DirtyRectRenderer:
             self._cached_surfaces.clear()
 
     def render_background(self) -> pygame.Surface:
-        """
-        Render and cache background.
-        Only redraws when marked dirty.
-        """
+        """Render and cache background. Only redraws when marked dirty."""
         if self._background_cache and not self._background_dirty:
             return self._background_cache
 
@@ -82,7 +76,6 @@ class DirtyRectRenderer:
         # Cache it
         self._background_cache = bg
         self._background_dirty = False
-
         return bg
 
     def invalidate_background(self) -> None:
@@ -94,8 +87,7 @@ class DirtyRectRenderer:
         sprite_group: pygame.sprite.Group,
         background: pygame.Surface,
     ) -> List[pygame.Rect]:
-        """
-        Render sprites using RenderUpdates for dirty rect tracking.
+        """Render sprites using RenderUpdates for dirty rect tracking.
 
         Returns:
             List of dirty rectangles
@@ -118,8 +110,7 @@ class DirtyRectRenderer:
         pos: Tuple[int, int],
         area: Optional[pygame.Rect] = None,
     ) -> pygame.Rect:
-        """
-        Optimized blit that tracks dirty rects.
+        """Optimized blit that tracks dirty rects.
 
         Returns:
             Dirty rectangle
@@ -129,8 +120,7 @@ class DirtyRectRenderer:
         return rect
 
     def update_display_optimized(self) -> None:
-        """
-        Update display using dirty rectangles.
+        """Update display using dirty rectangles.
         Only updates changed areas.
         """
         if self.use_dirty_rects and self.dirty_rects:
@@ -144,28 +134,26 @@ class DirtyRectRenderer:
     def get_memory_usage(self) -> Dict[str, int]:
         """Get memory usage statistics"""
         cache_size = sum(
-            surf.get_width() * surf.get_height() * surf.get_bytesize() for surf in self._cached_surfaces.values()
+            surf.get_width() * surf.get_height() * surf.get_bytesize()
+            for surf in self._cached_surfaces.values()
         )
-
         bg_size = 0
         if self._background_cache:
             bg_size = (
-                self._background_cache.get_width()
-                * self._background_cache.get_height()
-                * self._background_cache.get_bytesize()
+                self._background_cache.get_width() *
+                self._background_cache.get_height() *
+                self._background_cache.get_bytesize()
             )
-
         return {
-            "cached_surfaces": len(self._cached_surfaces),
-            "cache_size_bytes": cache_size,
-            "background_size_bytes": bg_size,
-            "total_bytes": cache_size + bg_size,
+            'cached_surfaces': len(self._cached_surfaces),
+            'cache_size_bytes': cache_size,
+            'background_size_bytes': bg_size,
+            'total_bytes': cache_size + bg_size,
         }
 
 
 class OptimizedRenderer:
-    """
-    Enhanced renderer with performance optimizations:
+    """Enhanced renderer with performance optimizations:
     - Dirty rect rendering
     - Surface caching
     - Batch rendering
@@ -187,7 +175,12 @@ class OptimizedRenderer:
         self.adaptive_screen = adaptive_screen
 
         # Dirty rect renderer
-        self.dirty_renderer = DirtyRectRenderer(screen, game_surface, theme, settings)
+        self.dirty_renderer = DirtyRectRenderer(
+            screen,
+            game_surface,
+            theme,
+            settings,
+        )
 
         # Sprite groups (converted to RenderUpdates for optimization)
         self.all_sprites: Optional[pygame.sprite.RenderUpdates] = None
@@ -236,8 +229,7 @@ class OptimizedRenderer:
         sprite_group: pygame.sprite.Group,
         screen_rect: pygame.Rect,
     ) -> List[pygame.sprite.Sprite]:
-        """
-        Cull sprites that are off-screen.
+        """Cull sprites that are off-screen.
 
         Returns:
             List of visible sprites
@@ -247,15 +239,12 @@ class OptimizedRenderer:
 
         visible = []
         for sprite in sprite_group:
-            if hasattr(sprite, "rect") and screen_rect.colliderect(sprite.rect):
+            if hasattr(sprite, 'rect') and screen_rect.colliderect(sprite.rect):
                 visible.append(sprite)
-
         return visible
 
     def render_game_optimized(self, state_manager: Any, shake: Any) -> None:
         """Optimized game rendering"""
-        import time
-
         start_time = time.perf_counter()
 
         # Clear dirty rects from previous frame
@@ -264,22 +253,31 @@ class OptimizedRenderer:
         # Render background (cached)
         background = self.dirty_renderer.render_background()
         self.game_surface.blit(background, (0, 0))
-        # Mark entire screen as dirty since background was drawn
-        self.dirty_renderer.mark_dirty(self.game_surface.get_rect())
 
         # Draw net and score (these change frequently, so no caching)
         state_manager.draw_net()
         state_manager.draw_score()
 
+        # Get screen rect for culling
+        screen_rect = self.game_surface.get_rect()
+
         # Draw sprites with dirty rect tracking
+        dirty_rects = []
         if self.trails:
-            self.dirty_renderer.render_sprites_optimized(self.trails, background)
-
+            dirty_rects.extend(self.dirty_renderer.render_sprites_optimized(
+                self.trails,
+                background,
+            ))
         if self.all_sprites:
-            self.dirty_renderer.render_sprites_optimized(self.all_sprites, background)
-
+            dirty_rects.extend(self.dirty_renderer.render_sprites_optimized(
+                self.all_sprites,
+                background,
+            ))
         if self.powerups:
-            self.dirty_renderer.render_sprites_optimized(self.powerups, background)
+            dirty_rects.extend(self.dirty_renderer.render_sprites_optimized(
+                self.powerups,
+                background,
+            ))
 
         if self.particles:
             self.particles.draw(self.game_surface)
@@ -292,23 +290,17 @@ class OptimizedRenderer:
 
         self._frame_count += 1
 
-        # Blit game_surface to screen for display
-        screen_rect = self.screen.blit(self.game_surface, (0, 0))
-        # Mark the blitted area as dirty
-        self.dirty_renderer.mark_dirty(screen_rect)
-
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get rendering performance statistics"""
         if not self._render_times:
             return {}
 
         avg_time = sum(self._render_times) / len(self._render_times)
-
         return {
-            "frame_count": self._frame_count,
-            "avg_render_time_ms": avg_time * 1000,
-            "fps_estimate": 1.0 / avg_time if avg_time > 0 else 0,
-            "memory_usage": self.dirty_renderer.get_memory_usage(),
+            'frame_count': self._frame_count,
+            'avg_render_time_ms': avg_time * 1000,
+            'fps_estimate': 1.0 / avg_time if avg_time > 0 else 0,
+            'memory_usage': self.dirty_renderer.get_memory_usage(),
         }
 
     def clear(self) -> None:

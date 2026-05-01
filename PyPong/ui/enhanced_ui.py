@@ -1,10 +1,7 @@
-"""
-Enhanced UI components with animations and effects
-"""
-from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple
-
+"""Enhanced UI components with animations and effects"""
 import pygame
+from typing import Optional, List, Tuple, Callable, Dict, Any
+from dataclasses import dataclass, field
 
 from PyPong.core.constants import Colors
 from PyPong.core.logger import logger
@@ -13,7 +10,6 @@ from PyPong.core.logger import logger
 @dataclass
 class Animation:
     """Animation data"""
-
     start_time: int
     duration: int
     start_value: float
@@ -30,12 +26,12 @@ class Animation:
 
         # Apply easing
         if self.easing == "ease_in":
-            progress = progress**2
+            progress = progress ** 2
         elif self.easing == "ease_out":
             progress = 1 - (1 - progress) ** 2
         elif self.easing == "ease_in_out":
             if progress < 0.5:
-                progress = 2 * progress**2
+                progress = 2 * progress ** 2
             else:
                 progress = 1 - 2 * (1 - progress) ** 2
 
@@ -49,37 +45,42 @@ class Animation:
 class ParticleEffect:
     """Particle effect system"""
 
-    def __init__(self, x: float, y: float, color: Tuple[int, int, int], count: int = 20, lifetime: int = 1000):
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        color: Tuple[int, int, int],
+        count: int = 20,
+        lifetime: int = 1000
+    ):
         self.particles: List[dict] = []
         self.lifetime = lifetime
 
         import random
-
         for _ in range(count):
             angle = random.uniform(0, 360)
             speed = random.uniform(1, 5)
-
             particle = {
-                "x": x,
-                "y": y,
-                "vx": speed * pygame.math.Vector2(1, 0).rotate(angle).x,
-                "vy": speed * pygame.math.Vector2(1, 0).rotate(angle).y,
-                "color": color,
-                "size": random.randint(2, 5),
-                "life": lifetime,
-                "max_life": lifetime,
+                'x': x,
+                'y': y,
+                'vx': speed * pygame.math.Vector2(1, 0).rotate(angle).x,
+                'vy': speed * pygame.math.Vector2(1, 0).rotate(angle).y,
+                'color': color,
+                'size': random.randint(2, 5),
+                'life': lifetime,
+                'max_life': lifetime
             }
             self.particles.append(particle)
 
     def update(self) -> bool:
         """Update particles, returns False when all dead"""
         for particle in self.particles[:]:
-            particle["x"] += particle["vx"]
-            particle["y"] += particle["vy"]
-            particle["vy"] += 0.2  # Gravity
-            particle["life"] -= 16  # Assuming 60 FPS
+            particle['x'] += particle['vx']
+            particle['y'] += particle['vy']
+            particle['vy'] += 0.2  # Gravity
+            particle['life'] -= 16  # Assuming 60 FPS
 
-            if particle["life"] <= 0:
+            if particle['life'] <= 0:
                 self.particles.remove(particle)
 
         return len(self.particles) > 0
@@ -87,14 +88,14 @@ class ParticleEffect:
     def draw(self, screen: pygame.Surface) -> None:
         """Draw particles"""
         for particle in self.particles:
-            alpha = int(255 * (particle["life"] / particle["max_life"]))
+            alpha = int(255 * (particle['life'] / particle['max_life']))
+            color = (*particle['color'], alpha)
 
             # Create surface with alpha
-            surf = pygame.Surface((particle["size"], particle["size"]))
+            surf = pygame.Surface((particle['size'], particle['size']))
             surf.set_alpha(alpha)
-            surf.fill(particle["color"])
-
-            screen.blit(surf, (int(particle["x"]), int(particle["y"])))
+            surf.fill(particle['color'])
+            screen.blit(surf, (int(particle['x']), int(particle['y'])))
 
 
 class ComboDisplay:
@@ -115,11 +116,14 @@ class ComboDisplay:
             # Start scale animation
             current_time = pygame.time.get_ticks()
             self.animation = Animation(
-                start_time=current_time, duration=200, start_value=1.5, end_value=1.0, easing="ease_out"
+                start_time=current_time,
+                duration=200,
+                start_value=1.5,
+                end_value=1.0,
+                easing="ease_out"
             )
-
-        self.combo = combo
-        self.multiplier = multiplier
+            self.combo = combo
+            self.multiplier = multiplier
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw combo display"""
@@ -146,7 +150,11 @@ class ComboDisplay:
         screen.blit(combo_text, combo_rect)
 
         # Multiplier text
-        mult_text = self.small_font.render(f"{self.multiplier:.1f}x points", True, Colors.GREEN.to_tuple())
+        mult_text = self.small_font.render(
+            f"{self.multiplier:.1f}x points",
+            True,
+            Colors.GREEN.to_tuple()
+        )
         mult_rect = mult_text.get_rect(center=(self.x, self.y + 40))
         screen.blit(mult_text, mult_rect)
 
@@ -164,12 +172,20 @@ class AchievementNotification:
 
         # Start animations
         self.y_animation = Animation(
-            start_time=self.start_time, duration=500, start_value=-100, end_value=50, easing="ease_out"
+            start_time=self.start_time,
+            duration=500,
+            start_value=-100,
+            end_value=50,
+            easing="ease_out"
         )
 
         fade_start = self.start_time + self.duration - 500
         self.alpha_animation = Animation(
-            start_time=fade_start, duration=500, start_value=255, end_value=0, easing="ease_in"
+            start_time=fade_start,
+            duration=500,
+            start_value=255,
+            end_value=0,
+            easing="ease_in"
         )
 
         self.font = pygame.font.SysFont("Helvetica", 32, bold=True)
@@ -199,12 +215,10 @@ class AchievementNotification:
         bg_width = 400
         bg_height = 80
         bg_rect = pygame.Rect(x - bg_width // 2, int(y), bg_width, bg_height)
-
         bg_surf = pygame.Surface((bg_width, bg_height))
         bg_surf.set_alpha(alpha)
         bg_surf.fill((40, 40, 40))
         screen.blit(bg_surf, bg_rect)
-
         pygame.draw.rect(screen, Colors.YELLOW.to_tuple(), bg_rect, 2)
 
         # Text
@@ -224,7 +238,14 @@ class AchievementNotification:
 class ProgressBar:
     """Animated progress bar"""
 
-    def __init__(self, x: int, y: int, width: int, height: int, color: Tuple[int, int, int] = Colors.GREEN.to_tuple()):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        color: Tuple[int, int, int] = Colors.GREEN.to_tuple()
+    ):
         self.x = x
         self.y = y
         self.width = width
@@ -245,7 +266,7 @@ class ProgressBar:
             duration=300,
             start_value=self.current_progress,
             end_value=self.target_progress,
-            easing="ease_out",
+            easing="ease_out"
         )
 
     def update(self) -> None:
@@ -257,15 +278,28 @@ class ProgressBar:
     def draw(self, screen: pygame.Surface) -> None:
         """Draw progress bar"""
         # Background
-        pygame.draw.rect(screen, (60, 60, 60), (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(
+            screen,
+            (60, 60, 60),
+            (self.x, self.y, self.width, self.height)
+        )
 
         # Progress fill
         fill_width = int(self.width * self.current_progress)
         if fill_width > 0:
-            pygame.draw.rect(screen, self.color, (self.x, self.y, fill_width, self.height))
+            pygame.draw.rect(
+                screen,
+                self.color,
+                (self.x, self.y, fill_width, self.height)
+            )
 
         # Border
-        pygame.draw.rect(screen, Colors.WHITE.to_tuple(), (self.x, self.y, self.width, self.height), 2)
+        pygame.draw.rect(
+            screen,
+            Colors.WHITE.to_tuple(),
+            (self.x, self.y, self.width, self.height),
+            2
+        )
 
 
 class Button:
@@ -279,7 +313,7 @@ class Button:
         height: int,
         text: str,
         callback: Optional[Callable] = None,
-        color: Tuple[int, int, int] = Colors.GRAY.to_tuple(),
+        color: Tuple[int, int, int] = Colors.GRAY.to_tuple()
     ):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
@@ -294,11 +328,9 @@ class Button:
         """Handle mouse events, returns True if clicked"""
         if event.type == pygame.MOUSEMOTION:
             self.is_hovered = self.rect.collidepoint(event.pos)
-
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if self.is_hovered:
                 self.is_pressed = True
-
         elif event.type == pygame.MOUSEBUTTONUP:
             if self.is_pressed and self.is_hovered:
                 self.is_pressed = False
@@ -306,7 +338,6 @@ class Button:
                     self.callback()
                 return True
             self.is_pressed = False
-
         return False
 
     def draw(self, screen: pygame.Surface) -> None:

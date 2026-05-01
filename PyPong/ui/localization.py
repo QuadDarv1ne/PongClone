@@ -3,28 +3,27 @@ Localization system for multi-language support
 """
 import json
 from pathlib import Path
-from typing import Dict, List, Optional
-
-from PyPong.core.logger import log_exception, logger
+from typing import Dict, Optional, List
+from PyPong.core.logger import logger, log_exception
 
 
 class Localization:
     """Manages game localization"""
 
     SUPPORTED_LANGUAGES: Dict[str, str] = {
-        "en": "English",
-        "ru": "Русский",
-        "es": "Español",
-        "de": "Deutsch",
-        "fr": "Français",
-        "zh": "中文",
-        "ja": "日本語",
+        'en': 'English',
+        'ru': 'Русский',
+        'es': 'Español',
+        'de': 'Deutsch',
+        'fr': 'Français',
+        'zh': '中文',
+        'ja': '日本語'
     }
 
-    def __init__(self, default_language: str = "ru") -> None:
+    def __init__(self, default_language: str = 'ru') -> None:
         self.current_language = default_language
         self.translations: Dict[str, Dict[str, str]] = {}
-        self.fallback_language = "ru"  # Русский как основной язык
+        self.fallback_language = 'ru'  # Русский как основной язык
 
         self._load_translations()
         logger.info(f"Localization initialized: {self.SUPPORTED_LANGUAGES.get(default_language, default_language)}")
@@ -33,7 +32,7 @@ class Localization:
     def _load_translations(self) -> None:
         """Load all translation files"""
         # Use absolute path relative to this file
-        locale_dir = Path(__file__).parent.parent / "locales"
+        locale_dir = Path(__file__).parent.parent / 'locales'
 
         if not locale_dir.exists():
             logger.warning("Locales directory not found, creating default translations")
@@ -41,11 +40,11 @@ class Localization:
             return
 
         for lang_code in self.SUPPORTED_LANGUAGES.keys():
-            lang_file = locale_dir / f"{lang_code}.json"
+            lang_file = locale_dir / f'{lang_code}.json'
 
             if lang_file.exists():
                 try:
-                    with open(lang_file, "r", encoding="utf-8") as f:
+                    with open(lang_file, 'r', encoding='utf-8') as f:
                         self.translations[lang_code] = json.load(f)
                     logger.debug(f"Loaded translations: {lang_code}")
                 except Exception as e:
@@ -53,9 +52,9 @@ class Localization:
 
     def _create_default_translations(self) -> None:
         """Create default English translations"""
-        locale_dir = Path(__file__).parent.parent / "locales"
+        locale_dir = Path(__file__).parent.parent / 'locales'
         locale_dir.mkdir(exist_ok=True)
-
+        
         # English translations
         en_translations = {
             # Menu
@@ -67,17 +66,20 @@ class Localization:
             "menu.stats": "Press S for Stats",
             "menu.settings": "Press O for Settings",
             "menu.quit": "Press ESC to Quit",
+            
             # Game modes
             "mode.ai": "vs AI",
             "mode.pvp": "Player vs Player",
             "mode.campaign": "Campaign",
             "mode.tournament": "Tournament",
+            
             # Difficulty
             "difficulty.easy": "Easy",
             "difficulty.medium": "Medium",
             "difficulty.hard": "Hard",
             "difficulty.expert": "Expert",
             "difficulty.insane": "Insane",
+            
             # Game
             "game.paused": "PAUSED",
             "game.resume": "Press ENTER to Resume",
@@ -87,6 +89,7 @@ class Localization:
             "game.score": "Score",
             "game.combo": "{0}x COMBO!",
             "game.multiplier": "{0}x points",
+            
             # Campaign
             "campaign.title": "Campaign",
             "campaign.progress": "Progress: {0}%",
@@ -96,16 +99,19 @@ class Localization:
             "campaign.stars_earned": "Stars Earned: {0}/3",
             "campaign.objectives": "Objectives:",
             "campaign.modifiers": "Modifiers:",
+            
             # Challenges
             "challenges.title": "Challenges",
             "challenges.daily": "Daily Challenges",
             "challenges.weekly": "Weekly Challenges",
             "challenges.reward": "Reward: {0} pts",
             "challenges.completed": "Completed!",
+            
             # Achievements
             "achievement.unlocked": "Achievement Unlocked!",
             "achievement.progress": "Progress: {0}/{1}",
             "achievement.points": "{0} points",
+            
             # Mini-games
             "minigame.target_practice": "Target Practice",
             "minigame.breakout": "Breakout",
@@ -115,6 +121,7 @@ class Localization:
             "minigame.score": "Score: {0}",
             "minigame.time": "Time: {0}s",
             "minigame.complete": "Complete!",
+            
             # Power-ups
             "powerup.speed_boost": "Speed Boost",
             "powerup.large_paddle": "Large Paddle",
@@ -126,6 +133,7 @@ class Localization:
             "powerup.shield": "Shield",
             "powerup.freeze": "Freeze",
             "powerup.magnet": "Magnet",
+            
             # Settings
             "settings.title": "Settings",
             "settings.music_volume": "Music Volume",
@@ -135,18 +143,12 @@ class Localization:
             "settings.language": "Language",
             "settings.theme": "Theme",
             "settings.back": "Back to Menu",
-            "settings.accessibility": "Accessibility",
-            # Accessibility
-            "accessibility.title": "Accessibility Settings",
-            "accessibility.high_contrast": "High Contrast",
-            "accessibility.large_ui": "Large UI",
-            "accessibility.audio_cues": "Audio Cues",
-            "accessibility.reduce_motion": "Reduce Motion",
-            "accessibility.color_blind_mode": "Color Blind Mode",
+            
             # Controls
             "controls.player1": "Player 1: A/Z",
             "controls.player2": "Player 2: Arrows",
             "controls.pause": "Pause: ESC",
+            
             # Tutorial
             "tutorial.welcome": "Welcome to Pong!",
             "tutorial.objective": "Hit the ball past your opponent",
@@ -154,6 +156,7 @@ class Localization:
             "tutorial.powerups": "Collect power-ups for advantages",
             "tutorial.combo": "Chain hits for combo bonuses",
             "tutorial.complete": "Tutorial Complete!",
+            
             # Misc
             "misc.loading": "Loading...",
             "misc.saving": "Saving...",
@@ -164,7 +167,7 @@ class Localization:
             "misc.on": "ON",
             "misc.off": "OFF",
         }
-
+        
         # Russian translations
         ru_translations = {
             "menu.title": "Улучшенный Понг",
@@ -175,15 +178,18 @@ class Localization:
             "menu.stats": "Нажмите S для Статистики",
             "menu.settings": "Нажмите O для Настроек",
             "menu.quit": "Нажмите ESC для выхода",
+            
             "mode.ai": "против ИИ",
             "mode.pvp": "Игрок против Игрока",
             "mode.campaign": "Кампания",
             "mode.tournament": "Турнир",
+            
             "difficulty.easy": "Легко",
             "difficulty.medium": "Средне",
             "difficulty.hard": "Сложно",
             "difficulty.expert": "Эксперт",
             "difficulty.insane": "Безумие",
+            
             "game.paused": "ПАУЗА",
             "game.resume": "Нажмите ENTER для продолжения",
             "game.game_over": "ИГРА ОКОНЧЕНА",
@@ -192,6 +198,7 @@ class Localization:
             "game.score": "Счет",
             "game.combo": "{0}x КОМБО!",
             "game.multiplier": "{0}x очков",
+            
             "campaign.title": "Кампания",
             "campaign.progress": "Прогресс: {0}%",
             "campaign.stars": "Звезды: {0}/{1}",
@@ -200,23 +207,18 @@ class Localization:
             "campaign.stars_earned": "Получено звезд: {0}/3",
             "campaign.objectives": "Цели:",
             "campaign.modifiers": "Модификаторы:",
+            
             "powerup.speed_boost": "Ускорение",
             "powerup.large_paddle": "Большая ракетка",
             "powerup.slow_ball": "Медленный мяч",
             "powerup.multi_ball": "Мультибол",
             "powerup.shield": "Щит",
             "powerup.freeze": "Заморозка",
+            
             "settings.title": "Настройки",
             "settings.language": "Язык",
             "settings.back": "Назад в меню",
-            "settings.accessibility": "Специальные возможности",
-            # Accessibility
-            "accessibility.title": "Специальные возможности",
-            "accessibility.high_contrast": "Высокий контраст",
-            "accessibility.large_ui": "Крупный интерфейс",
-            "accessibility.audio_cues": "Звуковые сигналы",
-            "accessibility.reduce_motion": "Уменьшить движение",
-            "accessibility.color_blind_mode": "Режим дальтонизма",
+            
             "misc.loading": "Загрузка...",
             "misc.saving": "Сохранение...",
             "misc.back": "Назад",
@@ -226,26 +228,26 @@ class Localization:
             "misc.on": "ВКЛ",
             "misc.off": "ВЫКЛ",
         }
-
+        
         # Save translations
-        self._save_translation("en", en_translations)
-        self._save_translation("ru", ru_translations)
-
-        self.translations["en"] = en_translations
-        self.translations["ru"] = ru_translations
-
+        self._save_translation('en', en_translations)
+        self._save_translation('ru', ru_translations)
+        
+        self.translations['en'] = en_translations
+        self.translations['ru'] = ru_translations
+    
     def _save_translation(self, lang_code: str, translations: dict) -> None:
         """Save translation file"""
-        locale_dir = Path(__file__).parent.parent / "locales"
+        locale_dir = Path(__file__).parent.parent / 'locales'
         locale_dir.mkdir(exist_ok=True)
-
+        
         try:
-            with open(locale_dir / f"{lang_code}.json", "w", encoding="utf-8") as f:
+            with open(locale_dir / f'{lang_code}.json', 'w', encoding='utf-8') as f:
                 json.dump(translations, f, ensure_ascii=False, indent=2)
             logger.debug(f"Saved translations: {lang_code}")
         except Exception as e:
             logger.error(f"Failed to save {lang_code}: {e}")
-
+    
     def get(self, key: str, *args, **kwargs) -> str:
         """Get translated string"""
         # Try current language
@@ -253,17 +255,17 @@ class Localization:
             text = self.translations[self.current_language].get(key)
             if text:
                 return self._format_text(text, *args, **kwargs)
-
+        
         # Fallback to English
         if self.fallback_language in self.translations:
             text = self.translations[self.fallback_language].get(key)
             if text:
                 return self._format_text(text, *args, **kwargs)
-
+        
         # Return key if not found
         logger.warning(f"Translation not found: {key}")
         return key
-
+    
     def _format_text(self, text: str, *args, **kwargs) -> str:
         """Format text with arguments"""
         try:
@@ -275,7 +277,7 @@ class Localization:
         except Exception as e:
             logger.error(f"Failed to format text: {e}")
             return text
-
+    
     def set_language(self, lang_code: str) -> bool:
         """Set current language"""
         if lang_code not in self.SUPPORTED_LANGUAGES:
@@ -311,7 +313,7 @@ class Localization:
 _localization: Optional[Localization] = None
 
 
-def init_localization(language: str = "ru") -> Localization:
+def init_localization(language: str = 'ru') -> Localization:
     """Initialize global localization"""
     global _localization
     _localization = Localization(language)

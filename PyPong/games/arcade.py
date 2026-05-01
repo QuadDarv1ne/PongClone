@@ -1,25 +1,15 @@
-"""
-Arcade game mode - with power-ups and AI
-"""
-from random import choice, randint
-
+""" Arcade game mode - with power-ups and AI """
 import pygame
+from pygame.locals import K_ESCAPE, K_a, K_DOWN, K_UP, K_z, KEYDOWN, KEYUP, QUIT
+from random import randint, choice
 
-from PyPong.core.config import (  # pylint: disable=no-name-in-module
+from PyPong.core.config import (
     BLACK,
     DIFFICULTY_LEVELS,
     FONT_NAME,
     GRAY,
     GREEN,
-    KEYDOWN,
-    KEYUP,
-    K_ESCAPE,
-    K_a,
-    K_DOWN,
-    K_UP,
-    K_z,
     POWERUP_SPAWN_CHANCE,
-    QUIT,
     WHITE,
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
@@ -31,15 +21,12 @@ from .base import GameMode, GameModeType
 
 
 class ArcadeMode(GameMode):
-    """
-    Arcade mode - includes power-ups and more dynamic gameplay
-    """
+    """Arcade mode - includes power-ups and more dynamic gameplay"""
 
     def __init__(self, screen: pygame.Surface, settings: dict = None):
         super().__init__(screen, settings)
-
-        self.ai_enabled = self.settings.get("ai_enabled", True)
-        self.ai_difficulty = self.settings.get("ai_difficulty", "Medium")
+        self.ai_enabled = self.settings.get('ai_enabled', True)
+        self.ai_difficulty = self.settings.get('ai_difficulty', 'Medium')
 
         # Colors
         self.bg_color = GRAY
@@ -49,7 +36,7 @@ class ArcadeMode(GameMode):
 
         # Power-ups
         self.powerups = pygame.sprite.Group()
-        self.powerup_spawn_chance = self.settings.get("powerup_spawn_chance", POWERUP_SPAWN_CHANCE)
+        self.powerup_spawn_chance = self.settings.get('powerup_spawn_chance', POWERUP_SPAWN_CHANCE)
 
     @property
     def mode_type(self) -> GameModeType:
@@ -58,7 +45,6 @@ class ArcadeMode(GameMode):
     def init_game_objects(self):
         """Initialize paddles and ball"""
         ai_speed = DIFFICULTY_LEVELS[self.ai_difficulty]["ai_speed"]
-
         self.paddle1 = Paddle(1, is_ai=False, color=self.paddle1_color)
         self.paddle2 = Paddle(2, is_ai=self.ai_enabled, color=self.paddle2_color)
 
@@ -67,7 +53,6 @@ class ArcadeMode(GameMode):
 
         self.ball = Ball()
         self.ball.image.fill(self.ball_color)
-
         self.all_sprites = pygame.sprite.Group(self.paddle1, self.paddle2, self.ball)
         self.powerups.empty()
 
@@ -86,6 +71,7 @@ class ArcadeMode(GameMode):
             # Player 1 controls
             elif event.key == K_a:
                 self.input_state["up1"] = True
+
             elif event.key == K_z:
                 self.input_state["down1"] = True
 
@@ -118,7 +104,10 @@ class ArcadeMode(GameMode):
 
         if self.ai_enabled:
             predicted_y = self.paddle2.predict_ball_position(
-                self.ball.rect.centerx, self.ball.rect.centery, self.ball.velocity_x, self.ball.velocity_y
+                self.ball.rect.centerx,
+                self.ball.rect.centery,
+                self.ball.velocity_x,
+                self.ball.velocity_y
             )
             self.paddle2.move(False, False, predicted_y)
         else:

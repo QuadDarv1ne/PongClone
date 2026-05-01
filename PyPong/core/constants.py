@@ -4,10 +4,12 @@ Game constants using Enums for better type safety
 from enum import Enum, IntEnum
 from typing import NamedTuple
 
+# Existing config imports
+from .config import *
+
 
 class PowerUpType(Enum):
     """Power-up types"""
-
     SPEED_BOOST = "speed_boost"
     LARGE_PADDLE = "large_paddle"
     SLOW_BALL = "slow_ball"
@@ -22,7 +24,6 @@ class PowerUpType(Enum):
 
 class Difficulty(Enum):
     """AI difficulty levels"""
-
     EASY = "Easy"
     MEDIUM = "Medium"
     HARD = "Hard"
@@ -32,7 +33,6 @@ class Difficulty(Enum):
 
 class GameMode(Enum):
     """Game modes"""
-
     AI = "ai"
     PVP = "pvp"
     CAMPAIGN = "campaign"
@@ -42,7 +42,6 @@ class GameMode(Enum):
 
 class ChallengeType(Enum):
     """Challenge types"""
-
     DAILY = "daily"
     WEEKLY = "weekly"
     SPECIAL = "special"
@@ -50,7 +49,6 @@ class ChallengeType(Enum):
 
 class ModifierType(Enum):
     """Modifier types"""
-
     GRAVITY = "gravity"
     WIND = "wind"
     INVISIBLE_BALL = "invisible_ball"
@@ -65,7 +63,6 @@ class ModifierType(Enum):
 
 class AchievementType(Enum):
     """Achievement types"""
-
     FIRST_WIN = "first_win"
     WIN_STREAK = "win_streak"
     PERFECT_GAME = "perfect_game"
@@ -79,7 +76,6 @@ class AchievementType(Enum):
 
 class ArenaType(Enum):
     """Arena types with obstacles"""
-
     CLASSIC = "classic"
     OBSTACLES = "obstacles"
     MOVING_WALLS = "moving_walls"
@@ -89,7 +85,6 @@ class ArenaType(Enum):
 
 class SoundTheme(Enum):
     """Sound themes"""
-
     CLASSIC = "classic"
     RETRO = "retro"
     FUTURISTIC = "futuristic"
@@ -98,18 +93,16 @@ class SoundTheme(Enum):
 
 class Color(NamedTuple):
     """RGB Color tuple"""
-
     r: int
     g: int
     b: int
-
+    
     def to_tuple(self) -> tuple[int, int, int]:
         return (self.r, self.g, self.b)
 
 
 class Colors:
     """Predefined colors"""
-
     WHITE = Color(255, 255, 255)
     BLACK = Color(0, 0, 0)
     GRAY = Color(80, 80, 80)
@@ -124,7 +117,6 @@ class Colors:
 
 class EventType(Enum):
     """Game event types for logging and achievements"""
-
     GAME_START = "game_start"
     GAME_END = "game_end"
     SCORE = "score"
@@ -139,7 +131,6 @@ class EventType(Enum):
 
 class LogLevel(IntEnum):
     """Logging levels"""
-
     DEBUG = 10
     INFO = 20
     WARNING = 30
@@ -150,7 +141,6 @@ class LogLevel(IntEnum):
 # Game balance constants
 class Balance:
     """Game balance constants"""
-
     COMBO_TIMEOUT_MS = 3000
     COMBO_MULTIPLIER = 1.5
     ACHIEVEMENT_POINTS = {
@@ -164,7 +154,7 @@ class Balance:
         AchievementType.CHALLENGE_MASTER: 1500,
         AchievementType.MINIGAME_EXPERT: 1000,
     }
-
+    
     POWERUP_DURATIONS = {
         PowerUpType.SPEED_BOOST: 5000,
         PowerUpType.LARGE_PADDLE: 5000,
@@ -173,7 +163,7 @@ class Balance:
         PowerUpType.FREEZE: 3000,
         PowerUpType.MAGNET: 7000,
     }
-
+    
     AI_REACTION_DELAYS = {
         Difficulty.EASY: 200,
         Difficulty.MEDIUM: 100,

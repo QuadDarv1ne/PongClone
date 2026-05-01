@@ -1,17 +1,13 @@
-"""
-Input handler for game events
-"""
+""" Input handler for game events """
 from typing import Callable, Dict, Optional
-
 import pygame
+from pygame.locals import K_ESCAPE, K_RETURN, K_s, K_o, K_F1, K_1, K_2, K_3, K_4, K_t, K_a, K_z, K_UP, K_DOWN
 
 from PyPong.core.game_state import GameState
 
 
 class InputHandler:
-    """
-    Обрабатывает ввод пользователя для игры.
-    """
+    """Обрабатывает ввод пользователя для игры."""
 
     def __init__(self) -> None:
         self.input_state: Dict[str, bool] = {
@@ -76,31 +72,31 @@ class InputHandler:
             tuple: (new_state, should_quit, action_data)
         """
         # ESC handling
-        if key == pygame.K_ESCAPE:
+        if key == K_ESCAPE:
             new_state = self._escape_transitions.get(current_state)
             if new_state is None:
                 return (current_state, True, {})  # Quit
             return (new_state, False, {})
 
         # ENTER handling
-        if key == pygame.K_RETURN:
+        if key == K_RETURN:
             new_state = self._enter_transitions.get(current_state)
             if new_state:
                 action_data = {
-                    "play_music": new_state == GameState.PLAYING,
-                    "cleanup": new_state == GameState.MENU and current_state == GameState.GAME_OVER,
-                    "reset_tournament": current_state == GameState.TOURNAMENT_COMPLETE,
+                    'play_music': new_state == GameState.PLAYING,
+                    'cleanup': new_state == GameState.MENU and current_state == GameState.GAME_OVER,
+                    'reset_tournament': current_state == GameState.TOURNAMENT_COMPLETE,
                 }
                 return (new_state, False, action_data)
             return (current_state, False, {})
 
         # Menu shortcuts
         if current_state == GameState.MENU:
-            if key == pygame.K_s:
+            if key == K_s:
                 return (GameState.STATS, False, {})
-            elif key == pygame.K_o:
+            elif key == K_o:
                 return (GameState.SETTINGS, False, {})
-            elif key == pygame.K_F1:
+            elif key == K_F1:
                 return (GameState.HELP, False, {})
 
         # Mode select keys
@@ -126,32 +122,29 @@ class InputHandler:
     def _handle_mode_select_keys(self, key: int) -> tuple:
         """Обработать клавиши выбора режима"""
         action_data = {}
-
-        if key == pygame.K_1:
+        if key == K_1:
             action_data["game_mode"] = "ai"
-        elif key == pygame.K_2:
+        elif key == K_2:
             action_data["game_mode"] = "pvp"
-        elif key == pygame.K_3:
+        elif key == K_3:
             action_data["difficulty"] = "Easy"
-        elif key == pygame.K_4:
+        elif key == K_4:
             action_data["difficulty"] = "Medium"
-        elif key == pygame.K_t:
+        elif key == K_t:
             action_data["toggle_tournament"] = True
-
         return (GameState.MODE_SELECT, False, action_data)
 
     def _handle_movement_input(self, key: int, is_pressed: bool) -> tuple:
         """Обработать ввод движения"""
         key_map = {
-            pygame.K_a: "up1",
-            pygame.K_z: "down1",
-            pygame.K_UP: "up2",
-            pygame.K_DOWN: "down2",
+            K_a: "up1",
+            K_z: "down1",
+            K_UP: "up2",
+            K_DOWN: "down2",
         }
-
         if key in key_map:
             self.set_input(key_map[key], is_pressed)
-
+            return (None, False, {})
         return (None, False, {})
 
     def apply_action_data(self, action_data: dict, game_context: dict) -> None:
@@ -162,11 +155,9 @@ class InputHandler:
             action_data: Данные действия от обработчика
             game_context: Контекст игры для обновления
         """
-        if "game_mode" in action_data:
-            game_context["game_mode"] = action_data["game_mode"]
-
-        if "difficulty" in action_data:
-            game_context["difficulty"] = action_data["difficulty"]
-
-        if "toggle_tournament" in action_data:
-            game_context["tournament_mode"] = not game_context.get("tournament_mode", False)
+        if 'game_mode' in action_data:
+            game_context['game_mode'] = action_data['game_mode']
+        if 'difficulty' in action_data:
+            game_context['difficulty'] = action_data['difficulty']
+        if 'toggle_tournament' in action_data:
+            game_context['tournament_mode'] = not game_context.get('tournament_mode', False)

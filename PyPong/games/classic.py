@@ -1,21 +1,18 @@
-"""
-Classic game mode - basic pong gameplay
-"""
-# pylint: disable=undefined-variable
+""" Classic game mode - basic pong gameplay """
 import pygame
 
-from PyPong.core.config import (  # pylint: disable=no-name-in-module
+from PyPong.core.config import (
     BLACK,
     DIFFICULTY_LEVELS,
     FONT_NAME,
     GRAY,
-    KEYDOWN,
-    KEYUP,
-    K_ESCAPE,
     K_a,
     K_DOWN,
     K_UP,
     K_z,
+    KEYDOWN,
+    KEYUP,
+    K_ESCAPE,
     QUIT,
     WHITE,
     WINDOW_HEIGHT,
@@ -27,16 +24,14 @@ from .base import GameMode, GameModeType
 
 
 class ClassicMode(GameMode):
-    """
-    Classic pong mode - simple 1v1 or vs AI
+    """Classic pong mode - simple 1v1 or vs AI
     First to winning_score wins
     """
 
     def __init__(self, screen: pygame.Surface, settings: dict = None):
         super().__init__(screen, settings)
-
-        self.ai_enabled = self.settings.get("ai_enabled", False)
-        self.ai_difficulty = self.settings.get("ai_difficulty", "Medium")
+        self.ai_enabled = self.settings.get('ai_enabled', False)
+        self.ai_difficulty = self.settings.get('ai_difficulty', 'Medium')
 
         # Colors
         self.bg_color = BLACK
@@ -52,7 +47,6 @@ class ClassicMode(GameMode):
     def init_game_objects(self):
         """Initialize paddles and ball"""
         ai_speed = DIFFICULTY_LEVELS[self.ai_difficulty]["ai_speed"]
-
         self.paddle1 = Paddle(1, is_ai=False, color=self.paddle1_color)
         self.paddle2 = Paddle(2, is_ai=self.ai_enabled, color=self.paddle2_color)
 
@@ -110,7 +104,10 @@ class ClassicMode(GameMode):
         if self.ai_enabled:
             # AI uses prediction
             predicted_y = self.paddle2.predict_ball_position(
-                self.ball.rect.centerx, self.ball.rect.centery, self.ball.velocity_x, self.ball.velocity_y
+                self.ball.rect.centerx,
+                self.ball.rect.centery,
+                self.ball.velocity_x,
+                self.ball.velocity_y
             )
             self.paddle2.move(False, False, predicted_y)
         else:

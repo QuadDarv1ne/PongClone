@@ -1,19 +1,17 @@
-"""
-Multiplayer game mode
-"""
+""" Multiplayer game mode """
 import pygame
 
-from PyPong.core.config import (  # pylint: disable=no-name-in-module
+from PyPong.core.config import (
     DARK_GRAY,
     FONT_NAME,
     GREEN,
-    KEYDOWN,
-    KEYUP,
-    K_ESCAPE,
     K_a,
     K_DOWN,
     K_UP,
     K_z,
+    KEYDOWN,
+    KEYUP,
+    K_ESCAPE,
     QUIT,
     WHITE,
     WINDOW_HEIGHT,
@@ -21,33 +19,31 @@ from PyPong.core.config import (  # pylint: disable=no-name-in-module
     YELLOW,
 )
 from PyPong.core.entities import Ball, Paddle
+
 from PyPong.games.base import GameMode, GameModeType
 from PyPong.systems.multiplayer import (
-    ConnectionType,
-    GameState,
-    LocalPVP,
     MultiplayerBase,
-    NetworkClient,
+    LocalPVP,
     NetworkHost,
+    NetworkClient,
+    GameState,
+    ConnectionType,
     create_multiplayer,
 )
 from PyPong.ui.localization import get_localization
 
 
 class MultiplayerMode(GameMode):
-    """
-    Multiplayer game mode - supports local PVP and network play
-    """
+    """Multiplayer game mode - supports local PVP and network play"""
 
     def __init__(self, screen: pygame.Surface, settings: dict = None):
         super().__init__(screen, settings)
-
-        self.connection_type = self.settings.get("connection_type", "local")
+        self.connection_type = self.settings.get('connection_type', 'local')
         self.multiplayer: MultiplayerBase = None
 
         # Network settings
-        self.host = self.settings.get("host", "localhost")
-        self.port = self.settings.get("port", 9999)
+        self.host = self.settings.get('host', 'localhost')
+        self.port = self.settings.get('port', 9999)
 
         # Colors
         self.bg_color = DARK_GRAY
@@ -87,7 +83,6 @@ class MultiplayerMode(GameMode):
 
         self.ball = Ball()
         self.all_sprites = pygame.sprite.Group(self.paddle1, self.paddle2, self.ball)
-
         self.waiting_for_connection = False
 
     def handle_input(self, event: pygame.event.Event) -> bool:
@@ -110,6 +105,7 @@ class MultiplayerMode(GameMode):
                 self.input_state["up1"] = True
             elif event.key == K_z:
                 self.input_state["down1"] = True
+
             # Player 2 controls (arrows)
             elif event.key == K_UP:
                 self.input_state["up2"] = True
@@ -136,7 +132,7 @@ class MultiplayerMode(GameMode):
         # Handle network input
         if isinstance(self.multiplayer, NetworkHost):
             # Host receives input from client
-            remote_input = self.multiplayer.receive_input()  # pylint: disable=assignment-from-none
+            remote_input = self.multiplayer.receive_input()
             if remote_input:
                 # Client controls player 2
                 self.input_state["up2"] = remote_input.get("up", False)
@@ -149,13 +145,14 @@ class MultiplayerMode(GameMode):
                 input_data = {"up": self.input_state["up1"], "down": self.input_state["down1"]}
             else:
                 input_data = {"up": self.input_state["up2"], "down": self.input_state["down2"]}
+
             self.multiplayer.send_input(input_data)
 
             # Receive game state from host
-            state = self.multiplayer.receive_game_state()  # pylint: disable=assignment-from-none
+            state = self.multiplayer.receive_game_state()
             if state:
                 self._apply_network_state(state)
-                return  # Skip local update, use network state
+            return  # Skip local update, use network state
 
         # Local update for host or local PVP
         self._update_local(dt)

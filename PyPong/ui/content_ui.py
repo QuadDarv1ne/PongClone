@@ -1,7 +1,17 @@
 """UI components for campaign, challenges, and mini-games"""
 import pygame
 
-from PyPong.core.config import BLACK, FONT_NAME, GREEN, GRAY, LIGHT_BLUE, WHITE, WINDOW_HEIGHT, WINDOW_WIDTH, YELLOW
+from PyPong.core.config import (
+    BLACK,
+    FONT_NAME,
+    GREEN,
+    GRAY,
+    LIGHT_BLUE,
+    WHITE,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+    YELLOW,
+)
 
 
 class CampaignUI:
@@ -24,52 +34,56 @@ class CampaignUI:
         title = self.title_font.render("Campaign", True, WHITE)
         self.screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 50)))
 
-        # Progress
+        # Progress completion
         completion = self.campaign.get_completion_percentage()
         stars = self.campaign.get_total_stars()
         progress_text = self.small_font.render(
-            f"Progress: {completion:.0f}% | Stars: {stars}/{len(self.campaign.levels) * 3}", True, YELLOW
+            f"Progress: {completion:.0f}% | Stars: {stars}/{len(self.campaign.levels) * 3}",
+            True,
+            YELLOW
         )
         self.screen.blit(progress_text, progress_text.get_rect(center=(WINDOW_WIDTH // 2, 100)))
 
         # Levels
         unlocked_levels = self.campaign.get_unlocked_levels()
         y = 160
-
         for i, level in enumerate(unlocked_levels):
             color = YELLOW if i == self.selected_level else WHITE
             if level.completed:
                 color = GREEN
 
             # Level name and difficulty
-            level_text = self.font.render(f"{level.id}. {level.name} [{level.difficulty}]", True, color)
+            level_text = self.font.render(
+                f"{level.id}. {level.name} [{level.difficulty}]",
+                True,
+                color
+            )
             self.screen.blit(level_text, (100, y))
 
             # Stars
             star_x = WINDOW_WIDTH - 200
             for s in range(3):
                 star_color = YELLOW if s < level.stars else (60, 60, 60)
-                pygame.draw.polygon(
-                    self.screen,
-                    star_color,
-                    [
-                        (star_x + s * 30 + 10, y + 5),
-                        (star_x + s * 30 + 13, y + 15),
-                        (star_x + s * 30 + 23, y + 15),
-                        (star_x + s * 30 + 15, y + 22),
-                        (star_x + s * 30 + 18, y + 32),
-                        (star_x + s * 30 + 10, y + 26),
-                        (star_x + s * 30 + 2, y + 32),
-                        (star_x + s * 30 + 5, y + 22),
-                        (star_x + s * 30 - 3, y + 15),
-                        (star_x + s * 30 + 7, y + 15),
-                    ],
-                )
-
+                pygame.draw.polygon(self.screen, star_color, [
+                    (star_x + s * 30 + 10, y + 5),
+                    (star_x + s * 30 + 13, y + 15),
+                    (star_x + s * 30 + 23, y + 15),
+                    (star_x + s * 30 + 15, y + 22),
+                    (star_x + s * 30 + 18, y + 32),
+                    (star_x + s * 30 + 10, y + 26),
+                    (star_x + s * 30 + 2, y + 32),
+                    (star_x + s * 30 + 5, y + 22),
+                    (star_x + s * 30 - 3, y + 15),
+                    (star_x + s * 30 + 7, y + 15),
+                ])
             y += 50
 
         # Controls hint
-        hint = self.small_font.render("Arrow Keys: Navigate | ENTER: Start Level | ESC: Back", True, WHITE)
+        hint = self.small_font.render(
+            "Arrow Keys: Navigate | ENTER: Start Level | ESC: Back",
+            True,
+            WHITE
+        )
         self.screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 40)))
 
     def draw_level_briefing(self, level):
@@ -91,7 +105,6 @@ class CampaignUI:
         mod_title = self.font.render("Modifiers:", True, WHITE)
         self.screen.blit(mod_title, (150, y))
         y += 50
-
         for key, value in level.modifiers.items():
             mod_text = self.small_font.render(f"• {key}: {value}", True, LIGHT_BLUE)
             self.screen.blit(mod_text, (180, y))
@@ -102,7 +115,6 @@ class CampaignUI:
         obj_title = self.font.render("Objectives:", True, WHITE)
         self.screen.blit(obj_title, (150, y))
         y += 50
-
         for obj in level.objectives:
             obj_text = self.small_font.render(f"• {obj}", True, GREEN)
             self.screen.blit(obj_text, (180, y))
@@ -129,22 +141,18 @@ class CampaignUI:
         for s in range(3):
             star_color = YELLOW if s < stars else (60, 60, 60)
             size = 40
-            pygame.draw.polygon(
-                self.screen,
-                star_color,
-                [
-                    (star_x + s * 60 + size // 2, star_y),
-                    (star_x + s * 60 + size // 2 + 5, star_y + 15),
-                    (star_x + s * 60 + size // 2 + 20, star_y + 15),
-                    (star_x + s * 60 + size // 2 + 8, star_y + 25),
-                    (star_x + s * 60 + size // 2 + 12, star_y + 40),
-                    (star_x + s * 60 + size // 2, star_y + 32),
-                    (star_x + s * 60 + size // 2 - 12, star_y + 40),
-                    (star_x + s * 60 + size // 2 - 8, star_y + 25),
-                    (star_x + s * 60 + size // 2 - 20, star_y + 15),
-                    (star_x + s * 60 + size // 2 - 5, star_y + 15),
-                ],
-            )
+            pygame.draw.polygon(self.screen, star_color, [
+                (star_x + s * 60 + size//2, star_y),
+                (star_x + s * 60 + size//2 + 5, star_y + 15),
+                (star_x + s * 60 + size//2 + 20, star_y + 15),
+                (star_x + s * 60 + size//2 + 8, star_y + 25),
+                (star_x + s * 60 + size//2 + 12, star_y + 40),
+                (star_x + s * 60 + size//2, star_y + 32),
+                (star_x + s * 60 + size//2 - 12, star_y + 40),
+                (star_x + s * 60 + size//2 - 8, star_y + 25),
+                (star_x + s * 60 + size//2 - 20, star_y + 15),
+                (star_x + s * 60 + size//2 - 5, star_y + 15),
+            ])
 
         # Time
         time_text = self.small_font.render(f"Time: {time_taken:.1f}s", True, WHITE)
@@ -195,8 +203,7 @@ class ChallengesUI:
         daily_title = self.font.render("Daily Challenges", True, YELLOW)
         self.screen.blit(daily_title, (50, y))
         y += 50
-
-        for challenge in active["daily"]:
+        for challenge in active['daily']:
             self._draw_challenge(challenge, 70, y)
             y += 100
 
@@ -205,8 +212,7 @@ class ChallengesUI:
         weekly_title = self.font.render("Weekly Challenges", True, GREEN)
         self.screen.blit(weekly_title, (50, y))
         y += 50
-
-        for challenge in active["weekly"]:
+        for challenge in active['weekly']:
             self._draw_challenge(challenge, 70, y)
             y += 100
 
@@ -244,7 +250,11 @@ class ChallengesUI:
         pygame.draw.rect(self.screen, color, (progress_x, progress_y, fill_width, progress_height))
 
         # Progress text
-        progress_text = self.small_font.render(f"{challenge.progress}/{challenge.target}", True, WHITE)
+        progress_text = self.small_font.render(
+            f"{challenge.progress}/{challenge.target}",
+            True,
+            WHITE
+        )
         self.screen.blit(progress_text, (progress_x + progress_width + 10, progress_y - 2))
 
         # Reward
@@ -266,11 +276,11 @@ class MiniGameUI:
         self.title_font = pygame.font.SysFont(FONT_NAME, 48)
         self.selected = 0
         self.minigame_list = [
-            ("target_practice", "Target Practice", "Hit as many targets as possible"),
-            ("breakout", "Breakout", "Break all the bricks"),
-            ("survival", "Survival", "Survive as long as possible"),
-            ("keep_up", "Keep Up", "Don't let the ball touch the bottom"),
-            ("precision", "Precision", "Hit the sweet spot for bonus points"),
+            ('target_practice', 'Target Practice', 'Hit as many targets as possible'),
+            ('breakout', 'Breakout', 'Break all the bricks'),
+            ('survival', 'Survival', 'Survive as long as possible'),
+            ('keep_up', 'Keep Up', 'Don\'t let the ball touch the bottom'),
+            ('precision', 'Precision', 'Hit the sweet spot for bonus points'),
         ]
 
     def draw_select(self):
@@ -283,16 +293,18 @@ class MiniGameUI:
         y = 150
         for i, (key, name, desc) in enumerate(self.minigame_list):
             color = YELLOW if i == self.selected else WHITE
-
             name_text = self.font.render(f"{i+1}. {name}", True, color)
             self.screen.blit(name_text, (150, y))
 
             desc_text = self.small_font.render(desc, True, (200, 200, 200))
             self.screen.blit(desc_text, (180, y + 40))
-
             y += 90
 
-        hint = self.small_font.render("Arrow Keys: Navigate | ENTER: Start | ESC: Back", True, WHITE)
+        hint = self.small_font.render(
+            "Arrow Keys: Navigate | ENTER: Start | ESC: Back",
+            True,
+            WHITE
+        )
         self.screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 40)))
 
     def draw_playing(self, minigame):

@@ -55,59 +55,9 @@ MAX_TRAILS = 20
 PARTICLES_PER_HIT = 8
 TRAIL_SPAWN_CHANCE = 4  # 1 in 4 chance
 
-# Performance profiles
-PERFORMANCE_PROFILES = {
-    "low": {
-        "max_particles": 20,
-        "max_trails": 10,
-        "particles_per_hit": 4,
-        "trail_spawn_chance": 8,
-        "effects_enabled": True,
-        "screen_shake": False,
-        "target_fps": 30,
-    },
-    "medium": {
-        "max_particles": 50,
-        "max_trails": 20,
-        "particles_per_hit": 8,
-        "trail_spawn_chance": 4,
-        "effects_enabled": True,
-        "screen_shake": True,
-        "target_fps": 60,
-    },
-    "high": {
-        "max_particles": 100,
-        "max_trails": 40,
-        "particles_per_hit": 12,
-        "trail_spawn_chance": 2,
-        "effects_enabled": True,
-        "screen_shake": True,
-        "target_fps": 60,
-    },
-    "ultra": {
-        "max_particles": 200,
-        "max_trails": 60,
-        "particles_per_hit": 16,
-        "trail_spawn_chance": 1,
-        "effects_enabled": True,
-        "screen_shake": True,
-        "target_fps": 120,
-    },
-}
-
 # Screen shake settings
 SHAKE_INTENSITY_NORMAL = (5, 5)
 SHAKE_INTENSITY_GOAL = (15, 15)
-
-# Visual indicator durations (in frames at 60 FPS)
-VISUAL_INDICATOR_HIT_DURATION = 60
-VISUAL_INDICATOR_GOAL_DURATION = 90
-VISUAL_INDICATOR_POWERUP_DURATION = 120
-
-# Particle physics
-PARTICLE_GRAVITY = 0.2
-PARTICLE_LIFETIME_MIN = 20
-PARTICLE_LIFETIME_MAX = 40
 
 # Power-up settings
 POWERUP_TYPES = [
@@ -117,3 +67,35 @@ POWERUP_TYPES = [
     "multi_ball",
     "shrink_opponent",
 ]
+
+# Performance profiles
+PERFORMANCE_PROFILES = {
+    "low": {
+        "max_particles": 20,
+        "max_trails": 10,
+        "target_fps": 30,
+        "enable_shake": False,
+        "enable_effects": False,
+    },
+    "medium": {
+        "max_particles": 30,
+        "max_trails": 15,
+        "target_fps": 60,
+        "enable_shake": True,
+        "enable_effects": True,
+    },
+    "high": {
+        "max_particles": 50,
+        "max_trails": 20,
+        "target_fps": 60,
+        "enable_shake": True,
+        "enable_effects": True,
+    },
+    "ultra": {
+        "max_particles": 100,
+        "max_trails": 30,
+        "target_fps": 120,
+        "enable_shake": True,
+        "enable_effects": True,
+    },
+}

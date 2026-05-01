@@ -1,21 +1,19 @@
-"""
-Main menu integration with GameEngine
-"""
+""" Main menu integration with GameEngine """
+import pygame
 from enum import Enum
 from typing import Optional
 
 import pygame
-
 from PyPong.core.config import FONT_NAME, FPS, WHITE, WINDOW_HEIGHT, WINDOW_WIDTH
+from PyPong.ui.localization import get_localization, init_localization
+from PyPong.ui.menu import MainMenu, SettingsMenu, Menu
+
 from PyPong.games.base import GameModeType
 from PyPong.games.engine import GameEngine
-from PyPong.ui.localization import get_localization, init_localization
-from PyPong.ui.menu import MainMenu, Menu, SettingsMenu
 
 
 class GameState(Enum):
     """Game states"""
-
     MENU = "menu"
     MODE_SELECT = "mode_select"
     PLAYING = "playing"
@@ -25,14 +23,11 @@ class GameState(Enum):
 
 
 class GameWithMenu(GameEngine):
-    """
-    Extended GameEngine with beautiful menu system
-    """
+    """Extended GameEngine with beautiful menu system"""
 
     def __init__(self) -> None:
         # Initialize localization first
-        init_localization("en")
-
+        init_localization('en')
         super().__init__()
 
         # Menu state
@@ -44,7 +39,7 @@ class GameWithMenu(GameEngine):
         self._init_menus()
 
         # Language toggle
-        self.current_lang = "en"
+        self.current_lang = 'en'
 
     def _init_menus(self):
         """Initialize all menus"""
@@ -58,7 +53,7 @@ class GameWithMenu(GameEngine):
         self.main_menu.items[3].action = lambda: self._start_game(GameModeType.MINIGAME)
         self.main_menu.items[4].action = lambda: self._show_stats()
         self.main_menu.items[5].action = lambda: self._open_settings()
-        self.main_menu.items[6].action = lambda: setattr(self, "running", False)
+        self.main_menu.items[6].action = lambda: setattr(self, 'running', False)
 
     def _start_game(self, mode: GameModeType):
         """Start game in specified mode"""
@@ -79,12 +74,12 @@ class GameWithMenu(GameEngine):
     def _toggle_language(self):
         """Toggle between EN and RU"""
         loc = get_localization()
-        if self.current_lang == "en":
-            loc.set_language("ru")
-            self.current_lang = "ru"
+        if self.current_lang == 'en':
+            loc.set_language('ru')
+            self.current_lang = 'ru'
         else:
-            loc.set_language("en")
-            self.current_lang = "en"
+            loc.set_language('en')
+            self.current_lang = 'en'
 
     def handle_events(self) -> bool:
         """Handle all events including menu"""

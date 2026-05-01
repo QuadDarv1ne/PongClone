@@ -1,12 +1,8 @@
-"""
-Beautiful main menu with localization support
-"""
+"""Beautiful main menu with localization support"""
 import math
-import random
-from typing import Any, Callable, Dict, List, Optional
-
 import pygame
 from pygame import Surface
+from typing import List, Optional, Callable, Dict, Any
 
 from PyPong.ui.localization import get_localization, t
 from PyPong.ui.themes import get_theme
@@ -40,8 +36,7 @@ class AnimatedText:
 
     def update(self, dt: float):
         if self.pulse:
-            self.anim_phase += dt * 3
-            # Subtle color pulse
+            self.anim_phase += dt * 3  # Subtle color pulse
             pulse = (math.sin(self.anim_phase) + 1) / 2 * 30
             r = min(255, self.base_color[0] + pulse)
             g = min(255, self.base_color[1] + pulse)
@@ -50,9 +45,7 @@ class AnimatedText:
 
 
 class Menu:
-    """
-    Beautiful animated menu system
-    """
+    """Beautiful animated menu system"""
 
     def __init__(self, screen: Surface, title: str = "menu.title"):
         self.screen = screen
@@ -78,16 +71,20 @@ class Menu:
 
     def _init_particles(self):
         """Initialize background particles"""
+        import random
         for _ in range(30):
-            self.bg_particles.append(
-                {
-                    "x": random.randint(0, 1024),
-                    "y": random.randint(0, 720),
-                    "size": random.randint(2, 6),
-                    "speed": random.uniform(0.2, 1.0),
-                    "color": random.choice([(100, 200, 255), (255, 100, 150), (100, 255, 150), (255, 200, 100)]),
-                }
-            )
+            self.bg_particles.append({
+                'x': random.randint(0, 1024),
+                'y': random.randint(0, 720),
+                'size': random.randint(2, 6),
+                'speed': random.uniform(0.2, 1.0),
+                'color': random.choice([
+                    (100, 200, 255),
+                    (255, 100, 150),
+                    (100, 255, 150),
+                    (255, 200, 100)
+                ])
+            })
 
     def add_item(self, text_key: str, action: Callable[[], None], shortcut: str = "", icon: str = ""):
         """Add menu item"""
@@ -103,10 +100,10 @@ class Menu:
 
         # Update particles
         for p in self.bg_particles:
-            p["y"] -= p["speed"]
-            if p["y"] < -10:
-                p["y"] = 730
-                p["x"] = pygame.display.get_surface().get_width() * (p["x"] / 1024)
+            p['y'] -= p['speed']
+            if p['y'] < -10:
+                p['y'] = 730
+                p['x'] = pygame.display.get_surface().get_width() * (p['x'] / 1024)
 
     def handle_input(self, event: pygame.event.Event) -> Optional[str]:
         """Handle menu input. Returns action result."""
@@ -116,31 +113,19 @@ class Menu:
         if event.key == pygame.K_UP:
             self.selected_index = (self.selected_index - 1) % len(self.items)
             return "navigate"
-
         elif event.key == pygame.K_DOWN:
             self.selected_index = (self.selected_index + 1) % len(self.items)
             return "navigate"
-
         elif event.key == pygame.K_RETURN:
             if self.items:
                 self.items[self.selected_index].action()
                 return "select"
-
         elif event.key == pygame.K_ESCAPE:
             return "back"
 
         # Number keys for quick selection
-        elif event.key in (
-            pygame.K_1,
-            pygame.K_2,
-            pygame.K_3,
-            pygame.K_4,
-            pygame.K_5,
-            pygame.K_6,
-            pygame.K_7,
-            pygame.K_8,
-            pygame.K_9,
-        ):
+        elif event.key in (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
+                           pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9):
             idx = event.key - pygame.K_1
             if idx < len(self.items):
                 self.selected_index = idx
@@ -169,12 +154,12 @@ class Menu:
     def _draw_background(self):
         """Draw animated background"""
         # Gradient background
-        bg_color = self.theme.get("bg_color", (20, 20, 40))
+        bg_color = self.theme.get('bg_color', (20, 20, 40))
         self.screen.fill(bg_color)
 
         # Draw particles
         for p in self.bg_particles:
-            pygame.draw.circle(self.screen, p["color"], (int(p["x"]), int(p["y"])), p["size"])
+            pygame.draw.circle(self.screen, p['color'], (int(p['x']), int(p['y'])), p['size'])
 
     def _draw_title(self):
         """Draw animated title"""
@@ -185,6 +170,8 @@ class Menu:
         title_font = pygame.font.SysFont("arial", 72, bold=True)
 
         # Animated title with glow
+        pulse = math.sin(self.anim_time * 2) * 0.1 + 1  # Glow effect
+
         glow_color = (100, 150, 255)
         for offset in range(3, 0, -1):
             glow_text = title_font.render(title, True, glow_color)
@@ -202,6 +189,7 @@ class Menu:
         if not self.items:
             return
 
+        menu_font = pygame.font.SysFont("arial", 36)
         shortcut_font = pygame.font.SysFont("arial", 24)
 
         start_y = 250
@@ -218,7 +206,7 @@ class Menu:
                 anim = 0
 
             # Selection animation
-            is_selected = i == self.selected_index
+            is_selected = (i == self.selected_index)
             if is_selected:
                 # Pulsing effect
                 scale = math.sin(self.anim_time * 4) * 0.2 + 1
@@ -236,7 +224,7 @@ class Menu:
             y = start_y + i * spacing
             y = int(y + (1 - anim) * 50)  # Slide in animation
 
-            # Draw shortcut
+            # Draw shortcut if item.shortcut:
             if item.shortcut:
                 shortcut_surf = shortcut_font.render(item.shortcut, True, (100, 100, 100))
                 self.screen.blit(shortcut_surf, (x - 50, y + 5))
@@ -248,7 +236,12 @@ class Menu:
                 self.screen.blit(arrow, (x - 40, y))
 
                 # Background highlight
-                highlight_rect = pygame.Rect(x - 60, y - 10, text_surf.get_width() + 120, 50)
+                highlight_rect = pygame.Rect(
+                    x - 60,
+                    y - 10,
+                    text_surf.get_width() + 120,
+                    50
+                )
                 pygame.draw.rect(self.screen, (50, 50, 80), highlight_rect, border_radius=10)
 
             self.screen.blit(text_surf, (x, y))
@@ -256,11 +249,13 @@ class Menu:
     def _draw_controls(self):
         """Draw control hints at bottom"""
         hint_font = pygame.font.SysFont("arial", 20)
-
-        controls = [("↑↓", "navigate"), ("Enter", "select"), ("Esc", "back")]
+        controls = [
+            ("↑↓", "navigate"),
+            ("Enter", "select"),
+            ("Esc", "back")
+        ]
 
         y = self.screen.get_height() - 40
-
         for i, (key, action) in enumerate(controls):
             text = f"{key}: {self.loc.get(f'controls.{action}', action)}"
             surf = hint_font.render(text, True, (100, 100, 100))
@@ -288,7 +283,7 @@ class MainMenu(Menu):
 
 
 class SettingsMenu(Menu):
-    """Settings menu with language and accessibility selection"""
+    """Settings menu with language selection"""
 
     def __init__(self, screen: Surface):
         super().__init__(screen, "settings.title")
@@ -301,24 +296,6 @@ class SettingsMenu(Menu):
         self.add_item("settings.sfx_volume", lambda: None, "S")
         self.add_item("settings.fullscreen", lambda: None, "F")
         self.add_item("settings.show_fps", lambda: None, "D")
-        self.add_item("settings.accessibility", lambda: None, "A")
-        self.add_item("settings.back", lambda: None, "Esc")
-
-
-class AccessibilityMenu(Menu):
-    """Accessibility settings menu"""
-
-    def __init__(self, screen: Surface):
-        super().__init__(screen, "accessibility.title")
-        self._setup_items()
-
-    def _setup_items(self):
-        """Setup accessibility items"""
-        self.add_item("accessibility.color_blind_mode", lambda: None, "C")
-        self.add_item("accessibility.high_contrast", lambda: None, "H")
-        self.add_item("accessibility.large_ui", lambda: None, "U")
-        self.add_item("accessibility.audio_cues", lambda: None, "O")
-        self.add_item("accessibility.reduce_motion", lambda: None, "R")
         self.add_item("settings.back", lambda: None, "Esc")
 
 
@@ -331,8 +308,7 @@ def test_menu():
 
     # Initialize localization
     from PyPong.ui.localization import init_localization
-
-    init_localization("en")
+    loc = init_localization('en')
 
     # Create menu
     menu = MainMenu(screen)
@@ -349,7 +325,8 @@ def test_menu():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-                menu.handle_input(event)
+
+            menu.handle_input(event)
 
         menu.update(dt)
         menu.draw()

@@ -1,16 +1,12 @@
-"""
-Android-specific optimizations and features
-"""
-from typing import Any, Dict, Optional
-
+"""Android-specific optimizations and features"""
 import pygame
+from typing import Optional, Dict, Any
 
 from PyPong.core.logger import logger
 
 
 class AndroidOptimizer:
-    """
-    Android-specific optimizations:
+    """Android-specific optimizations:
     - Battery saving mode
     - Performance profiles
     - Memory management
@@ -20,7 +16,7 @@ class AndroidOptimizer:
     def __init__(self):
         self.is_android = self._detect_android()
         self.battery_saver = False
-        self.performance_profile = "balanced"  # low, balanced, high
+        self.performance_profile = 'balanced'  # low, balanced, high
 
         if self.is_android:
             logger.info("Android platform detected, applying optimizations")
@@ -29,19 +25,18 @@ class AndroidOptimizer:
     def _detect_android(self) -> bool:
         """Detect if running on Android"""
         try:
-            import os
             import platform
-
+            import os
             # Check for Android in /proc/version
             try:
-                with open("/proc/version", "r") as f:
-                    if "android" in f.read().lower():
+                with open('/proc/version', 'r') as f:
+                    if 'android' in f.read().lower():
                         return True
             except (IOError, OSError):
                 pass
 
             # Check for Android environment variables
-            if os.environ.get("ANDROID_ROOT") or os.environ.get("ANDROID_DATA"):
+            if os.environ.get('ANDROID_ROOT') or os.environ.get('ANDROID_DATA'):
                 return True
 
             return False
@@ -53,8 +48,7 @@ class AndroidOptimizer:
         """Apply Android-specific settings"""
         # Reduce particle count
         from PyPong.core import config
-
-        if hasattr(config, "MAX_PARTICLES"):
+        if hasattr(config, 'MAX_PARTICLES'):
             config.MAX_PARTICLES = min(config.MAX_PARTICLES, 30)
 
         # Enable battery saver by default on Android
@@ -67,7 +61,7 @@ class AndroidOptimizer:
         Args:
             profile: 'low', 'balanced', or 'high'
         """
-        if profile not in ("low", "balanced", "high"):
+        if profile not in ('low', 'balanced', 'high'):
             logger.warning(f"Invalid profile: {profile}")
             return
 
@@ -75,11 +69,11 @@ class AndroidOptimizer:
         logger.info(f"Performance profile set to: {profile}")
 
         # Apply profile settings
-        if profile == "low":
+        if profile == 'low':
             self._apply_low_performance()
-        elif profile == "balanced":
+        elif profile == 'balanced':
             self._apply_balanced_performance()
-        elif profile == "high":
+        elif profile == 'high':
             self._apply_high_performance()
 
     def _apply_low_performance(self) -> None:
@@ -87,13 +81,13 @@ class AndroidOptimizer:
         from PyPong.core import config
 
         # Reduce effects
-        if hasattr(config, "MAX_PARTICLES"):
+        if hasattr(config, 'MAX_PARTICLES'):
             config.MAX_PARTICLES = 20
-        if hasattr(config, "MAX_TRAILS"):
+        if hasattr(config, 'MAX_TRAILS'):
             config.MAX_TRAILS = 10
 
         # Lower FPS target
-        if hasattr(config, "FPS"):
+        if hasattr(config, 'FPS'):
             config.FPS = 30
 
         self.battery_saver = True
@@ -103,11 +97,11 @@ class AndroidOptimizer:
         """Apply balanced performance settings"""
         from PyPong.core import config
 
-        if hasattr(config, "MAX_PARTICLES"):
+        if hasattr(config, 'MAX_PARTICLES'):
             config.MAX_PARTICLES = 30
-        if hasattr(config, "MAX_TRAILS"):
+        if hasattr(config, 'MAX_TRAILS'):
             config.MAX_TRAILS = 15
-        if hasattr(config, "FPS"):
+        if hasattr(config, 'FPS'):
             config.FPS = 60
 
         self.battery_saver = False
@@ -117,11 +111,11 @@ class AndroidOptimizer:
         """Apply high performance settings"""
         from PyPong.core import config
 
-        if hasattr(config, "MAX_PARTICLES"):
+        if hasattr(config, 'MAX_PARTICLES'):
             config.MAX_PARTICLES = 50
-        if hasattr(config, "MAX_TRAILS"):
+        if hasattr(config, 'MAX_TRAILS'):
             config.MAX_TRAILS = 20
-        if hasattr(config, "FPS"):
+        if hasattr(config, 'FPS'):
             config.FPS = 60
 
         self.battery_saver = False
@@ -145,7 +139,6 @@ class AndroidOptimizer:
         # Try to detect device capabilities
         try:
             import psutil
-
             # Check available memory
             memory = psutil.virtual_memory()
             available_mb = memory.available / (1024 * 1024)
@@ -155,27 +148,27 @@ class AndroidOptimizer:
 
             # Recommend profile based on resources
             if available_mb < 512 or cpu_count <= 2:
-                profile = "low"
+                profile = 'low'
             elif available_mb < 1024 or cpu_count <= 4:
-                profile = "balanced"
+                profile = 'balanced'
             else:
-                profile = "high"
+                profile = 'high'
 
             return {
-                "profile": profile,
-                "available_memory_mb": available_mb,
-                "cpu_count": cpu_count,
+                'profile': profile,
+                'available_memory_mb': available_mb,
+                'cpu_count': cpu_count,
             }
         except ImportError:
             # psutil not available, use conservative defaults
-            return {"profile": "balanced"}
+            return {'profile': 'balanced'}
 
     def optimize_touch_input(self) -> Dict[str, Any]:
         """Get optimized touch input settings"""
         return {
-            "touch_zone_size": "large" if self.is_android else "medium",
-            "haptic_feedback": self.is_android,
-            "gesture_sensitivity": "high" if self.is_android else "medium",
+            'touch_zone_size': 'large' if self.is_android else 'medium',
+            'haptic_feedback': self.is_android,
+            'gesture_sensitivity': 'high' if self.is_android else 'medium',
         }
 
 
@@ -203,7 +196,6 @@ class BackButtonHandler:
             if self.back_callback:
                 self.back_callback()
             return True
-
         return False
 
 
@@ -218,8 +210,7 @@ class ScreenWakeLock:
         """Detect Android platform"""
         try:
             import os
-
-            return bool(os.environ.get("ANDROID_ROOT"))
+            return bool(os.environ.get('ANDROID_ROOT'))
         except Exception:
             return False
 
@@ -231,13 +222,10 @@ class ScreenWakeLock:
         try:
             # Try to use Android wake lock via jnius
             from jnius import autoclass
-
-            PythonActivity = autoclass("org.kivy.android.PythonActivity")
-            View = autoclass("android.view.View")
-
+            PythonActivity = autoclass('org.kivy.android.PythonActivity')
+            View = autoclass('android.view.View')
             activity = PythonActivity.mActivity
             activity.getWindow().addFlags(View.KEEP_SCREEN_ON)
-
             self.is_locked = True
             logger.info("Screen wake lock acquired")
         except Exception as e:
@@ -250,13 +238,10 @@ class ScreenWakeLock:
 
         try:
             from jnius import autoclass
-
-            PythonActivity = autoclass("org.kivy.android.PythonActivity")
-            View = autoclass("android.view.View")
-
+            PythonActivity = autoclass('org.kivy.android.PythonActivity')
+            View = autoclass('android.view.View')
             activity = PythonActivity.mActivity
             activity.getWindow().clearFlags(View.KEEP_SCREEN_ON)
-
             self.is_locked = False
             logger.info("Screen wake lock released")
         except Exception as e:
@@ -274,8 +259,7 @@ class HapticFeedback:
         """Detect Android platform"""
         try:
             import os
-
-            return bool(os.environ.get("ANDROID_ROOT"))
+            return bool(os.environ.get('ANDROID_ROOT'))
         except Exception:
             return False
 
@@ -291,9 +275,9 @@ class HapticFeedback:
 
         try:
             from jnius import autoclass
-
-            PythonActivity = autoclass("org.kivy.android.PythonActivity")
-            Context = autoclass("android.content.Context")
+            PythonActivity = autoclass('org.kivy.android.PythonActivity')
+            Context = autoclass('android.content.Context')
+            Vibrator = autoclass('android.os.Vibrator')
 
             activity = PythonActivity.mActivity
             vibrator = activity.getSystemService(Context.VIBRATOR_SERVICE)

@@ -1,15 +1,13 @@
 """Test AI system"""
 import sys
-
-sys.path.insert(0, ".")
+sys.path.insert(0, '.')
 
 import pygame
-
 pygame.init()
 screen = pygame.display.set_mode((1, 1))
 
-from PyPong.core.entities import Ball, Paddle
-from PyPong.systems.ai import AdaptiveAI, PredictiveAI, SimpleAI, create_ai
+from PyPong.core.entities import Paddle, Ball
+from PyPong.systems.ai import create_ai, SimpleAI, PredictiveAI, AdaptiveAI
 
 # Create paddle and ball
 paddle = Paddle(player_number=2, is_ai=True)

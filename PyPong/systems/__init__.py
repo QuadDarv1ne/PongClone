@@ -1,9 +1,9 @@
 """Game systems"""
 from .achievements import AchievementManager
-from .arenas import Arena, ArenaManager
-from .audio import AudioManager
 from .enhanced_ai import EnhancedAI, TrajectoryPredictor
-from .enhanced_powerups import ComboSystem, EnhancedPowerUp, PowerUpRegistry
+from .enhanced_powerups import EnhancedPowerUp, ComboSystem, PowerUpRegistry
+from .arenas import Arena, ArenaManager
 from .replay_system import ReplayManager
-from .settings import Settings
+from .audio import AudioManager
 from .stats import StatsManager
+from .settings import Settings

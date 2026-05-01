@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Optional, Tuple
+"""Mobile touch controls and adaptive screen scaling"""
+from typing import Dict, List, Optional, Tuple, Any
 
 import pygame
 
@@ -20,12 +21,14 @@ class TouchControls:
         """Create touch zones optimized for different screen sizes"""
         # Left side for player 1, right side for player 2
         zone_width = self.screen_width // 2
+        # Add padding for better touch experience
+        padding = int(self.screen_height * 0.05)
 
         return {
             "p1_up": pygame.Rect(0, 0, zone_width, self.screen_height // 2),
             "p1_down": pygame.Rect(0, self.screen_height // 2, zone_width, self.screen_height // 2),
             "p2_up": pygame.Rect(zone_width, 0, zone_width, self.screen_height // 2),
-            "p2_down": pygame.Rect(zone_width, self.screen_height // 2, zone_width, self.screen_height // 2),
+            "p2_down": pygame.Rect(zone_width, self.screen_height // 2, zone_width, self.screen_height // 2)
         }
 
     def update_screen_size(self, width: int, height: int) -> None:
@@ -37,17 +40,17 @@ class TouchControls:
 
     def handle_touch(self, event):
         """Handle touch/mouse events"""
-        if event.type == pygame.MOUSEBUTTONDOWN:  # type: ignore[attr-defined]
+        if event.type == pygame.MOUSEBUTTONDOWN:
             pos = event.pos
             for zone_name, zone_rect in self.touch_zones.items():
                 if zone_rect.collidepoint(pos):
                     self.active_touches[zone_name] = True
 
-        elif event.type == pygame.MOUSEBUTTONUP:  # type: ignore[attr-defined]
+        elif event.type == pygame.MOUSEBUTTONUP:
             self.active_touches.clear()
 
         # Support for pygame FINGERDOWN/FINGERUP events (if available)
-        elif hasattr(pygame, "FINGERDOWN") and event.type == pygame.FINGERDOWN:  # type: ignore[attr-defined]
+        elif hasattr(pygame, 'FINGERDOWN') and event.type == pygame.FINGERDOWN:
             # Convert normalized coordinates to screen coordinates
             x = int(event.x * self.screen_width)
             y = int(event.y * self.screen_height)
@@ -56,15 +59,21 @@ class TouchControls:
                 if zone_rect.collidepoint(pos):
                     self.active_touches[zone_name] = True
 
-        elif hasattr(pygame, "FINGERUP") and event.type == pygame.FINGERUP:  # type: ignore[attr-defined]
+        elif hasattr(pygame, 'FINGERUP') and event.type == pygame.FINGERUP:
             self.active_touches.clear()
 
     def get_input(self, player):
         """Get input state for specified player"""
         if player == 1:
-            return {"up": self.active_touches.get("p1_up", False), "down": self.active_touches.get("p1_down", False)}
+            return {
+                "up": self.active_touches.get("p1_up", False),
+                "down": self.active_touches.get("p1_down", False)
+            }
         elif player == 2:
-            return {"up": self.active_touches.get("p2_up", False), "down": self.active_touches.get("p2_down", False)}
+            return {
+                "up": self.active_touches.get("p2_up", False),
+                "down": self.active_touches.get("p2_down", False)
+            }
         return {"up": False, "down": False}
 
     def toggle_zones(self) -> None:
@@ -92,7 +101,8 @@ class TouchControls:
 
         surface.blit(overlay, (0, 0))
 
-        # Draw labels
+        # Draw labels with adaptive font size
+        font_size = max(16, int(self.screen_height * 0.025))
         p1_up_text = self.font.render("↑", True, color_p1)
         p1_down_text = self.font.render("↓", True, color_p1)
         p2_up_text = self.font.render("↑", True, color_p2)
@@ -101,21 +111,11 @@ class TouchControls:
         # Position labels in center of zones
         padding = 20
         surface.blit(p1_up_text, (self.screen_width // 4 - p1_up_text.get_width() // 2, padding))
-        surface.blit(
-            p1_down_text,
-            (
-                self.screen_width // 4 - p1_down_text.get_width() // 2,
-                self.screen_height - padding - p1_down_text.get_height(),
-            ),
-        )
+        surface.blit(p1_down_text, (self.screen_width // 4 - p1_down_text.get_width() // 2,
+                                     self.screen_height - padding - p1_down_text.get_height()))
         surface.blit(p2_up_text, (3 * self.screen_width // 4 - p2_up_text.get_width() // 2, padding))
-        surface.blit(
-            p2_down_text,
-            (
-                3 * self.screen_width // 4 - p2_down_text.get_width() // 2,
-                self.screen_height - padding - p2_down_text.get_height(),
-            ),
-        )
+        surface.blit(p2_down_text, (3 * self.screen_width // 4 - p2_down_text.get_width() // 2,
+                                     self.screen_height - padding - p2_down_text.get_height()))
 
 
 class AdaptiveScreen:
@@ -149,7 +149,7 @@ class AdaptiveScreen:
             self.scale_x = width / self.base_width
             self.scale_y = height / self.base_height
 
-        self._needs_resize = self.scale_x != 1.0 or self.scale_y != 1.0
+        self._needs_resize = (self.scale_x != 1.0 or self.scale_y != 1.0)
 
     def scale_position(self, x: float, y: float) -> Tuple[int, int]:
         """Scale position coordinates"""
@@ -179,7 +179,6 @@ class AdaptiveScreen:
             # Create black background and center scaled surface
             final_surface = pygame.Surface((self.current_width, self.current_height))
             final_surface.fill((0, 0, 0))
-
             offset_x = (self.current_width - scaled_width) // 2
             offset_y = (self.current_height - scaled_height) // 2
             final_surface.blit(scaled_surface, (offset_x, offset_y))
@@ -196,5 +195,5 @@ class AdaptiveScreen:
             "current_resolution": (self.current_width, self.current_height),
             "scale": (self.scale_x, self.scale_y),
             "aspect_ratio": self.aspect_ratio,
-            "needs_resize": self._needs_resize,
+            "needs_resize": self._needs_resize
         }
