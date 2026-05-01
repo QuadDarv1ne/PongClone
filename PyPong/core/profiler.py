@@ -69,12 +69,17 @@ class PerformanceProfiler:
     def profile_section(self, name: str):
         """
         Context manager for profiling a code section
-        
+
         Usage:
             with profiler.profile_section('render'):
                 # code to profile
                 pass
         """
+        # Skip profiling if disabled
+        if not self._enabled:
+            yield
+            return
+
         start_time = time.perf_counter()
         try:
             yield

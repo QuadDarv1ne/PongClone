@@ -1,7 +1,7 @@
 """
 Collision manager for game physics
 """
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 import pygame
 
 from PyPong.core.entities import Paddle, Ball, PowerUp
@@ -110,13 +110,34 @@ class CollisionManager:
     def get_shake_intensity(self, is_goal: bool) -> Tuple[int, int]:
         """
         Получить интенсивность тряски экрана.
-        
+
         Args:
             is_goal: True если это гол
-            
+
         Returns:
             tuple: (intensity_x, intensity_y)
         """
         if is_goal:
             return SHAKE_INTENSITY_GOAL
         return SHAKE_INTENSITY_NORMAL
+
+    def check_multi_ball_collisions(
+        self,
+        balls: List[Ball],
+        paddle: Paddle
+    ) -> List[Tuple[Ball, bool]]:
+        """
+        Проверить коллизии нескольких мячей с ракеткой.
+
+        Args:
+            balls: Список мячей
+            paddle: Ракетка
+
+        Returns:
+            List[Tuple[Ball, bool]]: Список кортежей (мяч, была_коллизия)
+        """
+        collisions = []
+        for ball in balls:
+            is_collision = self.check_paddle_collision(ball, paddle)
+            collisions.append((ball, is_collision))
+        return collisions
