@@ -2,17 +2,8 @@
 
 ## 🔴 Критично (сделать сейчас)
 
-### Исправление тестов
-- [ ] `test_collision_manager.py::test_check_multi_ball_collisions` - метод отсутствует в CollisionManager
-- [ ] `test_integration.py::test_pong_game_creation` - модуль `PyPong.pong_v4` не найден
-- [ ] `test_integration.py::test_pong_game_shutdown` - модуль `PyPong.pong_v4` не найден
-- [ ] `test_object_pool.py::test_pool_reuse` - ожидает 1 использование, получает 2
-- [ ] `test_object_pool.py::test_pool_statistics` - ожидает 3 использования, получает больше
-- [ ] `test_object_pool.py::test_pool_vs_new_objects` - производительность пула хуже ожидаемой
-- [ ] `test_profiler.py::test_disabled_profiler` - профилировщик собирает данные даже когда отключен
-
 ### Проверка функциональности
-- [ ] Проверить работу игры после разрешения конфликтов слияния
+- [ ] Проверить работу игры после исправлений
 - [ ] Убедиться, что все импорты работают корректно
 - [ ] Проверить работу меню и навигации
 
