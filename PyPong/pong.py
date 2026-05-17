@@ -14,6 +14,7 @@ from PyPong.core.config import (
 )
 from PyPong.core.config_extended import config
 from PyPong.core.event_bus import get_event_bus, GameEvent
+from PyPong.core.constants import EventType
 from PyPong.core.profiler import get_profiler
 from PyPong.core.game_state import GameState, GameStateManager
 from PyPong.game.input_handler import InputHandler
@@ -23,6 +24,8 @@ from PyPong.rendering.renderer import Renderer
 from PyPong.systems.audio import AudioManager
 from PyPong.systems.stats import StatsManager
 from PyPong.systems.settings import Settings
+from PyPong.systems.achievements import AchievementManager
+from PyPong.systems.leaderboard import Leaderboard
 from PyPong.ui.ui import PowerUpIndicator, FPSCounter, SettingsMenu
 from PyPong.content.tournament import Tournament
 from PyPong.ui.themes import get_theme
@@ -99,6 +102,8 @@ class PongGame:
             self.state_manager = GameStateManager(self.screen, self.game_surface)
             self.audio = AudioManager()
             self.stats = StatsManager()
+            self.achievements = AchievementManager()
+            self.leaderboard = Leaderboard()
             self.tournament = Tournament()
             self.gamepad = GamepadManager()
             self.touch = mobile_module.TouchControls(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -341,6 +346,7 @@ class PongGame:
                 if state == GameState.MODE_SELECT:
                     self.game_loop.cleanup_game_objects()
                 self.audio.play_music()
+                self._game_start_time = pygame.time.get_ticks()
 
                 # Публикуем событие начала игры
                 self.event_bus.publish(GameEvent.GAME_START, {'mode': self.state_manager.game_mode})
@@ -353,6 +359,31 @@ class PongGame:
                         player1_score=self.state_manager.player1_score,
                         player2_score=self.state_manager.player2_score,
                     )
+                    # Check achievements
+                    duration = (pygame.time.get_ticks() - self._game_start_time) / 1000
+                    winner = self.state_manager.winner
+                    p1_score = self.state_manager.player1_score
+                    p2_score = self.state_manager.player2_score
+                    winner_score = p1_score if winner == 1 else p2_score
+                    perfect = (winner_score >= self.state_manager.player1_score + self.state_manager.player2_score - winner_score + 1) if winner else False
+                    self.achievements.check_event(
+                        EventType.GAME_END,
+                        won=winner is not None,
+                        perfect=perfect,
+                        duration=duration,
+                    )
+                    # Add to leaderboard
+                    if winner:
+                        score = winner_score * 100
+                        mode = self.state_manager.game_mode
+                        diff = self.state_manager.difficulty
+                        self.leaderboard.add_score(
+                            name=f"Player {winner}",
+                            score=score,
+                            mode=mode,
+                            difficulty=diff,
+                            duration=int(duration),
+                        )
                     self.game_loop.cleanup_game_objects()
                     self.state_manager.reset_scores()
 

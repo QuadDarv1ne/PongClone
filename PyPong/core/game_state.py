@@ -232,6 +232,13 @@ class GameStateManager:
         power_speed = self.small_font.render(t("help.powerups_speed"), True, WHITE)
         power_large = self.small_font.render(t("help.powerups_large"), True, WHITE)
         power_slow = self.small_font.render(t("help.powerups_slow"), True, WHITE)
+        power_multi = self.small_font.render(t("help.powerups_multi"), True, WHITE)
+        power_shrink = self.small_font.render(t("help.powerups_shrink"), True, WHITE)
+        power_invisible = self.small_font.render(t("help.powerups_invisible"), True, WHITE)
+        power_reverse = self.small_font.render(t("help.powerups_reverse"), True, WHITE)
+        power_shield = self.small_font.render(t("help.powerups_shield"), True, WHITE)
+        power_freeze = self.small_font.render(t("help.powerups_freeze"), True, WHITE)
+        power_magnet = self.small_font.render(t("help.powerups_magnet"), True, WHITE)
 
         # Objective
         obj_title = self.menu_font.render(t("help.objective_title"), True, WHITE)
@@ -257,13 +264,22 @@ class GameStateManager:
         self.game_surface.blit(gen_stats, gen_stats.get_rect(center=(WINDOW_WIDTH // 2, 360)))
         self.game_surface.blit(gen_settings, gen_settings.get_rect(center=(WINDOW_WIDTH // 2, 390)))
 
-        self.game_surface.blit(power_title, power_title.get_rect(center=(WINDOW_WIDTH // 2, 450)))
-        self.game_surface.blit(power_speed, power_speed.get_rect(center=(WINDOW_WIDTH // 2, 485)))
-        self.game_surface.blit(power_large, power_large.get_rect(center=(WINDOW_WIDTH // 2, 515)))
-        self.game_surface.blit(power_slow, power_slow.get_rect(center=(WINDOW_WIDTH // 2, 545)))
+        self.game_surface.blit(power_title, power_title.get_rect(center=(WINDOW_WIDTH // 2, 420)))
+        # Left column
+        self.game_surface.blit(power_speed, power_speed.get_rect(center=(WINDOW_WIDTH // 3, 460)))
+        self.game_surface.blit(power_large, power_large.get_rect(center=(WINDOW_WIDTH // 3, 488)))
+        self.game_surface.blit(power_slow, power_slow.get_rect(center=(WINDOW_WIDTH // 3, 516)))
+        self.game_surface.blit(power_multi, power_multi.get_rect(center=(WINDOW_WIDTH // 3, 544)))
+        self.game_surface.blit(power_shrink, power_shrink.get_rect(center=(WINDOW_WIDTH // 3, 572)))
+        # Right column
+        self.game_surface.blit(power_invisible, power_invisible.get_rect(center=(2 * WINDOW_WIDTH // 3, 460)))
+        self.game_surface.blit(power_reverse, power_reverse.get_rect(center=(2 * WINDOW_WIDTH // 3, 488)))
+        self.game_surface.blit(power_shield, power_shield.get_rect(center=(2 * WINDOW_WIDTH // 3, 516)))
+        self.game_surface.blit(power_freeze, power_freeze.get_rect(center=(2 * WINDOW_WIDTH // 3, 544)))
+        self.game_surface.blit(power_magnet, power_magnet.get_rect(center=(2 * WINDOW_WIDTH // 3, 572)))
 
-        self.game_surface.blit(obj_title, obj_title.get_rect(center=(WINDOW_WIDTH // 2, 590)))
-        self.game_surface.blit(obj_text, obj_text.get_rect(center=(WINDOW_WIDTH // 2, 625)))
-        self.game_surface.blit(obj_tip, obj_tip.get_rect(center=(WINDOW_WIDTH // 2, 660)))
+        self.game_surface.blit(obj_title, obj_title.get_rect(center=(WINDOW_WIDTH // 2, 610)))
+        self.game_surface.blit(obj_text, obj_text.get_rect(center=(WINDOW_WIDTH // 2, 640)))
+        self.game_surface.blit(obj_tip, obj_tip.get_rect(center=(WINDOW_WIDTH // 2, 665)))
 
         self.game_surface.blit(back, back.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30)))
