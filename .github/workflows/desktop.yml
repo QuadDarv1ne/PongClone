@@ -28,7 +28,7 @@ jobs:
     - name: Build Windows EXE
       run: |
         cd PyPong
-        pyinstaller --onefile --windowed --name EnhancedPong --icon=../assets/icon.ico --add-data "*.wav;." --add-data "*.ogg;." --add-data "*.mp3;." --add-data "music;music" pong_v4.py
+        pyinstaller --onefile --windowed --name EnhancedPong --icon=../assets/icon.ico --add-data "assets;assets" --add-data "locales;locales" --add-data "data;data" pong.py
       shell: pwsh
 
     - name: Upload Windows EXE
@@ -70,7 +70,7 @@ jobs:
     - name: Build Linux Binary
       run: |
         cd PyPong
-        pyinstaller --onefile --name EnhancedPong --add-data "*.wav:." --add-data "*.ogg:." --add-data "*.mp3:." --add-data "music:music" pong_v4.py
+        pyinstaller --onefile --name EnhancedPong --add-data "assets:assets" --add-data "locales:locales" --add-data "data:data" pong.py
 
     - name: Make executable
       run: chmod +x PyPong/dist/EnhancedPong
@@ -114,7 +114,7 @@ jobs:
     - name: Build macOS App
       run: |
         cd PyPong
-        pyinstaller --onefile --windowed --name EnhancedPong --add-data "*.wav:." --add-data "*.ogg:." --add-data "*.mp3:." --add-data "music:music" pong_v4.py
+        pyinstaller --onefile --windowed --name EnhancedPong --add-data "assets:assets" --add-data "locales:locales" --add-data "data:data" pong.py
 
     - name: Create DMG
       run: |
