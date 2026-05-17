@@ -104,6 +104,7 @@ class Paddle(pygame.sprite.Sprite):
         return sim_y
 
     def resize(self, new_height: int) -> None:
+        new_height = max(new_height, 20)  # minimum viable paddle height
         center = self.rect.center
         self.height = new_height
         self.image = pygame.Surface([self.width, self.height])
@@ -157,9 +158,7 @@ class Ball(pygame.sprite.Sprite):
             self.rect.clamp_ip(pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
 
     def bounce_paddle(self, paddle: Paddle) -> None:
-        # Guard against zero division
-        if paddle.height == 0:
-            return
+        assert paddle.height > 0, "Paddle height must be positive"
         # Calculate hit position on paddle (-1 to 1)
         hit_pos = (self.rect.centery - paddle.rect.centery) / (paddle.height / 2)
         hit_pos = max(-1, min(1, hit_pos))

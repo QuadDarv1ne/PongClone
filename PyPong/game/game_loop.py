@@ -245,19 +245,20 @@ class GameLoop:
                     self.shake.start(*intensity)
     
     def _check_scoring(self) -> None:
-        """Проверить забитый гол"""
-        scorer = self.collision_manager.check_score(self.ball, WINDOW_WIDTH)
-        
-        if scorer:
-            self.state_manager.add_score(scorer)
-            self.audio.play_sound("score")
-            self.goal_anim.start(scorer)
-            
-            intensity = self.collision_manager.get_shake_intensity(is_goal=True)
-            self.shake.start(*intensity)
-            
-            if self.state_manager.state == GameState.PLAYING:
-                self.ball.reset_ball()
+        """Проверить забитый гол для всех мячей"""
+        balls = [s for s in self.all_sprites if isinstance(s, Ball)]
+        for b in balls:
+            scorer = self.collision_manager.check_score(b, WINDOW_WIDTH)
+            if scorer:
+                self.state_manager.add_score(scorer)
+                self.audio.play_sound("score")
+                self.goal_anim.start(scorer)
+
+                intensity = self.collision_manager.get_shake_intensity(is_goal=True)
+                self.shake.start(*intensity)
+
+                if self.state_manager.state == GameState.PLAYING:
+                    b.reset_ball()
     
     def _handle_powerup_collisions(self) -> None:
         """Обработать коллизии с power-up"""
