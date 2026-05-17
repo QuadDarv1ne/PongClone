@@ -272,11 +272,13 @@ class MainMenu(Menu):
 
     def _setup_items(self):
         """Setup menu items"""
-        # These will be connected to actual actions
+        self.add_item("menu.quick_match", lambda: None, "Q")
         self.add_item("menu.start", lambda: None, "Enter")
+        self.add_item("menu.multiplayer", lambda: None, "P")
         self.add_item("menu.campaign", lambda: None, "C")
         self.add_item("menu.challenges", lambda: None, "H")
         self.add_item("menu.minigames", lambda: None, "M")
+        self.add_item("menu.customize", lambda: None, "U")
         self.add_item("menu.stats", lambda: None, "S")
         self.add_item("menu.settings", lambda: None, "O")
         self.add_item("menu.quit", lambda: None, "Esc")

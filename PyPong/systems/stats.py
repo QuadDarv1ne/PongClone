@@ -38,7 +38,12 @@ class StatsManager:
             "highest_score": 0,
             "total_goals": 0,
             "best_streak": 0,
-            "last_played": None
+            "last_played": None,
+            "match_history": [],  # List of recent matches
+            "total_playtime": 0,  # seconds
+            "longest_rally": 0,  # hits in a single rally
+            "powerups_collected": 0,
+            "achievements_unlocked": 0,
         }
     
     @log_exception
@@ -55,7 +60,12 @@ class StatsManager:
         self, 
         winner: int, 
         player1_score: int, 
-        player2_score: int
+        player2_score: int,
+        game_mode: str = "classic",
+        difficulty: str = "",
+        duration: int = 0,
+        longest_rally: int = 0,
+        powerups_collected: int = 0
     ) -> None:
         """Записать результат игры"""
         self.stats["games_played"] += 1
@@ -73,6 +83,29 @@ class StatsManager:
         
         self.stats["total_goals"] += player1_score + player2_score
         self.stats["last_played"] = datetime.now().isoformat()
+        
+        # Track cumulative stats
+        if duration > 0:
+            self.stats["total_playtime"] = self.stats.get("total_playtime", 0) + duration
+        if longest_rally > 0:
+            self.stats["longest_rally"] = max(self.stats.get("longest_rally", 0), longest_rally)
+        if powerups_collected > 0:
+            self.stats["powerups_collected"] = self.stats.get("powerups_collected", 0) + powerups_collected
+        
+        # Add to match history (keep last 50)
+        match_record = {
+            "date": datetime.now().isoformat(),
+            "mode": game_mode,
+            "difficulty": difficulty,
+            "winner": winner,
+            "score": f"{player1_score}-{player2_score}",
+            "duration": duration,
+            "longest_rally": longest_rally,
+        }
+        
+        history = self.stats.get("match_history", [])
+        history.insert(0, match_record)  # Most recent first
+        self.stats["match_history"] = history[:50]  # Keep only last 50
         
         self.save_stats()
     

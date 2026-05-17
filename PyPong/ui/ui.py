@@ -151,6 +151,8 @@ class SettingsMenu:
         "vsync": "settings.vsync",
         "powerup_spawn_chance": "settings.powerup_spawn_chance",
         "reset_defaults": "settings.reset_defaults",
+        "export_settings": "settings.export_settings",
+        "import_settings": "settings.import_settings",
         "controls_page": "settings.controls_page",
         "back": "settings.back",
     }
@@ -205,6 +207,8 @@ class SettingsMenu:
         ("high_contrast", False),
         # Actions
         ("controls_page", False),
+        ("export_settings", False),
+        ("import_settings", False),
         ("reset_defaults", False),
         # Footer
         ("back", False),
@@ -217,6 +221,7 @@ class SettingsMenu:
         self.small_font = pygame.font.SysFont(FONT_NAME, 28)
         self.title_font = pygame.font.SysFont(FONT_NAME, 40, bold=True)
         self.desc_font = pygame.font.SysFont(FONT_NAME, 22)
+        self.search_font = pygame.font.SysFont(FONT_NAME, 24)
         self.selected = 0
         self._build_options()
         # Scroll offset for long menus
@@ -227,6 +232,14 @@ class SettingsMenu:
         # Reset confirmation state
         self.awaiting_reset_confirm = False
         self._reset_display = pygame.display.get_mode
+        # Search
+        self.search_query = ""
+        self.search_active = False
+        self.filtered_options = list(range(len(self.options)))
+        # Presets
+        self.showing_presets = False
+        self.presets_selected = 0
+        self._build_presets()
 
     def _build_options(self) -> None:
         """Build flat options list from categorized structure"""
@@ -237,24 +250,124 @@ class SettingsMenu:
             if is_header:
                 self.category_headers.append(len(self.options) - 1)
 
+    def _build_presets(self) -> None:
+        """Define setting presets"""
+        self.presets = {
+            "casual": {
+                "name_key": "settings.preset_casual",
+                "settings": {
+                    "difficulty": "Easy",
+                    "winning_score": 3,
+                    "ball_speed": 3,
+                    "paddle_size": 140,
+                    "powerup_spawn_chance": 750,
+                    "enable_effects": True,
+                    "enable_shake": False,
+                    "target_fps": 60,
+                    "performance_profile": "medium",
+                    "audio_cues": True,
+                    "reduce_motion": False,
+                }
+            },
+            "competitive": {
+                "name_key": "settings.preset_competitive",
+                "settings": {
+                    "difficulty": "Hard",
+                    "winning_score": 11,
+                    "ball_speed": 6,
+                    "paddle_size": 80,
+                    "powerup_spawn_chance": 0,
+                    "enable_effects": False,
+                    "enable_shake": False,
+                    "target_fps": 120,
+                    "performance_profile": "high",
+                    "audio_cues": False,
+                    "reduce_motion": True,
+                }
+            },
+            "streamer": {
+                "name_key": "settings.preset_streamer",
+                "settings": {
+                    "difficulty": "Medium",
+                    "winning_score": 5,
+                    "ball_speed": 4,
+                    "paddle_size": 100,
+                    "powerup_spawn_chance": 500,
+                    "enable_effects": True,
+                    "enable_shake": True,
+                    "target_fps": 60,
+                    "performance_profile": "ultra",
+                    "show_fps": False,
+                    "audio_cues": True,
+                }
+            },
+            "accessibility": {
+                "name_key": "settings.preset_accessibility",
+                "settings": {
+                    "difficulty": "Easy",
+                    "winning_score": 3,
+                    "ball_speed": 2,
+                    "paddle_size": 160,
+                    "powerup_spawn_chance": 250,
+                    "enable_effects": True,
+                    "enable_shake": False,
+                    "target_fps": 60,
+                    "performance_profile": "medium",
+                    "audio_cues": True,
+                    "reduce_motion": True,
+                    "high_contrast": True,
+                    "large_ui": True,
+                    "colorblind_mode": "normal",
+                }
+            },
+        }
+        self.preset_keys = list(self.presets.keys())
+
+    def _apply_preset(self, preset_key: str) -> None:
+        """Apply a preset configuration"""
+        preset = self.presets.get(preset_key)
+        if not preset:
+            return
+
+        for key, value in preset["settings"].items():
+            self.settings.set(key, value)
+
+        # Re-apply accessibility and performance settings
+        self._apply_accessibility_changes()
+        self._apply_vsync()
+
+        # Apply performance profile if set
+        profile = self.settings.get("performance_profile")
+        if profile:
+            self._apply_profile(profile)
+
+        logger.info(f"Applied preset: {preset_key}")
+
     def draw(self) -> None:
         """Отрисовать меню настроек с категориями и описаниями"""
         if self.showing_controls:
             self._draw_controls_page()
             return
 
+        if self.showing_presets:
+            self._draw_presets()
+            return
+
         self.screen.fill((15, 15, 25))
 
         # Title with underline
         title = self.title_font.render(t("settings.title"), True, (100, 200, 255))
-        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 50))
+        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 30))
         self.screen.blit(title, title_rect)
-        pygame.draw.line(
-            self.screen, (60, 120, 180),
-            (title_rect.left, title_rect.bottom + 4),
-            (title_rect.right, title_rect.bottom + 4),
-            2,
+
+        # Search bar
+        self._draw_search_bar()
+
+        # Presets button hint
+        presets_btn = self.search_font.render(
+            t("settings.presets_button"), True, (150, 200, 100)
         )
+        self.screen.blit(presets_btn, (WINDOW_WIDTH - 200, 45))
 
         # Calculate scroll offset to keep selected item visible
         if self.selected < self.scroll_offset:
@@ -262,31 +375,38 @@ class SettingsMenu:
         elif self.selected >= self.scroll_offset + self.max_visible:
             self.scroll_offset = self.selected - self.max_visible + 1
 
-        # Draw options
-        start_y = 95
+        # Draw options (filtered by search if active)
+        start_y = 85
         line_height = 32
-        for i in range(self.scroll_offset, min(len(self.options), self.scroll_offset + self.max_visible)):
+
+        options_to_draw = self.filtered_options if self.search_active else list(range(len(self.options)))
+
+        visible_count = 0
+        for i in options_to_draw:
+            if visible_count >= self.max_visible:
+                break
+
+            visible_y = start_y + visible_count * line_height
             option = self.options[i]
-            visible_idx = i - self.scroll_offset
-            y = start_y + visible_idx * line_height
+            visible_count += 1
 
             # Category header
             if i in self.category_headers:
                 header_text = t(self.OPTION_KEYS.get(option, option))
                 header_surf = self.small_font.render(header_text, True, (80, 160, 200))
-                self.screen.blit(header_surf, (WINDOW_WIDTH // 2 - header_surf.get_width() // 2, y))
+                self.screen.blit(header_surf, (WINDOW_WIDTH // 2 - header_surf.get_width() // 2, visible_y))
                 # Separator line
                 pygame.draw.line(
                     self.screen, (40, 60, 80),
-                    (50, y + line_height - 2),
-                    (WINDOW_WIDTH - 50, y + line_height - 2),
+                    (50, visible_y + line_height - 2),
+                    (WINDOW_WIDTH - 50, visible_y + line_height - 2),
                     1,
                 )
                 continue
 
             # Selected highlight
             if i == self.selected:
-                highlight_rect = pygame.Rect(40, y - 2, WINDOW_WIDTH - 80, line_height)
+                highlight_rect = pygame.Rect(40, visible_y - 2, WINDOW_WIDTH - 80, line_height)
                 pygame.draw.rect(self.screen, (30, 40, 60), highlight_rect, border_radius=4)
                 pygame.draw.rect(self.screen, (80, 160, 255), highlight_rect, 1, border_radius=4)
 
@@ -329,7 +449,7 @@ class SettingsMenu:
                 elif option == "powerup_spawn_chance":
                     pct = value / 10 if value > 0 else 0
                     value = f"{pct:.0f}%" if value > 0 else t("misc.off")
-                elif option in ("reset_defaults", "controls_page"):
+                elif option in ("reset_defaults", "controls_page", "export_settings", "import_settings"):
                     value = ""
 
                 if value:
@@ -340,22 +460,22 @@ class SettingsMenu:
                 text = t(self.OPTION_KEYS[option])
 
             text_surface = self.small_font.render(text, True, color)
-            self.screen.blit(text_surface, (60, y))
+            self.screen.blit(text_surface, (60, visible_y))
 
         # Description for selected option
-        self._draw_description()
+        self._draw_description_for_selected()
 
         # Reset confirmation overlay
         if self.awaiting_reset_confirm:
             self._draw_reset_confirmation()
 
         # Scroll indicators
-        total_non_header = len(self.options) - len(self.category_headers)
-        if total_non_header > self.max_visible:
+        if len(options_to_draw) > self.max_visible:
             if self.scroll_offset > 0:
                 up_arrow = self.small_font.render("▲", True, (100, 100, 120))
                 self.screen.blit(up_arrow, (WINDOW_WIDTH - 30, start_y - 18))
-            if self.scroll_offset + self.max_visible < len(self.options):
+            last_visible_idx = min(self.scroll_offset + self.max_visible, len(options_to_draw))
+            if last_visible_idx < len(options_to_draw):
                 down_arrow = self.small_font.render("▼", True, (100, 100, 120))
                 last_y = start_y + (self.max_visible - 1) * line_height
                 self.screen.blit(down_arrow, (WINDOW_WIDTH - 30, last_y + line_height))
@@ -380,6 +500,154 @@ class SettingsMenu:
             desc_y = WINDOW_HEIGHT - 40
 
         self.screen.blit(desc_surf, (60, desc_y))
+
+    def _draw_description_for_selected(self) -> None:
+        """Draw description for the currently selected option (search-aware)"""
+        options_to_draw = self.filtered_options if self.search_active else list(range(len(self.options)))
+        if not options_to_draw:
+            return
+
+        # Find the visible position of selected item
+        try:
+            visible_idx = options_to_draw.index(self.selected)
+        except ValueError:
+            return
+
+        option = self.options[self.selected]
+        if self.selected in self.category_headers:
+            return
+
+        desc_key = f"settings.desc_{option}"
+        desc = t(desc_key)
+        if desc == desc_key:
+            return
+
+        desc_surf = self.desc_font.render(desc, True, (120, 140, 160))
+        desc_y = 85 + visible_idx * 32 + 32
+        if desc_y > WINDOW_HEIGHT - 40:
+            desc_y = WINDOW_HEIGHT - 40
+
+        self.screen.blit(desc_surf, (60, desc_y))
+
+    def _draw_search_bar(self) -> None:
+        """Draw search bar"""
+        search_x, search_y = 50, 55
+        search_w, search_h = WINDOW_WIDTH - 100, 30
+
+        # Search background
+        bg_color = (40, 50, 70) if self.search_active else (30, 30, 40)
+        pygame.draw.rect(self.screen, bg_color, (search_x, search_y, search_w, search_h), border_radius=6)
+        if self.search_active:
+            pygame.draw.rect(self.screen, (100, 200, 255), (search_x, search_y, search_w, search_h), 2, border_radius=6)
+
+        # Search icon
+        icon = self.search_font.render("🔍" if self.search_active else "⌕", True, (150, 150, 150))
+        self.screen.blit(icon, (search_x + 8, search_y + 2))
+
+        # Search text
+        if self.search_query:
+            text = self.search_font.render(self.search_query, True, (255, 255, 255))
+            self.screen.blit(text, (search_x + 35, search_y + 3))
+        elif self.search_active:
+            placeholder = self.search_font.render(t("settings.search_placeholder"), True, (100, 100, 120))
+            self.screen.blit(placeholder, (search_x + 35, search_y + 3))
+        else:
+            hint = self.search_font.render(t("settings.search_hint"), True, (100, 100, 120))
+            self.screen.blit(hint, (search_x + 35, search_y + 3))
+
+        # Result count
+        if self.search_active:
+            count = len(self.filtered_options) - len([i for i in self.filtered_options if i in self.category_headers])
+            count_text = self.search_font.render(f"{count} found", True, (150, 200, 100))
+            self.screen.blit(count_text, (search_x + search_w - 100, search_y + 3))
+
+    def _update_search(self) -> None:
+        """Filter options based on search query"""
+        if not self.search_query:
+            self.search_active = False
+            self.filtered_options = list(range(len(self.options)))
+            return
+
+        self.search_active = True
+        query = self.search_query.lower()
+        self.filtered_options = []
+
+        for i, option in enumerate(self.options):
+            # Search in display name
+            display_name = t(self.OPTION_KEYS.get(option, option)).lower()
+            # Search in description
+            desc_key = f"settings.desc_{option}"
+            desc = t(desc_key).lower()
+            # Search in option key itself
+            key_search = option.lower()
+
+            if query in display_name or query in desc or query in key_search:
+                self.filtered_options.append(i)
+
+        # Reset selection if needed
+        if self.selected not in self.filtered_options and self.filtered_options:
+            # Find closest visible option
+            for i in self.filtered_options:
+                if i not in self.category_headers:
+                    self.selected = i
+                    break
+
+    def _draw_presets(self) -> None:
+        """Draw presets screen"""
+        self.screen.fill((15, 15, 25))
+
+        # Title
+        title = self.title_font.render(t("settings.presets_title"), True, (150, 200, 100))
+        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 50))
+        self.screen.blit(title, title_rect)
+
+        # Preset cards
+        card_width = 400
+        card_height = 120
+        start_x = (WINDOW_WIDTH - card_width) // 2
+        start_y = 120
+        spacing = 20
+
+        for i, preset_key in enumerate(self.preset_keys):
+            preset = self.presets[preset_key]
+            y = start_y + i * (card_height + spacing)
+
+            # Card background
+            is_selected = (i == self.presets_selected)
+            card_color = (40, 60, 40) if is_selected else (30, 30, 40)
+            pygame.draw.rect(self.screen, card_color, (start_x, y, card_width, card_height), border_radius=8)
+            if is_selected:
+                pygame.draw.rect(self.screen, (150, 200, 100), (start_x, y, card_width, card_height), 2, border_radius=8)
+
+            # Preset name
+            preset_name = t(preset["name_key"])
+            name_surf = self.font.render(preset_name, True, (255, 255, 255))
+            self.screen.blit(name_surf, (start_x + 20, y + 10))
+
+            # Description (list key settings)
+            settings_desc = []
+            s = preset["settings"]
+            if "difficulty" in s:
+                settings_desc.append(t(f"difficulty.{s['difficulty'].lower()}"))
+            if "ball_speed" in s:
+                settings_desc.append(f"Speed: {s['ball_speed']}")
+            if "paddle_size" in s:
+                settings_desc.append(f"Paddle: {s['paddle_size']}")
+            if "winning_score" in s:
+                settings_desc.append(f"Score: {s['winning_score']}")
+
+            desc_text = " | ".join(settings_desc)
+            desc_surf = self.desc_font.render(desc_text, True, (150, 150, 150))
+            self.screen.blit(desc_surf, (start_x + 20, y + 50))
+
+            # Apply hint
+            if is_selected:
+                apply_hint = self.desc_font.render(f"ENTER: {t('settings.preset_apply')}", True, (150, 200, 100))
+                self.screen.blit(apply_hint, (start_x + 20, y + 80))
+
+        # Bottom hint
+        back_hint = self.search_font.render(f"ESC: {t('settings.preset_back')}", True, (100, 100, 100))
+        self.screen.blit(back_hint, (WINDOW_WIDTH // 2 - 60, WINDOW_HEIGHT - 50))
 
     def _draw_controls_page(self) -> None:
         """Draw the controls/keybindings page"""
@@ -466,6 +734,20 @@ class SettingsMenu:
         if event.type != pygame.KEYDOWN:
             return None
 
+        # Handle presets screen
+        if self.showing_presets:
+            if event.key == pygame.K_ESCAPE:
+                self.showing_presets = False
+            elif event.key == pygame.K_UP:
+                self.presets_selected = max(0, self.presets_selected - 1)
+            elif event.key == pygame.K_DOWN:
+                self.presets_selected = min(len(self.preset_keys) - 1, self.presets_selected + 1)
+            elif event.key == pygame.K_RETURN:
+                preset_key = self.preset_keys[self.presets_selected]
+                self._apply_preset(preset_key)
+                self.showing_presets = False
+            return None
+
         # Handle reset confirmation
         if self.awaiting_reset_confirm:
             if event.key == pygame.K_RETURN:
@@ -473,6 +755,30 @@ class SettingsMenu:
                 self.awaiting_reset_confirm = False
             elif event.key == pygame.K_ESCAPE:
                 self.awaiting_reset_confirm = False
+            return None
+
+        # Handle search mode
+        if self.search_active:
+            if event.key == pygame.K_ESCAPE:
+                # Exit search
+                self.search_query = ""
+                self._update_search()
+            elif event.key == pygame.K_BACKSPACE:
+                # Delete last character
+                self.search_query = self.search_query[:-1]
+                self._update_search()
+            elif event.key == pygame.K_RETURN:
+                # Exit search
+                self.search_query = ""
+                self._update_search()
+            elif event.key == pygame.K_F:
+                # Toggle search with Ctrl+F (just F for now)
+                self.search_query = ""
+                self._update_search()
+            elif event.unicode and event.unicode.isprintable():
+                # Add character to search
+                self.search_query += event.unicode
+                self._update_search()
             return None
 
         # Controls page
@@ -483,6 +789,18 @@ class SettingsMenu:
 
         if event.key == pygame.K_ESCAPE:
             return "back"
+
+        if event.key == pygame.K_F:
+            # Enter search mode
+            self.search_query = ""
+            self._update_search()
+            return None
+
+        if event.key == pygame.K_p:
+            # Open presets
+            self.showing_presets = True
+            self.presets_selected = 0
+            return None
 
         if event.key == pygame.K_UP:
             self._move_selection(-1)
@@ -500,6 +818,10 @@ class SettingsMenu:
                 self.showing_controls = True
             elif option == "reset_defaults":
                 self.awaiting_reset_confirm = True
+            elif option == "export_settings":
+                self._export_settings()
+            elif option == "import_settings":
+                self._import_settings()
 
         return None
 
@@ -604,6 +926,86 @@ class SettingsMenu:
         self._apply_accessibility_changes()
         self._apply_vsync()
         logger.info("Settings reset to defaults")
+
+    def _export_settings(self) -> None:
+        """Export current settings to a JSON file"""
+        import datetime
+        from pathlib import Path
+
+        try:
+            # Create exports directory
+            exports_dir = Path(__file__).parent.parent / 'data' / 'exports'
+            exports_dir.mkdir(parents=True, exist_ok=True)
+
+            # Generate filename with timestamp
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = exports_dir / f"settings_{timestamp}.json"
+
+            # Export only user settings (not internal ones)
+            export_data = {
+                "version": "1.0",
+                "exported_at": datetime.datetime.now().isoformat(),
+                "settings": {}
+            }
+
+            # Filter out internal/auto-detected settings
+            skip_keys = {"auto_detected", "window_width", "window_height"}
+            for key, value in self.settings.data.items():
+                if key not in skip_keys:
+                    export_data["settings"][key] = value
+
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(export_data, f, indent=2)
+
+            logger.info(f"Settings exported to: {filename}")
+            # Show notification (could be enhanced later)
+            print(f"Settings exported to: {filename}")
+
+        except Exception as e:
+            logger.error(f"Failed to export settings: {e}")
+            print(f"Export failed: {e}")
+
+    def _import_settings(self) -> None:
+        """Import settings from the most recent export file"""
+        from pathlib import Path
+
+        try:
+            exports_dir = Path(__file__).parent.parent / 'data' / 'exports'
+
+            if not exports_dir.exists():
+                logger.info("No exports directory found")
+                return
+
+            # Find the most recent export file
+            export_files = list(exports_dir.glob("settings_*.json"))
+            if not export_files:
+                logger.info("No export files found")
+                return
+
+            # Sort by modification time, get most recent
+            latest_file = max(export_files, key=lambda f: f.stat().st_mtime)
+
+            with open(latest_file, 'r', encoding='utf-8') as f:
+                import_data = json.load(f)
+
+            # Validate format
+            if "settings" not in import_data:
+                raise ValueError("Invalid export file format")
+
+            # Import settings
+            for key, value in import_data["settings"].items():
+                self.settings.set(key, value)
+
+            # Re-apply everything
+            self._apply_accessibility_changes()
+            self._apply_vsync()
+
+            logger.info(f"Settings imported from: {latest_file}")
+            print(f"Settings imported from: {latest_file.name}")
+
+        except Exception as e:
+            logger.error(f"Failed to import settings: {e}")
+            print(f"Import failed: {e}")
 
     def _apply_vsync(self) -> None:
         """Apply vsync setting"""

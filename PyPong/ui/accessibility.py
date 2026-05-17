@@ -271,6 +271,138 @@ class VisualIndicator:
             surface.blit(text_surface, ind['position'])
 
 
+class SoundVisualizer:
+    """Visual representation of sound events for accessibility"""
+    
+    def __init__(self, screen_width: int, screen_height: int):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.active_pulses: List[Dict] = []
+        self.max_pulses = 3
+        
+        # Sound event types and their visual representations
+        self.event_styles = {
+            'goal': {
+                'color': (255, 215, 0),  # Gold
+                'icon': '★',
+                'text': 'GOAL!',
+                'position': 'center',
+            },
+            'hit': {
+                'color': (100, 200, 255),  # Blue
+                'icon': '•',
+                'text': '',
+                'position': 'ball',
+            },
+            'powerup': {
+                'color': (255, 100, 255),  # Purple
+                'icon': '✦',
+                'text': 'POWER-UP',
+                'position': 'powerup',
+            },
+            'bounce': {
+                'color': (150, 150, 150),  # Gray
+                'icon': '〰',
+                'text': '',
+                'position': 'edge',
+            },
+            'win': {
+                'color': (255, 215, 0),  # Gold
+                'icon': '🏆',
+                'text': 'WINNER!',
+                'position': 'center',
+            },
+        }
+    
+    def add_sound_event(
+        self,
+        event_type: str,
+        ball_position: Optional[Tuple[int, int]] = None,
+        powerup_position: Optional[Tuple[int, int]] = None,
+    ) -> None:
+        """
+        Add a visual sound event.
+        
+        Args:
+            event_type: Type of sound event (goal, hit, powerup, bounce, win)
+            ball_position: Current ball position for positioning
+            powerup_position: Power-up position for positioning
+        """
+        if len(self.active_pulses) >= self.max_pulses:
+            self.active_pulses.pop(0)
+        
+        style = self.event_styles.get(event_type, {
+            'color': (255, 255, 255),
+            'icon': '!',
+            'text': '',
+            'position': 'center',
+        })
+        
+        # Determine position
+        if style['position'] == 'ball' and ball_position:
+            pos = (ball_position[0], ball_position[1] - 30)
+        elif style['position'] == 'powerup' and powerup_position:
+            pos = (powerup_position[0], powerup_position[1] - 30)
+        elif style['position'] == 'edge':
+            pos = (self.screen_width // 2, 50)
+        else:  # center
+            pos = (self.screen_width // 2, self.screen_height // 3)
+        
+        self.active_pulses.append({
+            'event_type': event_type,
+            'position': pos,
+            'color': style['color'],
+            'icon': style['icon'],
+            'text': style['text'],
+            'age': 0,
+            'duration': 45,  # frames
+            'max_radius': 60,
+        })
+    
+    def update(self) -> None:
+        """Update sound visualizations"""
+        for pulse in self.active_pulses:
+            pulse['age'] += 1
+        
+        # Remove expired pulses
+        self.active_pulses = [
+            p for p in self.active_pulses if p['age'] < p['duration']
+        ]
+    
+    def draw(self, surface: pygame.Surface, font: Optional[pygame.font.Font] = None) -> None:
+        """Draw sound visualizations"""
+        if font is None:
+            font = pygame.font.SysFont("arial", 24, bold=True)
+        
+        for pulse in self.active_pulses:
+            progress = pulse['age'] / pulse['duration']
+            alpha = int(255 * (1 - progress))
+            
+            x, y = pulse['position']
+            color = pulse['color']
+            
+            # Expanding ring effect
+            radius = int(pulse['max_radius'] * progress)
+            if radius > 0:
+                ring_surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+                ring_color = (*color, int(100 * (1 - progress)))
+                pygame.draw.circle(ring_surf, ring_color, (radius, radius), radius, 3)
+                surface.blit(ring_surf, (x - radius, y - radius))
+            
+            # Icon
+            if pulse['icon']:
+                icon_font = pygame.font.SysFont("arial", 32)
+                icon_surf = icon_font.render(pulse['icon'], True, color)
+                icon_surf.set_alpha(alpha)
+                surface.blit(icon_surf, (x - icon_surf.get_width() // 2, y - 20))
+            
+            # Text
+            if pulse['text']:
+                text_surf = font.render(pulse['text'], True, color)
+                text_surf.set_alpha(alpha)
+                surface.blit(text_surf, (x - text_surf.get_width() // 2, y + 15))
+
+
 class KeyboardNavigator:
     """Keyboard navigation for menus (accessibility)"""
     

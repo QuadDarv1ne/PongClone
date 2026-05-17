@@ -159,6 +159,120 @@ class ComboDisplay:
         screen.blit(mult_text, mult_rect)
 
 
+class ToastNotification:
+    """Toast-style notification with slide-in/out animation"""
+
+    def __init__(
+        self,
+        message: str,
+        subtitle: str = "",
+        icon: str = "",
+        color: Tuple[int, int, int] = Colors.YELLOW.to_tuple(),
+        duration: int = 3000,
+        position: str = "top_right"
+    ):
+        self.message = message
+        self.subtitle = subtitle
+        self.icon = icon
+        self.color = color
+        self.duration = duration
+        self.position = position
+
+        self.start_time = pygame.time.get_ticks()
+        self.font = pygame.font.SysFont("Helvetica", 28, bold=True)
+        self.small_font = pygame.font.SysFont("Helvetica", 20)
+        self.icon_font = pygame.font.SysFont("Helvetica", 32)
+
+        # Animation timings
+        self.slide_in_duration = 400
+        self.slide_out_duration = 300
+        self.visible_duration = duration - self.slide_in_duration - self.slide_out_duration
+
+    def _get_position(self, screen_width: int, screen_height: int) -> Tuple[int, int]:
+        """Calculate position based on placement preference"""
+        if self.position == "top_right":
+            return (screen_width - 420, 60)
+        elif self.position == "top_center":
+            return (screen_width // 2 - 200, 60)
+        elif self.position == "bottom_center":
+            return (screen_width // 2 - 200, screen_height - 100)
+        return (screen_width - 420, 60)
+
+    def is_active(self) -> bool:
+        """Check if notification is still active"""
+        elapsed = pygame.time.get_ticks() - self.start_time
+        return elapsed < self.duration
+
+    def _get_slide_offset(self) -> float:
+        """Get current slide animation offset (0-1)"""
+        current_time = pygame.time.get_ticks()
+        elapsed = current_time - self.start_time
+
+        if elapsed < self.slide_in_duration:
+            # Sliding in
+            return elapsed / self.slide_in_duration
+        elif elapsed > self.duration - self.slide_out_duration:
+            # Sliding out
+            return 1.0 - (elapsed - (self.duration - self.slide_out_duration)) / self.slide_out_duration
+        return 1.0
+
+    def _get_alpha(self) -> int:
+        """Get current alpha value"""
+        offset = self._get_slide_offset()
+        return int(255 * offset)
+
+    def draw(self, screen: pygame.Surface) -> None:
+        """Draw notification"""
+        if not self.is_active():
+            return
+
+        alpha = self._get_alpha()
+        slide = self._get_slide_offset()
+
+        screen_width = screen.get_width()
+        screen_height = screen.get_height()
+
+        # Position
+        x, base_y = self._get_position(screen_width, screen_height)
+        y = int(base_y + (1 - slide) * -50)  # Slide from above
+
+        # Dimensions
+        width = 400
+        height = 70 if self.subtitle else 50
+
+        # Background
+        bg_surf = pygame.Surface((width, height), pygame.SRCALPHA)
+        bg_color = (*self.color, int(40 * slide))
+        pygame.draw.rect(bg_surf, bg_color, (0, 0, width, height), border_radius=8)
+        bg_surf.set_alpha(alpha)
+
+        screen.blit(bg_surf, (x, y))
+
+        # Border
+        border_surf = pygame.Surface((width, height), pygame.SRCALPHA)
+        border_surf.set_alpha(alpha)
+        pygame.draw.rect(border_surf, (*self.color, int(200 * slide)), (0, 0, width, height), 2, border_radius=8)
+        screen.blit(border_surf, (x, y))
+
+        # Icon
+        if self.icon:
+            icon_surf = self.icon_font.render(self.icon, True, self.color)
+            icon_surf.set_alpha(alpha)
+            screen.blit(icon_surf, (x + 10, y + 10))
+
+        # Message
+        msg_surf = self.font.render(self.message, True, Colors.WHITE.to_tuple())
+        msg_surf.set_alpha(alpha)
+        msg_x = x + 50 if self.icon else x + 15
+        screen.blit(msg_surf, (msg_x, y + 10))
+
+        # Subtitle
+        if self.subtitle:
+            sub_surf = self.small_font.render(self.subtitle, True, (200, 200, 200))
+            sub_surf.set_alpha(alpha)
+            screen.blit(sub_surf, (msg_x, y + 40))
+
+
 class AchievementNotification:
     """Achievement unlock notification"""
 
@@ -222,7 +336,7 @@ class AchievementNotification:
         pygame.draw.rect(screen, Colors.YELLOW.to_tuple(), bg_rect, 2)
 
         # Text
-        title = self.font.render("🏆 Achievement Unlocked!", True, Colors.YELLOW.to_tuple())
+        title = self.font.render("Achievement Unlocked!", True, Colors.YELLOW.to_tuple())
         title_surf = pygame.Surface(title.get_size())
         title_surf.set_alpha(alpha)
         title_surf.blit(title, (0, 0))
@@ -359,6 +473,7 @@ class NotificationManager:
 
     def __init__(self) -> None:
         self.notifications: List[AchievementNotification] = []
+        self.toasts: List[ToastNotification] = []
         self.particles: List[ParticleEffect] = []
 
     def add_achievement(self, name: str, points: int) -> None:
@@ -366,6 +481,37 @@ class NotificationManager:
         notification = AchievementNotification(name, points)
         self.notifications.append(notification)
         logger.debug(f"Added achievement notification: {name}")
+
+    def add_toast(
+        self,
+        message: str,
+        subtitle: str = "",
+        icon: str = "",
+        color: Tuple[int, int, int] = Colors.YELLOW.to_tuple(),
+        duration: int = 3000,
+        position: str = "top_right"
+    ) -> None:
+        """Add toast notification"""
+        toast = ToastNotification(message, subtitle, icon, color, duration, position)
+        self.toasts.append(toast)
+        logger.debug(f"Added toast notification: {message}")
+
+    def add_success(self, message: str, subtitle: str = "") -> None:
+        """Add success toast"""
+        self.add_toast(message, subtitle, "✓", Colors.GREEN.to_tuple())
+
+    def add_error(self, message: str, subtitle: str = "") -> None:
+        """Add error toast"""
+        self.add_toast(message, subtitle, "✗", Colors.RED.to_tuple())
+
+    def add_info(self, message: str, subtitle: str = "") -> None:
+        """Add info toast"""
+        self.add_toast(message, subtitle, "ℹ", (100, 150, 255))
+
+    def add_unlock(self, item_name: str, item_type: str = "") -> None:
+        """Add unlock notification"""
+        subtitle = f"{item_type} unlocked!" if item_type else "Unlocked!"
+        self.add_toast(item_name, subtitle, "🔓", Colors.YELLOW.to_tuple())
 
     def add_particles(self, x: float, y: float, color: Tuple[int, int, int]) -> None:
         """Add particle effect"""
@@ -376,6 +522,7 @@ class NotificationManager:
         """Update all notifications"""
         # Remove inactive notifications
         self.notifications = [n for n in self.notifications if n.is_active()]
+        self.toasts = [t for t in self.toasts if t.is_active()]
 
         # Update particles
         self.particles = [p for p in self.particles if p.update()]
@@ -386,6 +533,12 @@ class NotificationManager:
         for particle in self.particles:
             particle.draw(screen)
 
-        # Draw notifications
+        # Draw toasts (stacked vertically)
+        active_toasts = [t for t in self.toasts if t.is_active()]
+        for i, toast in enumerate(active_toasts):
+            # Offset each toast vertically to stack them
+            toast.draw(screen)
+
+        # Draw achievement notifications
         for i, notification in enumerate(self.notifications):
             notification.draw(screen, screen.get_width() // 2)
