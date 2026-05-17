@@ -1,18 +1,11 @@
 """ Multiplayer game mode """
 import pygame
+from pygame.locals import K_a, K_DOWN, K_UP, K_z, KEYDOWN, KEYUP, K_ESCAPE, QUIT
 
 from PyPong.core.config import (
     DARK_GRAY,
     FONT_NAME,
     GREEN,
-    K_a,
-    K_DOWN,
-    K_UP,
-    K_z,
-    KEYDOWN,
-    KEYUP,
-    K_ESCAPE,
-    QUIT,
     WHITE,
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
