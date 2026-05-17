@@ -223,6 +223,10 @@ class TrailPool:
         """Clear all trails"""
         self.trails.empty()
 
+    def empty(self) -> None:
+        """Alias for clear() — pygame.sprite.Group compatibility"""
+        self.clear()
+
 
 class BatchRenderer:
     """

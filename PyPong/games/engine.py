@@ -159,10 +159,11 @@ class GameEngine:
 
         pygame.quit()
 
-    def main() -> None:
-        """Entry point"""
-        engine = GameEngine()
-        engine.run()
+
+def main() -> None:
+    """Entry point"""
+    engine = GameEngine()
+    engine.run()
 
 
 if __name__ == "__main__":

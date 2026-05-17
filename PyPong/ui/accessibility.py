@@ -2,7 +2,7 @@
 Accessibility features for PyPong
 """
 import pygame
-from typing import Optional, Dict, Tuple, List
+from typing import Optional, Dict, Tuple, List, Any
 from enum import Enum, auto
 from PyPong.core.logger import logger
 
@@ -187,7 +187,7 @@ class AccessibilityManager:
         # In a real implementation, this would interface with
         # platform-specific screen reader APIs
     
-    def get_settings(self) -> Dict[str, any]:
+    def get_settings(self) -> Dict[str, Any]:
         """Get current accessibility settings"""
         return {
             'color_blind_mode': self.color_blind_mode.name,
@@ -198,7 +198,7 @@ class AccessibilityManager:
             'reduce_motion': self.reduce_motion,
         }
     
-    def load_settings(self, settings: Dict[str, any]) -> None:
+    def load_settings(self, settings: Dict[str, Any]) -> None:
         """Load accessibility settings"""
         try:
             mode_name = settings.get('color_blind_mode', 'NORMAL')
