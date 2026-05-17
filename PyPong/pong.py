@@ -284,6 +284,8 @@ class PongGame:
             self._handle_escape()
         elif key == K_RETURN:
             self._handle_enter()
+        elif self.state_manager.state == GameState.ONBOARDING:
+            self._handle_onboarding_keys(key)
         elif self.state_manager.state == GameState.MENU:
             self._handle_menu_keys(key)
         elif self.state_manager.state == GameState.MODE_SELECT:
@@ -316,12 +318,15 @@ class PongGame:
             GameState.MINIGAME_PLAYING: GameState.MENU,
             GameState.MINIGAME_COMPLETE: GameState.MENU,
             GameState.GOAL_CELEBRATION: GameState.GAME_OVER,
+            GameState.ONBOARDING: GameState.MENU,
         }
 
         new_state = transitions.get(state)
         if new_state:
             self.state_manager.state = new_state
             if new_state == GameState.MENU:
+                if state == GameState.ONBOARDING:
+                    self.settings.set("has_seen_onboarding", True)
                 self.game_loop.cleanup_game_objects()
         else:
             logger.warning(f"No ESC transition defined for state: {state}")
@@ -432,6 +437,17 @@ class PongGame:
             self.state_manager.set_difficulty(action_data['difficulty'])
 
     @log_exception
+    def _handle_onboarding_keys(self, key: int) -> None:
+        """Обработать клавиши на экране обучения"""
+        sm = self.state_manager
+        if key == K_RETURN:
+            if sm.onboarding_slide < sm.onboarding_total_slides - 1:
+                sm.onboarding_slide += 1
+            else:
+                self.settings.set("has_seen_onboarding", True)
+                sm.state = GameState.MODE_SELECT
+
+    @log_exception
     def update_game(self) -> None:
         """Обновить игру"""
         if self.state_manager.state == GameState.PLAYING:
@@ -504,6 +520,11 @@ class PongGame:
         """Запустить игровой цикл"""
         running = True
         frame_count = 0
+
+        # Show onboarding on first launch
+        if not self.settings.get("has_seen_onboarding", False):
+            self.state_manager.state = GameState.ONBOARDING
+            self.state_manager.onboarding_slide = 0
 
         try:
             while running:

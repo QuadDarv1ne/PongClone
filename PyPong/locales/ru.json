@@ -123,6 +123,21 @@
   "help.objective_tip": "Совет: Бейте мяч краем ракетки для ударов под углом!",
   "help.back": "Нажмите ESC для возврата",
   
+  "onboarding.slide_1_title": "Добро пожаловать в Enhanced Pong!",
+  "onboarding.slide_1_content_1": "Классический Понг с захватывающими бонусами!",
+  "onboarding.slide_1_content_2": "Первым набрав 5 очков побеждает.",
+  "onboarding.slide_1_content_3": "Перебейте мяч за ракетку противника, чтобы забить.",
+  "onboarding.slide_2_title": "Управление",
+  "onboarding.slide_3_title": "Бонусы",
+  "onboarding.slide_4_title": "Готовы играть!",
+  "onboarding.slide_4_content_1": "Выберите режим: против ИИ или Игрок против Игрока.",
+  "onboarding.slide_4_content_2": "Собирайте бонусы, чтобы получить преимущество!",
+  "onboarding.slide_4_content_3": "Удачи, и пусть победит сильнейший!",
+  "onboarding.next": "Нажмите ENTER для продолжения",
+  "onboarding.start": "Нажмите ENTER для игры",
+  "onboarding.skip": "Нажмите ESC для пропуска",
+  "onboarding.progress": "Слайд {0} из {1}",
+
   "tournament.winner": "Победитель турнира: Игрок {0}!",
   "tournament.back": "Нажмите ENTER для возврата",
   

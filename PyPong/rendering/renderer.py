@@ -162,6 +162,11 @@ class Renderer:
         self.game_surface.fill(BLACK)
         state_manager.draw_help()
     
+    def render_onboarding(self, state_manager: Any) -> None:
+        """Отрисовать экран обучения"""
+        self.game_surface.fill(BLACK)
+        state_manager.draw_onboarding()
+    
     def render_settings(self, settings_menu: Any) -> None:
         """Отрисовать настройки"""
         settings_menu.draw()
@@ -225,6 +230,7 @@ class Renderer:
             GameState.STATS: lambda: self.render_stats(state_manager, stats_manager),
             GameState.SETTINGS: lambda: self.render_settings(settings_menu),
             GameState.HELP: lambda: self.render_help(state_manager),
+            GameState.ONBOARDING: lambda: self.render_onboarding(state_manager),
             GameState.TOURNAMENT_COMPLETE: lambda: self.render_tournament_complete(tournament),
             GameState.CAMPAIGN_SELECT: lambda: self.render_menu(state_manager),
             GameState.CAMPAIGN_PLAYING: lambda: self.render_game(

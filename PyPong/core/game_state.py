@@ -34,6 +34,7 @@ class GameState(Enum):
     MINIGAME_COMPLETE = 15
     HELP = 16
     GOAL_CELEBRATION = 17
+    ONBOARDING = 18
 
 
 class GameStateManager:
@@ -53,6 +54,10 @@ class GameStateManager:
         self.difficulty = "Medium"
         self.game_mode = "ai"
         self.tournament_mode = False
+
+        # Onboarding
+        self.onboarding_slide = 0
+        self.onboarding_total_slides = 4
 
         # Fonts
         self.title_font = pygame.font.SysFont(FONT_NAME, 72)
@@ -283,3 +288,118 @@ class GameStateManager:
         self.game_surface.blit(obj_tip, obj_tip.get_rect(center=(WINDOW_WIDTH // 2, 665)))
 
         self.game_surface.blit(back, back.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30)))
+
+    def draw_onboarding(self) -> None:
+        """Отрисовать экран обучения"""
+        self.game_surface.fill(GRAY)
+
+        slide = self.onboarding_slide
+
+        if slide == 0:
+            self._draw_slide_welcome()
+        elif slide == 1:
+            self._draw_slide_controls()
+        elif slide == 2:
+            self._draw_slide_powerups()
+        elif slide == 3:
+            self._draw_slide_ready()
+
+        # Slide counter
+        progress = self.small_font.render(
+            t("onboarding.progress").format(slide + 1, self.onboarding_total_slides),
+            True, (150, 150, 150)
+        )
+        self.game_surface.blit(progress, progress.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 60)))
+
+        # Navigation hints
+        if slide < self.onboarding_total_slides - 1:
+            next_text = self.small_font.render(t("onboarding.next"), True, WHITE)
+            self.game_surface.blit(next_text, next_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30)))
+        else:
+            start_text = self.small_font.render(t("onboarding.start"), True, GREEN)
+            self.game_surface.blit(start_text, start_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 30)))
+
+        skip_text = self.small_font.render(t("onboarding.skip"), True, (150, 150, 150))
+        self.game_surface.blit(skip_text, skip_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 10)))
+
+    def _draw_slide_welcome(self) -> None:
+        """Slide 1: Welcome"""
+        title = self.title_font.render(t("onboarding.slide_1_title"), True, WHITE)
+        c1 = self.small_font.render(t("onboarding.slide_1_content_1"), True, WHITE)
+        c2 = self.small_font.render(t("onboarding.slide_1_content_2"), True, WHITE)
+        c3 = self.small_font.render(t("onboarding.slide_1_content_3"), True, WHITE)
+
+        self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 150)))
+        self.game_surface.blit(c1, c1.get_rect(center=(WINDOW_WIDTH // 2, 280)))
+        self.game_surface.blit(c2, c2.get_rect(center=(WINDOW_WIDTH // 2, 340)))
+        self.game_surface.blit(c3, c3.get_rect(center=(WINDOW_WIDTH // 2, 400)))
+
+    def _draw_slide_controls(self) -> None:
+        """Slide 2: Controls (two-column)"""
+        title = self.title_font.render(t("onboarding.slide_2_title"), True, WHITE)
+
+        p1_title = self.menu_font.render(t("help.player1_title"), True, GREEN)
+        p1_up = self.small_font.render(t("help.player1_up"), True, WHITE)
+        p1_down = self.small_font.render(t("help.player1_down"), True, WHITE)
+
+        p2_title = self.menu_font.render(t("help.player2_title"), True, YELLOW)
+        p2_up = self.small_font.render(t("help.player2_up"), True, WHITE)
+        p2_down = self.small_font.render(t("help.player2_down"), True, WHITE)
+
+        gen_start = self.small_font.render(t("help.general_start"), True, WHITE)
+        gen_pause = self.small_font.render(t("help.general_pause"), True, WHITE)
+
+        self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 80)))
+
+        self.game_surface.blit(p1_title, p1_title.get_rect(center=(WINDOW_WIDTH // 4, 180)))
+        self.game_surface.blit(p1_up, p1_up.get_rect(center=(WINDOW_WIDTH // 4, 230)))
+        self.game_surface.blit(p1_down, p1_down.get_rect(center=(WINDOW_WIDTH // 4, 270)))
+
+        self.game_surface.blit(p2_title, p2_title.get_rect(center=(3 * WINDOW_WIDTH // 4, 180)))
+        self.game_surface.blit(p2_up, p2_up.get_rect(center=(3 * WINDOW_WIDTH // 4, 230)))
+        self.game_surface.blit(p2_down, p2_down.get_rect(center=(3 * WINDOW_WIDTH // 4, 270)))
+
+        self.game_surface.blit(gen_start, gen_start.get_rect(center=(WINDOW_WIDTH // 2, 370)))
+        self.game_surface.blit(gen_pause, gen_pause.get_rect(center=(WINDOW_WIDTH // 2, 410)))
+
+    def _draw_slide_powerups(self) -> None:
+        """Slide 3: Power-ups (two-column)"""
+        title = self.title_font.render(t("onboarding.slide_3_title"), True, (255, 165, 0))
+
+        p_speed = self.small_font.render(t("help.powerups_speed"), True, WHITE)
+        p_large = self.small_font.render(t("help.powerups_large"), True, WHITE)
+        p_slow = self.small_font.render(t("help.powerups_slow"), True, WHITE)
+        p_multi = self.small_font.render(t("help.powerups_multi"), True, WHITE)
+        p_shrink = self.small_font.render(t("help.powerups_shrink"), True, WHITE)
+
+        p_invis = self.small_font.render(t("help.powerups_invisible"), True, WHITE)
+        p_reverse = self.small_font.render(t("help.powerups_reverse"), True, WHITE)
+        p_shield = self.small_font.render(t("help.powerups_shield"), True, WHITE)
+        p_freeze = self.small_font.render(t("help.powerups_freeze"), True, WHITE)
+        p_magnet = self.small_font.render(t("help.powerups_magnet"), True, WHITE)
+
+        self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 100)))
+
+        self.game_surface.blit(p_speed, p_speed.get_rect(center=(WINDOW_WIDTH // 3, 200)))
+        self.game_surface.blit(p_large, p_large.get_rect(center=(WINDOW_WIDTH // 3, 250)))
+        self.game_surface.blit(p_slow, p_slow.get_rect(center=(WINDOW_WIDTH // 3, 300)))
+        self.game_surface.blit(p_multi, p_multi.get_rect(center=(WINDOW_WIDTH // 3, 350)))
+        self.game_surface.blit(p_shrink, p_shrink.get_rect(center=(WINDOW_WIDTH // 3, 400)))
+
+        self.game_surface.blit(p_invis, p_invis.get_rect(center=(2 * WINDOW_WIDTH // 3, 200)))
+        self.game_surface.blit(p_reverse, p_reverse.get_rect(center=(2 * WINDOW_WIDTH // 3, 250)))
+        self.game_surface.blit(p_shield, p_shield.get_rect(center=(2 * WINDOW_WIDTH // 3, 300)))
+        self.game_surface.blit(p_freeze, p_freeze.get_rect(center=(2 * WINDOW_WIDTH // 3, 350)))
+        self.game_surface.blit(p_magnet, p_magnet.get_rect(center=(2 * WINDOW_WIDTH // 3, 400)))
+
+    def _draw_slide_ready(self) -> None:
+        """Slide 4: Ready to Play"""
+        title = self.title_font.render(t("onboarding.slide_4_title"), True, GREEN)
+        c1 = self.small_font.render(t("onboarding.slide_4_content_1"), True, WHITE)
+        c2 = self.small_font.render(t("onboarding.slide_4_content_2"), True, WHITE)
+        c3 = self.small_font.render(t("onboarding.slide_4_content_3"), True, WHITE)
+
+        self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 200)))
+        self.game_surface.blit(c1, c1.get_rect(center=(WINDOW_WIDTH // 2, 320)))
+        self.game_surface.blit(c2, c2.get_rect(center=(WINDOW_WIDTH // 2, 380)))
+        self.game_surface.blit(c3, c3.get_rect(center=(WINDOW_WIDTH // 2, 440)))

@@ -123,6 +123,21 @@
   "help.objective_tip": "Tip: Hit the ball with the edge of your paddle for angled shots!",
   "help.back": "Press ESC to go back",
   
+  "onboarding.slide_1_title": "Welcome to Enhanced Pong!",
+  "onboarding.slide_1_content_1": "A classic Pong game with exciting power-ups!",
+  "onboarding.slide_1_content_2": "First to 5 points wins the match.",
+  "onboarding.slide_1_content_3": "Hit the ball past your opponent's paddle to score.",
+  "onboarding.slide_2_title": "Controls",
+  "onboarding.slide_3_title": "Power-Ups",
+  "onboarding.slide_4_title": "Ready to Play!",
+  "onboarding.slide_4_content_1": "Choose AI or Player vs Player mode.",
+  "onboarding.slide_4_content_2": "Collect power-ups to gain the advantage!",
+  "onboarding.slide_4_content_3": "Have fun and may the best player win!",
+  "onboarding.next": "Press ENTER for next",
+  "onboarding.start": "Press ENTER to play",
+  "onboarding.skip": "Press ESC to skip",
+  "onboarding.progress": "Slide {0} of {1}",
+
   "tournament.winner": "Tournament Winner: Player {0}!",
   "tournament.back": "Press ENTER to go back",
   

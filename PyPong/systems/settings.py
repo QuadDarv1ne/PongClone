@@ -42,7 +42,8 @@ class Settings:
             "show_fps": False,
             "fullscreen": False,
             "theme": "dark",
-            "touch_controls": False
+            "touch_controls": False,
+            "has_seen_onboarding": False,
         }
     
     @log_exception
