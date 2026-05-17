@@ -54,6 +54,7 @@ class GameStateManager:
         self.difficulty = "Medium"
         self.game_mode = "ai"
         self.tournament_mode = False
+        self.winning_score = WINNING_SCORE  # Default, overridden via settings
 
         # Onboarding
         self.onboarding_slide = 0
@@ -92,10 +93,10 @@ class GameStateManager:
         else:
             self.player2_score += 1
 
-        if self.player1_score >= WINNING_SCORE:
+        if self.player1_score >= self.winning_score:
             self.winner = 1
             self.state = GameState.GOAL_CELEBRATION
-        elif self.player2_score >= WINNING_SCORE:
+        elif self.player2_score >= self.winning_score:
             self.winner = 2
             self.state = GameState.GOAL_CELEBRATION
 
@@ -203,13 +204,14 @@ class GameStateManager:
     def draw_stats(self, stats_manager: "StatsManager") -> None:
         """Отрисовать статистику"""
         self.game_surface.fill(GRAY)
+        stats = stats_manager.stats
 
         title = self.title_font.render(t("stats.title"), True, WHITE)
-        games = self.menu_font.render(t("stats.games_played").format(stats_manager.stats['games_played']), True, WHITE)
-        p1_wins = self.menu_font.render(t("stats.player1_wins").format(stats_manager.stats['player1_wins']), True, WHITE)
-        p2_wins = self.menu_font.render(t("stats.player2_wins").format(stats_manager.stats['player2_wins']), True, WHITE)
-        high_score = self.menu_font.render(t("stats.highest_score").format(stats_manager.stats['highest_score']), True, WHITE)
-        total_goals = self.menu_font.render(t("stats.total_goals").format(stats_manager.stats['total_goals']), True, WHITE)
+        games = self.menu_font.render(t("stats.games_played").format(stats.get('games_played', 0)), True, WHITE)
+        p1_wins = self.menu_font.render(t("stats.player1_wins").format(stats.get('player1_wins', 0)), True, WHITE)
+        p2_wins = self.menu_font.render(t("stats.player2_wins").format(stats.get('player2_wins', 0)), True, WHITE)
+        high_score = self.menu_font.render(t("stats.highest_score").format(stats.get('highest_score', 0)), True, WHITE)
+        total_goals = self.menu_font.render(t("stats.total_goals").format(stats.get('total_goals', 0)), True, WHITE)
         back = self.small_font.render(t("stats.back"), True, WHITE)
 
         self.game_surface.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 100)))

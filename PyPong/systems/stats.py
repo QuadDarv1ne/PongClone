@@ -72,7 +72,7 @@ class StatsManager:
         
         if winner == 1:
             self.stats["player1_wins"] += 1
-        else:
+        elif winner == 2:
             self.stats["player2_wins"] += 1
         
         self.stats["highest_score"] = max(

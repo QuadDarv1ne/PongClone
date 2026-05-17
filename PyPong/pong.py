@@ -468,7 +468,8 @@ class PongGame:
                         player2_score=self.state_manager.player2_score,
                     )
                     # Check achievements
-                    duration = (pygame.time.get_ticks() - self._game_start_time) / 1000
+                    start_time = getattr(self, '_game_start_time', pygame.time.get_ticks())
+                    duration = (pygame.time.get_ticks() - start_time) / 1000
                     winner = self.state_manager.winner
                     p1_score = self.state_manager.player1_score
                     p2_score = self.state_manager.player2_score

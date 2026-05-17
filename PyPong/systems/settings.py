@@ -89,8 +89,12 @@ class Settings:
             logger.error(f"Failed to save settings: {e}")
     
     def get(self, key: str, default: Any = None) -> Any:
-        """Получить значение настройки"""
-        return self.data.get(key, default)
+        """Получить значение настройки с автоматическим fallback на значения по умолчанию"""
+        if key in self.data:
+            return self.data[key]
+        # Fall back to defaults for missing keys
+        defaults = self.default_settings()
+        return defaults.get(key, default)
     
     def set(self, key: str, value: Any) -> None:
         """Установить значение настройки"""

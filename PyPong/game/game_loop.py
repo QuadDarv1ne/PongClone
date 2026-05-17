@@ -74,6 +74,11 @@ class GameLoop:
         """Инициализировать игровые объекты"""
         is_ai = self.state_manager.game_mode == "ai"
         
+        # Sync winning_score from settings
+        ws = self.settings.get("winning_score")
+        if ws is not None:
+            self.state_manager.winning_score = ws
+        
         self.paddle1 = Paddle(1, is_ai=False, color=self.theme.paddle1_color)
         self.paddle2 = Paddle(2, is_ai=is_ai, color=self.theme.paddle2_color)
         self.ball = Ball()
@@ -222,7 +227,8 @@ class GameLoop:
     def _spawn_powerups(self) -> None:
         """Создать power-up случайно во время игры"""
         from random import randint
-        if self.powerups and randint(1, POWERUP_SPAWN_CHANCE) == 1 and len(self.powerups) == 0:
+        spawn_chance = self.settings.get("powerup_spawn_chance", POWERUP_SPAWN_CHANCE)
+        if self.powerups and randint(1, spawn_chance) == 1 and len(self.powerups) == 0:
             powerup = PowerUp()
             self.powerups.add(powerup)
     

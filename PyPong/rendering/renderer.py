@@ -99,6 +99,7 @@ class Renderer:
         if powerup_indicator and self.all_sprites:
             paddles = [s for s in self.all_sprites if hasattr(s, "player_number")]
             if len(paddles) >= 2:
+                paddles.sort(key=lambda p: p.player_number)
                 powerup_indicator.draw(
                     self.game_surface, self.powerups, paddles[0], paddles[1]
                 )

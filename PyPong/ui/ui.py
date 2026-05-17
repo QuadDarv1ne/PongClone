@@ -1,4 +1,5 @@
 """UI components for the game"""
+import json
 import pygame
 from typing import Any, Dict, List, Optional, Tuple
 from PyPong.core.config import (
@@ -231,7 +232,6 @@ class SettingsMenu:
         self.showing_controls = False
         # Reset confirmation state
         self.awaiting_reset_confirm = False
-        self._reset_display = pygame.display.get_mode
         # Search
         self.search_query = ""
         self.search_active = False
@@ -415,11 +415,11 @@ class SettingsMenu:
             if option != "back":
                 display_name = t(self.OPTION_KEYS.get(option, option))
                 value = self.settings.get(option)
-                if value is None:
-                    value = "N/A"
 
                 # Format value based on option type
-                if option in ("music_volume", "sfx_volume"):
+                if value is None:
+                    value = "N/A"
+                elif option in ("music_volume", "sfx_volume"):
                     value = f"{value:.0%}"
                 elif option in ("show_fps", "fullscreen", "touch_controls",
                                 "enable_effects", "enable_shake", "audio_cues",
@@ -771,10 +771,11 @@ class SettingsMenu:
                 # Exit search
                 self.search_query = ""
                 self._update_search()
-            elif event.key == pygame.K_F:
-                # Toggle search with Ctrl+F (just F for now)
+            elif event.key == pygame.K_f:
+                # Exit search (toggle)
+                self.search_active = False
                 self.search_query = ""
-                self._update_search()
+                self.filtered_options = list(range(len(self.options)))
             elif event.unicode and event.unicode.isprintable():
                 # Add character to search
                 self.search_query += event.unicode
@@ -790,10 +791,11 @@ class SettingsMenu:
         if event.key == pygame.K_ESCAPE:
             return "back"
 
-        if event.key == pygame.K_F:
+        if event.key == pygame.K_f:
             # Enter search mode
+            self.search_active = True
             self.search_query = ""
-            self._update_search()
+            self.filtered_options = list(range(len(self.options)))
             return None
 
         if event.key == pygame.K_p:
@@ -827,13 +829,12 @@ class SettingsMenu:
 
     def _move_selection(self, direction: int) -> None:
         """Move selection skipping category headers"""
+        if not self.options:
+            return
         old_selected = self.selected
-        while True:
+        for _ in range(len(self.options)):
             self.selected = (self.selected + direction) % len(self.options)
             if self.selected not in self.category_headers:
-                break
-            # Safety: if we looped all the way around
-            if self.selected == old_selected:
                 break
 
     def _adjust_value(self, direction: int) -> None:
