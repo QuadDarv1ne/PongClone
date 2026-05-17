@@ -148,11 +148,15 @@ class Ball(pygame.sprite.Sprite):
         self.velocity_x = 0.0
         self.velocity_y = 0.0
         self.speed = BALL_INITIAL_SPEED
+        self._px = 0.0  # float position accumulator for x
+        self._py = 0.0  # float position accumulator for y
         self.reset_ball()
 
     def reset_ball(self) -> None:
         self.rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
         self.speed = BALL_INITIAL_SPEED
+        self._px = float(self.rect.centerx)
+        self._py = float(self.rect.centery)
 
         # Random direction
         angle = choice([45, 135, 225, 315])
@@ -168,13 +172,17 @@ class Ball(pygame.sprite.Sprite):
         self.velocity_y = self.speed * math.sin(current_angle)
 
     def move(self) -> None:
-        self.rect.x += round(self.velocity_x)
-        self.rect.y += round(self.velocity_y)
+        self._px += self.velocity_x
+        self._py += self.velocity_y
+        self.rect.centerx = int(round(self._px))
+        self.rect.centery = int(round(self._py))
 
     def bounce_wall(self) -> None:
         if self.rect.top <= 0 or self.rect.bottom >= WINDOW_HEIGHT:
             self.velocity_y *= -1
             self.rect.clamp_ip(pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
+            self._px = float(self.rect.centerx)
+            self._py = float(self.rect.centery)
 
     def bounce_paddle(self, paddle: Paddle) -> None:
         assert paddle.height > 0, "Paddle height must be positive"
@@ -193,6 +201,14 @@ class Ball(pygame.sprite.Sprite):
         rad = math.radians(angle)
         self.velocity_x = direction * self.speed * math.cos(rad)
         self.velocity_y = self.speed * math.sin(rad)
+
+        # Push ball out of paddle to prevent sticking
+        if direction == 1:
+            self.rect.left = paddle.rect.right
+        else:
+            self.rect.right = paddle.rect.left
+        self._px = float(self.rect.centerx)
+        self._py = float(self.rect.centery)
 
         # Increase speed
         self.increase_speed()

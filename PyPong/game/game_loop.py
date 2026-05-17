@@ -88,7 +88,6 @@ class GameLoop:
         # Set AI difficulty
         if is_ai:
             difficulty = self.state_manager.difficulty
-            from PyPong.core.config import DIFFICULTY_LEVELS
             self.paddle2.set_speed(DIFFICULTY_LEVELS[difficulty]["ai_speed"])
         
         # Reset input state
@@ -303,6 +302,8 @@ class GameLoop:
         """Создать дополнительный мяч"""
         new_ball = Ball()
         new_ball.rect.center = self.ball.rect.center
+        new_ball._px = float(self.ball.rect.centerx)
+        new_ball._py = float(self.ball.rect.centery)
         new_ball.velocity_x = -self.ball.velocity_x
         new_ball.velocity_y = self.ball.velocity_y
         new_ball.image.fill(self.theme.ball_color)
