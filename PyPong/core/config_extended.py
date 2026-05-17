@@ -80,7 +80,7 @@ DEFAULT_CONFIG = {
     "adaptive_resolution": True,
     
     # Localization
-    "language": "ru",
+    "language": "en",
 }
 
 

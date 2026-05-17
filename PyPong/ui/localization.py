@@ -20,10 +20,10 @@ class Localization:
         'ja': '日本語'
     }
 
-    def __init__(self, default_language: str = 'ru') -> None:
+    def __init__(self, default_language: str = 'en') -> None:
         self.current_language = default_language
         self.translations: Dict[str, Dict[str, str]] = {}
-        self.fallback_language = 'ru'  # Русский как основной язык
+        self.fallback_language = 'en'  # English as fallback
 
         self._load_translations()
         logger.info(f"Localization initialized: {self.SUPPORTED_LANGUAGES.get(default_language, default_language)}")
@@ -313,7 +313,7 @@ class Localization:
 _localization: Optional[Localization] = None
 
 
-def init_localization(language: str = 'ru') -> Localization:
+def init_localization(language: str = 'en') -> Localization:
     """Initialize global localization"""
     global _localization
     _localization = Localization(language)

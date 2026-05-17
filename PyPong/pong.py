@@ -189,17 +189,16 @@ class PongGame:
 
     @log_exception
     def _detect_mobile(self) -> bool:
-        """Detect if running on mobile platform"""
+        """Detect if running on mobile platform (Android/iOS)"""
         try:
             import platform
             import os
 
             system = platform.system().lower()
 
-            # Android detection
+            # Android detection via /proc/version
             if system == 'linux':
                 try:
-                    # Check for Android in /proc/version
                     with open('/proc/version', 'r') as f:
                         if 'android' in f.read().lower():
                             return True
@@ -210,18 +209,18 @@ class PongGame:
                 if os.environ.get('ANDROID_ROOT') or os.environ.get('ANDROID_DATA'):
                     return True
 
-            # iOS detection (if pygame-ce supports it in future)
+            # iOS detection
             if system == 'darwin':
-                # Check if running on iOS (not macOS)
                 machine = platform.machine().lower()
                 if 'iphone' in machine or 'ipad' in machine:
                     return True
 
-            # Check for touch screen on Windows/Linux tablets
-            if hasattr(pygame, 'FINGERDOWN'):
-                # If pygame supports touch events, assume mobile/tablet
-                return True
+            # Kivy/Buildozer environment (used for Android builds)
+            if os.environ.get('ANDROID_APP_PATH') or os.environ.get('PYTHONOPTIMIZE'):
+                if 'android' in os.environ.get('EXTRAPATH', '').lower():
+                    return True
 
+            # Not a mobile platform
             return False
         except Exception as e:
             logger.warning(f"Platform detection failed: {e}")

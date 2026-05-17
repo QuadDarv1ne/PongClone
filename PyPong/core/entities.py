@@ -76,8 +76,16 @@ class Paddle(pygame.sprite.Sprite):
 
         target_x = self.rect.centerx if self.player_number == 2 else self.rect.centerx
 
-        # Шаг симуляции
-        while True:
+        # Guard against infinite loop when ball_velocity_x is 0
+        if ball_velocity_x == 0:
+            return WINDOW_HEIGHT // 2
+
+        # Шаг симуляции с защитой от бесконечного цикла
+        max_iterations = WINDOW_WIDTH * 2  # Safety limit
+        iterations = 0
+        while iterations < max_iterations:
+            iterations += 1
+
             # Проверяем, достиг ли мяч ракетки
             if self.player_number == 2 and sim_x >= target_x:
                 return sim_y
@@ -92,10 +100,6 @@ class Paddle(pygame.sprite.Sprite):
             if sim_y <= 0 or sim_y >= WINDOW_HEIGHT:
                 sim_vy = -sim_vy
                 sim_y = max(0, min(WINDOW_HEIGHT, sim_y))
-
-            # Ограничение итераций для производительности
-            if abs(sim_x - target_x) < 5:
-                break
 
         return sim_y
 
