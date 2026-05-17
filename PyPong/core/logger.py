@@ -5,7 +5,7 @@ import logging
 import sys
 from pathlib import Path
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from PyPong.core.constants import LogLevel
 
 
@@ -31,7 +31,17 @@ class GameLogger:
         log_dir = Path('logs')
         log_dir.mkdir(exist_ok=True)
         
-        # File handler with rotation
+        # Clean up log files older than 7 days
+        cutoff = datetime.now() - timedelta(days=7)
+        for log_file in log_dir.glob('pong_*.log'):
+            try:
+                file_date = datetime.strptime(log_file.stem.split('_')[1], '%Y%m%d')
+                if file_date < cutoff:
+                    log_file.unlink()
+            except (ValueError, IndexError, OSError):
+                pass
+        
+        # File handler
         log_file = log_dir / f'pong_{datetime.now().strftime("%Y%m%d")}.log'
         file_handler = logging.FileHandler(log_file, encoding='utf-8')
         file_handler.setLevel(logging.DEBUG)

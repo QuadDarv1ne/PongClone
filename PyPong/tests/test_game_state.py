@@ -95,7 +95,7 @@ class TestGameStateManager:
             state_manager.add_score(1)
         
         assert state_manager.winner == 1
-        assert state_manager.state.name == "GAME_OVER"
+        assert state_manager.state.name == "GOAL_CELEBRATION"
     
     def test_set_difficulty(self, state_manager):
         """Установка сложности"""

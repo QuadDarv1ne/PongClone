@@ -6,6 +6,7 @@ on different hardware configurations.
 """
 import time
 import unittest
+import pytest
 from typing import Any, Dict, List
 
 import pygame
@@ -282,6 +283,7 @@ class FPSBenchmark(unittest.TestCase):
         # Render should complete in under 5ms for 60 FPS target
         self.assertLess(avg_render_time, 5.0, "Average render time should be under 5ms")
 
+    @pytest.mark.performance
     def test_frame_pacing(self) -> None:
         """Test frame pacing consistency (important for smooth gameplay)"""
         # Run short simulation and measure frame time variance
