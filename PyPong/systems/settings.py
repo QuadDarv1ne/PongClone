@@ -44,6 +44,7 @@ class Settings:
             "theme": "dark",
             "touch_controls": False,
             "has_seen_onboarding": False,
+            "language": "en",
             # Auto-detect placeholders (filled on first launch)
             "auto_detected": False,
             "window_width": None,

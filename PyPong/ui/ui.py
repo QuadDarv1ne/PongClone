@@ -113,6 +113,17 @@ class FPSCounter:
 class SettingsMenu:
     """Меню настроек"""
 
+    # Native language display names
+    LANGUAGE_NAMES = {
+        "en": "English",
+        "ru": "Русский",
+        "es": "Español",
+        "de": "Deutsch",
+        "fr": "Français",
+        "zh": "中文",
+        "ja": "日本語",
+    }
+
     # Translation keys for settings options
     OPTION_KEYS = {
         "music_volume": "settings.music_volume",
@@ -120,10 +131,21 @@ class SettingsMenu:
         "show_fps": "settings.show_fps",
         "fullscreen": "settings.fullscreen",
         "touch_controls": "settings.touch_controls",
+        "difficulty": "settings.difficulty",
+        "winning_score": "settings.winning_score",
         "theme": "settings.theme",
+        "target_fps": "settings.target_fps",
+        "enable_effects": "settings.enable_effects",
+        "enable_shake": "settings.enable_shake",
+        "performance_profile": "settings.performance_profile",
         "language": "settings.language",
-        "back": "settings.back"
+        "back": "settings.back",
     }
+
+    THEMES = ["classic", "dark", "neon", "retro", "ocean"]
+    DIFFICULTIES = ["Easy", "Medium", "Hard"]
+    TARGET_FPS_OPTIONS = [30, 60, 120]
+    PERFORMANCE_PROFILES = ["low", "medium", "high", "ultra"]
 
     def __init__(self, screen: pygame.Surface, settings: Settings) -> None:
         self.screen = screen
@@ -137,9 +159,15 @@ class SettingsMenu:
             "show_fps",
             "fullscreen",
             "touch_controls",
+            "difficulty",
+            "winning_score",
             "theme",
+            "target_fps",
+            "enable_effects",
+            "enable_shake",
+            "performance_profile",
             "language",
-            "back"
+            "back",
         ]
 
     def draw(self) -> None:
@@ -151,22 +179,33 @@ class SettingsMenu:
 
         for i, option in enumerate(self.options):
             color = YELLOW if i == self.selected else WHITE
-            
+
             if option != "back":
-                # Get translated display name
                 display_name = t(self.OPTION_KEYS.get(option, option))
-                value = self.settings.get(option, "N/A")
-                
+                value = self.settings.get(option)
+                if value is None:
+                    value = "N/A"
+
                 # Format value based on option type
-                if option in ["music_volume", "sfx_volume"]:
+                if option in ("music_volume", "sfx_volume"):
                     value = f"{value:.0%}"
-                elif option in ["show_fps", "fullscreen", "touch_controls"]:
+                elif option in ("show_fps", "fullscreen", "touch_controls",
+                                "enable_effects", "enable_shake"):
                     value = t("misc.on") if value else t("misc.off")
+                elif option == "difficulty":
+                    value = t(f"difficulty.{value.lower()}", value)
                 elif option == "theme":
-                    value = value.title()
+                    value = t(f"settings.theme_{value}", value.title())
                 elif option == "language":
-                    value = get_current_language().upper()
-                
+                    lang_code = get_current_language()
+                    value = self.LANGUAGE_NAMES.get(lang_code, lang_code.upper())
+                elif option == "target_fps":
+                    value = f"{value} FPS"
+                elif option == "performance_profile":
+                    value = t(f"settings.profile_{value}", value.title())
+                elif option == "winning_score":
+                    value = str(value)
+
                 text = f"{display_name}: {value}"
             else:
                 text = t(self.OPTION_KEYS[option])
@@ -174,9 +213,9 @@ class SettingsMenu:
             text_surface = self.small_font.render(text, True, color)
             self.screen.blit(
                 text_surface,
-                text_surface.get_rect(center=(WINDOW_WIDTH // 2, 180 + i * 50))
+                text_surface.get_rect(center=(WINDOW_WIDTH // 2, 160 + i * 42)),
             )
-    
+
     def handle_input(self, event: pygame.event.Event) -> Optional[str]:
         """
         Обработать ввод в меню настроек.
@@ -215,17 +254,45 @@ class SettingsMenu:
 
         current = self.settings.get(option)
 
-        if option in ["music_volume", "sfx_volume"]:
+        if option in ("music_volume", "sfx_volume"):
             new_value = max(0.0, min(1.0, current + direction * 0.1))
             self.settings.set(option, round(new_value, 1))
-        elif option in ["show_fps", "fullscreen", "touch_controls"]:
+        elif option in ("show_fps", "fullscreen", "touch_controls",
+                        "enable_effects", "enable_shake"):
             self.settings.set(option, not current)
         elif option == "theme":
-            themes = ["classic", "dark", "neon", "retro", "ocean"]
-            current_idx = themes.index(current) if current in themes else 0
-            new_idx = (current_idx + direction) % len(themes)
-            self.settings.set(option, themes[new_idx])
+            current_idx = self.THEMES.index(current) if current in self.THEMES else 0
+            new_idx = (current_idx + direction) % len(self.THEMES)
+            self.settings.set(option, self.THEMES[new_idx])
+        elif option == "difficulty":
+            current_idx = self.DIFFICULTIES.index(current) if current in self.DIFFICULTIES else 1
+            new_idx = (current_idx + direction) % len(self.DIFFICULTIES)
+            self.settings.set(option, self.DIFFICULTIES[new_idx])
+        elif option == "winning_score":
+            new_value = max(3, min(15, current + direction))
+            self.settings.set(option, new_value)
+        elif option == "target_fps":
+            current_idx = self.TARGET_FPS_OPTIONS.index(current) if current in self.TARGET_FPS_OPTIONS else 1
+            new_idx = (current_idx + direction) % len(self.TARGET_FPS_OPTIONS)
+            self.settings.set(option, self.TARGET_FPS_OPTIONS[new_idx])
+        elif option == "performance_profile":
+            current_idx = self.PERFORMANCE_PROFILES.index(current) if current in self.PERFORMANCE_PROFILES else 1
+            new_idx = (current_idx + direction) % len(self.PERFORMANCE_PROFILES)
+            new_profile = self.PERFORMANCE_PROFILES[new_idx]
+            self.settings.set(option, new_profile)
+            self._apply_profile(new_profile)
         elif option == "language":
-            # Cycle through languages
             new_lang = cycle_language()
+            self.settings.set("language", new_lang)
             logger.info(f"Language changed to: {new_lang}")
+
+    def _apply_profile(self, profile_name: str) -> None:
+        """Apply performance profile settings"""
+        from PyPong.core.config import PERFORMANCE_PROFILES
+
+        profile = PERFORMANCE_PROFILES.get(profile_name, PERFORMANCE_PROFILES["medium"])
+        self.settings.set("max_particles", profile["max_particles"])
+        self.settings.set("max_trails", profile["max_trails"])
+        self.settings.set("target_fps", profile["target_fps"])
+        self.settings.set("enable_shake", profile["enable_shake"])
+        self.settings.set("enable_effects", profile["enable_effects"])

@@ -59,11 +59,16 @@ class PongGame:
             logger.error(f"Failed to initialize pygame: {e}")
             raise
 
-        # Инициализация локализации (из .env или английский по умолчанию)
+        # Инициализация настроек (до локализации, чтобы считать сохранённый язык)
+        self._init_settings()
+
+        # Инициализация локализации: приоритет — settings.json, затем .env, затем английский
         language = self.env.get('LANGUAGE', 'en')
+        saved_lang = self.settings.get("language")
+        if saved_lang:
+            language = saved_lang
         init_localization(language)
 
-        self._init_settings()
         self._auto_detect_and_apply()
         self._init_display()
         self._init_managers()
