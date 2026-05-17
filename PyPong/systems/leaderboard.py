@@ -131,7 +131,7 @@ class Leaderboard:
         
         if position < self.max_entries:
             scores.insert(position, entry)
-            scores = scores[:self.max_entries]
+            del scores[self.max_entries:]  # Trim in-place
             return position + 1
         
         return None

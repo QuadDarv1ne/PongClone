@@ -202,6 +202,8 @@ class MultiplayerMode(GameMode):
         self.paddle2.rect.centery = state.paddle2_y
         self.ball.rect.centerx = state.ball_x
         self.ball.rect.centery = state.ball_y
+        self.ball._px = float(state.ball_x)
+        self.ball._py = float(state.ball_y)
         self.ball.velocity_x = state.ball_vx
         self.ball.velocity_y = state.ball_vy
         self.player1_score = state.player1_score

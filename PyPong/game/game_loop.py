@@ -262,7 +262,7 @@ class GameLoop:
     
     def _handle_powerup_collisions(self) -> None:
         """Обработать коллизии с power-up"""
-        for powerup in self.powerups:
+        for powerup in list(self.powerups):
             # Collision with paddles
             for paddle in [self.paddle1, self.paddle2]:
                 if self.collision_manager.check_powerup_collision(powerup, paddle):

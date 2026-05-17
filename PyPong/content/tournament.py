@@ -21,8 +21,10 @@ class Tournament:
     def record_game_win(self, winner):
         if winner == 1:
             self.player1_wins += 1
-        else:
+        elif winner == 2:
             self.player2_wins += 1
+        else:
+            return  # Invalid winner value, do nothing
         
         self.current_game += 1
         

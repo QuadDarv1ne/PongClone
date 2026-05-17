@@ -74,7 +74,7 @@ class Paddle(pygame.sprite.Sprite):
         else:
             if up and self.rect.top > 5:
                 self.rect.y -= self.speed
-            elif down and self.rect.bottom < WINDOW_HEIGHT - 5:
+            if down and self.rect.bottom < WINDOW_HEIGHT - 5:
                 self.rect.y += self.speed
 
         # Keep paddle in bounds
