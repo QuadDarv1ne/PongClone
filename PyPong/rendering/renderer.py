@@ -50,13 +50,21 @@ class Renderer:
         """Очистить экран"""
         self.game_surface.fill(self.theme.bg_color)
     
-    def render_game(self, state_manager: Any, shake: Any) -> None:
+    def render_game(
+        self,
+        state_manager: Any,
+        shake: Any,
+        touch_controls: Any = None,
+        powerup_indicator: Any = None,
+    ) -> None:
         """
         Отрисовать игровой экран.
 
         Args:
             state_manager: Менеджер состояния игры
             shake: ScreenShake эффект
+            touch_controls: TouchControls instance
+            powerup_indicator: PowerUpIndicator instance
         """
         self.clear()
 
@@ -78,12 +86,21 @@ class Renderer:
             self.powerups.draw(self.game_surface)
         if self.particles:
             self.particles.draw(self.game_surface)
-        
-        # Draw touch controls
-        if self.settings.get("touch_controls", False):
-            from PyPong.mobile import TouchControls
-            # Touch controls already have draw method
-        
+
+        # Draw touch control zones
+        if touch_controls and self.settings.get("touch_controls", False):
+            touch_controls.draw(self.game_surface)
+
+        # Draw power-up indicators
+        if powerup_indicator and self.powerups:
+            active_powerups = [p for p in self.powerups if getattr(p, "active", False)]
+            if active_powerups and self.all_sprites:
+                paddles = [s for s in self.all_sprites if hasattr(s, "player_number")]
+                if len(paddles) >= 2:
+                    powerup_indicator.draw(
+                        self.game_surface, self.powerups, paddles[0], paddles[1]
+                    )
+
         # Draw tournament status
         if state_manager.tournament_mode:
             state_manager.tournament.draw_status(self.game_surface)
@@ -103,10 +120,15 @@ class Renderer:
         self.game_surface.fill(BLACK)
         state_manager.draw_mode_select()
     
-    def render_pause(self, state_manager: Any) -> None:
+    def render_pause(
+        self,
+        state_manager: Any,
+        touch_controls: Any = None,
+        powerup_indicator: Any = None,
+    ) -> None:
         """Отрисовать паузу"""
         # Сначала отрисовать игру
-        self.render_game(state_manager, None)
+        self.render_game(state_manager, None, touch_controls, powerup_indicator)
         # Затем overlay паузы
         state_manager.draw_pause()
     
@@ -153,10 +175,12 @@ class Renderer:
         settings_menu: Any = None,
         stats_manager: Any = None,
         tournament: Any = None,
+        touch_controls: Any = None,
+        powerup_indicator: Any = None,
     ) -> None:
         """
         Основной метод отрисовки.
-        
+
         Args:
             state: Текущее состояние игры
             state_manager: Менеджер состояния
@@ -164,12 +188,18 @@ class Renderer:
             settings_menu: Меню настроек
             stats_manager: Менеджер статистики
             tournament: Турнирный менеджер
+            touch_controls: TouchControls instance
+            powerup_indicator: PowerUpIndicator instance
         """
         renderers = {
             GameState.MENU: lambda: self.render_menu(state_manager),
             GameState.MODE_SELECT: lambda: self.render_mode_select(state_manager),
-            GameState.PLAYING: lambda: self.render_game(state_manager, shake),
-            GameState.PAUSED: lambda: self.render_pause(state_manager),
+            GameState.PLAYING: lambda: self.render_game(
+                state_manager, shake, touch_controls, powerup_indicator
+            ),
+            GameState.PAUSED: lambda: self.render_pause(
+                state_manager, touch_controls, powerup_indicator
+            ),
             GameState.GAME_OVER: lambda: self.render_game_over(state_manager),
             GameState.STATS: lambda: self.render_stats(state_manager, stats_manager),
             GameState.SETTINGS: lambda: self.render_settings(settings_menu),

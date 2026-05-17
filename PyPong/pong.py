@@ -449,6 +449,8 @@ class PongGame:
             settings_menu=self.settings_menu,
             stats_manager=self.stats,
             tournament=self.tournament,
+            touch_controls=self.touch,
+            powerup_indicator=self.powerup_indicator,
         )
 
     @log_exception

@@ -208,9 +208,13 @@ class GameLoop:
         from random import randint
         if len(self.trails) < MAX_TRAILS:
             if randint(1, TRAIL_SPAWN_CHANCE) == 1:
-                from PyPong.ui.effects import Trail
-                trail = Trail(self.ball.rect.centerx, self.ball.rect.centery)
-                self.trails.add(trail)
+                trail_color = self.theme.ball_color
+                self.trails.add_trail(
+                    self.ball.rect.centerx,
+                    self.ball.rect.centery,
+                    trail_color,
+                    size=5,
+                )
     
     def _handle_paddle_collisions(self) -> None:
         """Обработать коллизии с ракетками"""

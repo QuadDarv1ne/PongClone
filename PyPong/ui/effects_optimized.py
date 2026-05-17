@@ -200,6 +200,17 @@ class TrailPool:
         trail = OptimizedTrail(x, y, color, size)
         self.trails.add(trail)
     
+    def add(self, trail: 'OptimizedTrail') -> None:
+        """Add a trail sprite directly (for pygame.sprite.Group compatibility)"""
+        if len(self.trails) >= self.max_size:
+            oldest = min(self.trails.sprites(), key=lambda t: t.age)
+            oldest.kill()
+        self.trails.add(trail)
+    
+    def __len__(self) -> int:
+        """Return number of active trails"""
+        return len(self.trails)
+    
     def update(self) -> None:
         """Update all trails"""
         self.trails.update()
