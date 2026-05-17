@@ -57,13 +57,15 @@ class PowerUpIndicator:
                 # Timer bar
                 elapsed = pygame.time.get_ticks() - powerup.start_time
                 duration = powerup.TYPES[powerup.type]["duration"]
-                progress = 1.0 - (elapsed / duration)
 
                 bar_width = 180
                 bar_height = 10
 
-                pygame.draw.rect(screen, (60, 60, 60), (x_pos + 10, y_offset + 32, bar_width, bar_height))
-                pygame.draw.rect(screen, GREEN, (x_pos + 10, y_offset + 32, int(bar_width * progress), bar_height))
+                if duration > 0:
+                    progress = 1.0 - (elapsed / duration)
+                    pygame.draw.rect(screen, (60, 60, 60), (x_pos + 10, y_offset + 32, bar_width, bar_height))
+                    pygame.draw.rect(screen, GREEN, (x_pos + 10, y_offset + 32, int(bar_width * max(0, progress)), bar_height))
+                # Power-ups with duration=0 (e.g., multi_ball) skip the timer bar
 
                 y_offset += 60
 

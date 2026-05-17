@@ -148,8 +148,8 @@ class Ball(pygame.sprite.Sprite):
         self.velocity_y = self.speed * math.sin(current_angle)
 
     def move(self) -> None:
-        self.rect.x += self.velocity_x
-        self.rect.y += self.velocity_y
+        self.rect.x += int(self.velocity_x)
+        self.rect.y += int(self.velocity_y)
 
     def bounce_wall(self) -> None:
         if self.rect.top <= 0 or self.rect.bottom >= WINDOW_HEIGHT:

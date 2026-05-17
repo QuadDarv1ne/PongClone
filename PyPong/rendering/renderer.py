@@ -136,6 +136,18 @@ class Renderer:
         """Отрисовать конец игры"""
         self.game_surface.fill(BLACK)
         state_manager.draw_game_over()
+
+    def render_goal_celebration(
+        self,
+        state_manager: Any,
+        touch_controls: Any = None,
+        powerup_indicator: Any = None,
+        goal_anim: Any = None,
+    ) -> None:
+        """Отрисовать празднование гола (игра + анимация гола)"""
+        self.render_game(state_manager, None, touch_controls, powerup_indicator)
+        if goal_anim:
+            goal_anim.draw(self.game_surface)
     
     def render_stats(self, state_manager: Any, stats_manager: Any) -> None:
         """Отрисовать статистику"""
@@ -177,6 +189,7 @@ class Renderer:
         tournament: Any = None,
         touch_controls: Any = None,
         powerup_indicator: Any = None,
+        goal_anim: Any = None,
     ) -> None:
         """
         Основной метод отрисовки.
@@ -201,10 +214,24 @@ class Renderer:
                 state_manager, touch_controls, powerup_indicator
             ),
             GameState.GAME_OVER: lambda: self.render_game_over(state_manager),
+            GameState.GOAL_CELEBRATION: lambda: self.render_goal_celebration(
+                state_manager, touch_controls, powerup_indicator, goal_anim
+            ),
             GameState.STATS: lambda: self.render_stats(state_manager, stats_manager),
             GameState.SETTINGS: lambda: self.render_settings(settings_menu),
             GameState.HELP: lambda: self.render_help(state_manager),
             GameState.TOURNAMENT_COMPLETE: lambda: self.render_tournament_complete(tournament),
+            GameState.CAMPAIGN_SELECT: lambda: self.render_menu(state_manager),
+            GameState.CAMPAIGN_PLAYING: lambda: self.render_game(
+                state_manager, shake, touch_controls, powerup_indicator
+            ),
+            GameState.CAMPAIGN_COMPLETE: lambda: self.render_game_over(state_manager),
+            GameState.CHALLENGES: lambda: self.render_menu(state_manager),
+            GameState.MINIGAME_SELECT: lambda: self.render_menu(state_manager),
+            GameState.MINIGAME_PLAYING: lambda: self.render_game(
+                state_manager, shake, touch_controls, powerup_indicator
+            ),
+            GameState.MINIGAME_COMPLETE: lambda: self.render_game_over(state_manager),
         }
         
         render_func = renderers.get(state)

@@ -33,6 +33,7 @@ class GameState(Enum):
     MINIGAME_PLAYING = 14
     MINIGAME_COMPLETE = 15
     HELP = 16
+    GOAL_CELEBRATION = 17
 
 
 class GameStateManager:
@@ -77,10 +78,10 @@ class GameStateManager:
 
         if self.player1_score >= WINNING_SCORE:
             self.winner = 1
-            self.state = GameState.GAME_OVER
+            self.state = GameState.GOAL_CELEBRATION
         elif self.player2_score >= WINNING_SCORE:
             self.winner = 2
-            self.state = GameState.GAME_OVER
+            self.state = GameState.GOAL_CELEBRATION
 
     def set_difficulty(self, difficulty: str) -> None:
         """Установить сложность"""

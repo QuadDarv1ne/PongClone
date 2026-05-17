@@ -111,7 +111,8 @@ class GameLoop:
         self.ball = None
         self.all_sprites = None
         self.powerups = None
-        self.particles = None
+        # NOTE: Do NOT set self.particles or self.trails to None.
+        # They are effect pools that persist across game sessions.
     
     def update(self) -> None:
         """
@@ -306,6 +307,9 @@ class GameLoop:
     
     def _create_particles(self, x: int, y: int, color: tuple) -> None:
         """Создать частицы с использованием ParticlePool"""
+        if self.particles is None:
+            return
+        
         if isinstance(self.particles, ParticlePool):
             # Используем оптимизированный пул
             self.particles.emit(x, y, color, PARTICLES_PER_HIT)

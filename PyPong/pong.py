@@ -386,7 +386,6 @@ class PongGame:
             self.state_manager.tournament_mode = not self.state_manager.tournament_mode
             if self.state_manager.tournament_mode:
                 self.tournament.reset()
-            action_data['difficulty'] = 'Hard'
 
         # Применить изменения
         if 'game_mode' in action_data:
@@ -432,6 +431,20 @@ class PongGame:
                     logger.error(f"Error updating game loop: {e}", exc_info=True)
                     self.state_manager.state = GameState.MENU
 
+                # Record tournament game win when a game ends
+                if (self.state_manager.tournament_mode
+                        and self.state_manager.state == GameState.GAME_OVER
+                        and self.state_manager.winner is not None
+                        and not self.tournament.is_complete()):
+                    self.tournament.record_game_win(self.state_manager.winner)
+                    if self.tournament.is_complete():
+                        self.state_manager.state = GameState.TOURNAMENT_COMPLETE
+
+                # Auto-transition from goal celebration to game over
+                if self.state_manager.state == GameState.GOAL_CELEBRATION:
+                    if self.goal_anim is None or not self.goal_anim.active:
+                        self.state_manager.state = GameState.GAME_OVER
+
     @log_exception
     def draw(self) -> None:
         """Отрисовать кадр"""
@@ -444,6 +457,7 @@ class PongGame:
             tournament=self.tournament,
             touch_controls=self.touch,
             powerup_indicator=self.powerup_indicator,
+            goal_anim=self.goal_anim,
         )
 
     @log_exception
@@ -499,9 +513,6 @@ class PongGame:
         except Exception:
             pass
 
-
-# Import effects at the end to avoid circular imports
-from PyPong.ui.effects import ScreenShake, GoalAnimation
 
 
 if __name__ == "__main__":

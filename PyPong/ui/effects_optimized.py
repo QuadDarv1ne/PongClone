@@ -143,7 +143,11 @@ class OptimizedParticlePool:
         """Draw all active particles"""
         for particle in self.active_particles:
             particle.draw(surface)
-    
+
+    def __len__(self) -> int:
+        """Return number of active particles"""
+        return len(self.active_particles)
+
     def clear(self) -> None:
         """Clear all particles"""
         for particle in self.active_particles:
