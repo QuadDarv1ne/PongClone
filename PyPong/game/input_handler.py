@@ -1,7 +1,7 @@
 """ Input handler for game events """
 from typing import Callable, Dict, Optional
 import pygame
-from pygame.locals import K_ESCAPE, K_RETURN, K_s, K_o, K_F1, K_1, K_2, K_3, K_4, K_t, K_a, K_z, K_UP, K_DOWN
+from pygame.locals import K_ESCAPE, K_RETURN, K_s, K_o, K_F1, K_1, K_2, K_3, K_4, K_t, K_a, K_z, K_w, K_UP, K_DOWN
 
 from PyPong.core.game_state import GameState
 
@@ -139,6 +139,8 @@ class InputHandler:
         key_map = {
             K_a: "up1",
             K_z: "down1",
+            K_w: "up1",
+            K_s: "down1",
             K_UP: "up2",
             K_DOWN: "down2",
         }

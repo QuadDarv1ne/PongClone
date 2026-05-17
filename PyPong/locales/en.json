@@ -17,8 +17,8 @@
   "mode.tournament_on": "Tournament: ON (Best of 3)",
   "mode.tournament_off": "Tournament: OFF (Press T)",
   "mode.difficulty": "AI Difficulty: {0} (3/4/5)",
-  "mode.controls_ai": "Controls: A/Z - Player 1",
-  "mode.controls_pvp": "Controls: A/Z - Player 1 | Arrows - Player 2",
+  "mode.controls_ai": "Controls: A/Z or W/S - Player 1",
+  "mode.controls_pvp": "Controls: A/Z or W/S - Player 1 | Arrows - Player 2",
   "mode.start": "Press ENTER to Start",
   
   "difficulty.easy": "Easy",
@@ -97,8 +97,8 @@
   
   "help.title": "How to Play",
   "help.player1_title": "Player 1 (Left)",
-  "help.player1_up": "A - Move Up",
-  "help.player1_down": "Z - Move Down",
+  "help.player1_up": "A/W - Move Up",
+  "help.player1_down": "Z/S - Move Down",
   "help.player2_title": "Player 2 (Right / AI)",
   "help.player2_up": "UP Arrow - Move Up",
   "help.player2_down": "DOWN Arrow - Move Down",

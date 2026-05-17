@@ -119,7 +119,7 @@ class OnboardingManager:
                 id='controls',
                 type=OnboardingStepType.INTERACTIVE,
                 title='Controls',
-                description='Use A/Z or Arrow keys to move your paddle up and down.',
+                description='Use A/Z, W/S, or Arrow keys to move your paddle up and down.',
                 condition=lambda: self.user_actions.get('paddle_moved', 0) >= 3,
                 highlight_rect=pygame.Rect(50, 300, 20, 120),
             ),

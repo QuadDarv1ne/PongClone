@@ -145,14 +145,14 @@ class Localization:
             "settings.back": "Back to Menu",
             
             # Controls
-            "controls.player1": "Player 1: A/Z",
+            "controls.player1": "Player 1: A/Z or W/S",
             "controls.player2": "Player 2: Arrows",
             "controls.pause": "Pause: ESC",
             
             # Tutorial
             "tutorial.welcome": "Welcome to Pong!",
             "tutorial.objective": "Hit the ball past your opponent",
-            "tutorial.controls": "Use A/Z to move your paddle",
+            "tutorial.controls": "Use A/Z or W/S to move your paddle",
             "tutorial.powerups": "Collect power-ups for advantages",
             "tutorial.combo": "Chain hits for combo bonuses",
             "tutorial.complete": "Tutorial Complete!",

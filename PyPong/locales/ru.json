@@ -17,8 +17,8 @@
   "mode.tournament_on": "Турнир: ВКЛ (До 2 побед)",
   "mode.tournament_off": "Турнир: ВЫКЛ (Нажмите T)",
   "mode.difficulty": "Сложность ИИ: {0} (3/4/5)",
-  "mode.controls_ai": "Управление: A/Z - Игрок 1",
-  "mode.controls_pvp": "Управление: A/Z - Игрок 1 | Стрелки - Игрок 2",
+  "mode.controls_ai": "Управление: A/Z или W/S - Игрок 1",
+  "mode.controls_pvp": "Управление: A/Z или W/S - Игрок 1 | Стрелки - Игрок 2",
   "mode.start": "Нажмите ENTER для начала",
   
   "difficulty.easy": "Легко",
@@ -97,8 +97,8 @@
   
   "help.title": "Как играть",
   "help.player1_title": "Игрок 1 (Слева)",
-  "help.player1_up": "A - Движение вверх",
-  "help.player1_down": "Z - Движение вниз",
+  "help.player1_up": "A/W - Движение вверх",
+  "help.player1_down": "Z/S - Движение вниз",
   "help.player2_title": "Игрок 2 (Справа / ИИ)",
   "help.player2_up": "Стрелка ВВЕРХ - Движение вверх",
   "help.player2_down": "Стрелка ВНИЗ - Движение вниз",
