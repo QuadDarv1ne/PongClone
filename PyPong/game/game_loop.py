@@ -296,6 +296,7 @@ class GameLoop:
         elif powerup.type == "shrink_opponent":
             opponent = self.paddle2 if collector == self.paddle1 else self.paddle1
             powerup.opponent_paddle = opponent
+            opponent.add_effect("shrink_opponent", powerup.TYPES["shrink_opponent"]["duration"])
             opponent.resize(50)
     
     def _create_extra_ball(self) -> None:

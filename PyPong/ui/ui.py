@@ -1,6 +1,6 @@
 """UI components for the game"""
 import pygame
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 from PyPong.core.config import (
     WHITE, BLACK, GRAY, LIGHT_BLUE, RED, GREEN, YELLOW,
     FONT_NAME, WINDOW_WIDTH, WINDOW_HEIGHT,
@@ -26,9 +26,7 @@ class PowerUpIndicator:
         paddle2: Paddle
     ) -> None:
         """Отрисовать индикаторы power-up"""
-        y_offset = 150
-
-        # Map powerup types to translation keys
+        # Map powerup types to translation keys and colors
         name_map: Dict[str, str] = {
             "speed_boost": t("powerup.speed_boost"),
             "large_paddle": t("powerup.large_paddle"),
@@ -36,38 +34,66 @@ class PowerUpIndicator:
             "multi_ball": t("powerup.multi_ball"),
             "shrink_opponent": t("powerup.shrink_opponent")
         }
+        color_map: Dict[str, Tuple[int, int, int]] = {
+            "speed_boost": GREEN,
+            "large_paddle": YELLOW,
+            "slow_ball": LIGHT_BLUE,
+            "multi_ball": RED,
+            "shrink_opponent": (255, 165, 0),
+        }
 
-        for powerup in powerups:
-            if powerup.active:
-                paddle = paddle1 if powerup.affected_paddle == paddle1 else paddle2
-                x_pos = 20 if paddle == paddle1 else WINDOW_WIDTH - 220
+        from PyPong.core.entities import PowerUp
+        duration_map = PowerUp.TYPES
 
-                # Background
-                bg_rect = pygame.Rect(x_pos, y_offset, 200, 50)
-                pygame.draw.rect(screen, (40, 40, 40), bg_rect)
-                pygame.draw.rect(screen, WHITE, bg_rect, 2)
+        self._draw_paddle_effects(screen, paddle1, 20, name_map, color_map, duration_map)
+        self._draw_paddle_effects(screen, paddle2, WINDOW_WIDTH - 220, name_map, color_map, duration_map)
 
-                # Power-up name
-                name = self.font.render(
-                    name_map.get(powerup.type, "Power-Up"),
-                    True, WHITE
-                )
-                screen.blit(name, (x_pos + 10, y_offset + 5))
+    def _draw_paddle_effects(
+        self,
+        screen: pygame.Surface,
+        paddle: Paddle,
+        x_pos: int,
+        name_map: Dict[str, str],
+        color_map: Dict[str, Tuple[int, int, int]],
+        duration_map: Dict[str, Dict[str, Any]]
+    ) -> None:
+        """Draw active power-up effects for a single paddle."""
+        y_offset = 150
+        now = pygame.time.get_ticks()
 
-                # Timer bar
-                elapsed = pygame.time.get_ticks() - powerup.start_time
-                duration = powerup.TYPES[powerup.type]["duration"]
+        # Clean up expired effects
+        for expired in paddle.get_expired_effects(duration_map):
+            paddle.remove_effect(expired)
 
-                bar_width = 180
-                bar_height = 10
+        for effect_type, start_time in paddle.active_effects.items():
+            duration = duration_map.get(effect_type, {}).get("duration", 0)
+            elapsed = now - start_time
 
-                if duration > 0:
-                    progress = 1.0 - (elapsed / duration)
-                    pygame.draw.rect(screen, (60, 60, 60), (x_pos + 10, y_offset + 32, bar_width, bar_height))
-                    pygame.draw.rect(screen, GREEN, (x_pos + 10, y_offset + 32, int(bar_width * max(0, progress)), bar_height))
-                # Power-ups with duration=0 (e.g., multi_ball) skip the timer bar
+            # Skip expired timed effects (instant effects like multi_ball always show briefly)
+            if duration > 0 and elapsed > duration:
+                continue
 
-                y_offset += 60
+            # Background
+            bg_rect = pygame.Rect(x_pos, y_offset, 200, 50)
+            pygame.draw.rect(screen, (40, 40, 40), bg_rect)
+            effect_color = color_map.get(effect_type, WHITE)
+            pygame.draw.rect(screen, effect_color, bg_rect, 2)
+
+            # Power-up name
+            name = self.font.render(
+                name_map.get(effect_type, "Power-Up"),
+                True, WHITE
+            )
+            screen.blit(name, (x_pos + 10, y_offset + 5))
+
+            # Timer bar
+            if duration > 0:
+                progress = 1.0 - (elapsed / duration)
+                bar_width, bar_height = 180, 10
+                pygame.draw.rect(screen, (60, 60, 60), (x_pos + 10, y_offset + 32, bar_width, bar_height))
+                pygame.draw.rect(screen, effect_color, (x_pos + 10, y_offset + 32, int(bar_width * max(0, progress)), bar_height))
+
+            y_offset += 60
 
 
 class FPSCounter:

@@ -34,6 +34,25 @@ class Paddle(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.reset_position()
         self.original_height = PADDLE_HEIGHT
+        self.active_effects: Dict[str, int] = {}  # type -> start_time
+
+    def add_effect(self, effect_type: str, duration: int) -> None:
+        """Track an active power-up effect with its start time."""
+        self.active_effects[effect_type] = pygame.time.get_ticks()
+
+    def remove_effect(self, effect_type: str) -> None:
+        """Remove a tracked power-up effect."""
+        self.active_effects.pop(effect_type, None)
+
+    def get_expired_effects(self, duration_map: Dict[str, int]) -> list:
+        """Return list of effect types that have expired based on duration map."""
+        now = pygame.time.get_ticks()
+        expired = []
+        for effect_type, start_time in self.active_effects.items():
+            duration = duration_map.get(effect_type, 0)
+            if duration > 0 and now - start_time > duration:
+                expired.append(effect_type)
+        return expired
 
     def reset_position(self) -> None:
         if self.player_number == 1:
@@ -224,6 +243,9 @@ class PowerUp(pygame.sprite.Sprite):
         self.start_time = pygame.time.get_ticks()
         self.affected_paddle = paddle
 
+        duration = self.TYPES[self.type]["duration"]
+        paddle.add_effect(self.type, duration)
+
         if self.type == "speed_boost":
             paddle.set_speed(paddle.speed * 1.5)
         elif self.type == "large_paddle":
@@ -233,11 +255,13 @@ class PowerUp(pygame.sprite.Sprite):
     def deactivate(self) -> None:
         self.active = False
         if self.affected_paddle:
+            self.affected_paddle.remove_effect(self.type)
             if self.type == "speed_boost":
                 self.affected_paddle.set_speed(PADDLE_SPEED)
             elif self.type == "large_paddle":
                 self.affected_paddle.reset_size()
         if self.type == "shrink_opponent" and self.opponent_paddle:
+            self.opponent_paddle.remove_effect("shrink_opponent")
             self.opponent_paddle.reset_size()
         self.kill()
 

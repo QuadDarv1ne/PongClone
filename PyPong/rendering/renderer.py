@@ -92,14 +92,12 @@ class Renderer:
             touch_controls.draw(self.game_surface)
 
         # Draw power-up indicators
-        if powerup_indicator and self.powerups:
-            active_powerups = [p for p in self.powerups if getattr(p, "active", False)]
-            if active_powerups and self.all_sprites:
-                paddles = [s for s in self.all_sprites if hasattr(s, "player_number")]
-                if len(paddles) >= 2:
-                    powerup_indicator.draw(
-                        self.game_surface, self.powerups, paddles[0], paddles[1]
-                    )
+        if powerup_indicator and self.all_sprites:
+            paddles = [s for s in self.all_sprites if hasattr(s, "player_number")]
+            if len(paddles) >= 2:
+                powerup_indicator.draw(
+                    self.game_surface, self.powerups, paddles[0], paddles[1]
+                )
 
         # Draw tournament status
         if state_manager.tournament_mode:
