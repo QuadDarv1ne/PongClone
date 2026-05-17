@@ -6,6 +6,7 @@ from typing import Optional, Any, Union
 
 from PyPong.core.game_state import GameState
 from PyPong.core.config import BLACK
+from PyPong.ui.ui import FPSCounter
 
 
 class Renderer:
@@ -32,6 +33,7 @@ class Renderer:
         self.powerups: Optional[pygame.sprite.Group] = None
         self.particles: Optional[Any] = None
         self.trails: Optional[pygame.sprite.Group] = None
+        self.fps_counter = FPSCounter()
     
     def set_sprite_groups(
         self,
@@ -54,6 +56,7 @@ class Renderer:
         self,
         state_manager: Any,
         shake: Any,
+        clock: Optional[pygame.time.Clock] = None,
         touch_controls: Any = None,
         powerup_indicator: Any = None,
     ) -> None:
@@ -63,6 +66,7 @@ class Renderer:
         Args:
             state_manager: Менеджер состояния игры
             shake: ScreenShake эффект
+            clock: игровой таймер для FPS
             touch_controls: TouchControls instance
             powerup_indicator: PowerUpIndicator instance
         """
@@ -104,9 +108,8 @@ class Renderer:
             state_manager.tournament.draw_status(self.game_surface)
         
         # Draw FPS
-        if self.settings.get("show_fps", False):
-            from PyPong.ui.ui import FPSCounter
-            # FPS counter draw
+        if self.settings.get("show_fps", False) and clock:
+            self.fps_counter.draw(self.game_surface, clock)
     
     def render_menu(self, state_manager: Any) -> None:
         """Отрисовать меню"""
@@ -121,12 +124,13 @@ class Renderer:
     def render_pause(
         self,
         state_manager: Any,
+        clock: Optional[pygame.time.Clock] = None,
         touch_controls: Any = None,
         powerup_indicator: Any = None,
     ) -> None:
         """Отрисовать паузу"""
         # Сначала отрисовать игру
-        self.render_game(state_manager, None, touch_controls, powerup_indicator)
+        self.render_game(state_manager, None, clock, touch_controls, powerup_indicator)
         # Затем overlay паузы
         state_manager.draw_pause()
     
@@ -138,12 +142,13 @@ class Renderer:
     def render_goal_celebration(
         self,
         state_manager: Any,
+        clock: Optional[pygame.time.Clock] = None,
         touch_controls: Any = None,
         powerup_indicator: Any = None,
         goal_anim: Any = None,
     ) -> None:
         """Отрисовать празднование гола (игра + анимация гола)"""
-        self.render_game(state_manager, None, touch_controls, powerup_indicator)
+        self.render_game(state_manager, None, clock, touch_controls, powerup_indicator)
         if goal_anim:
             goal_anim.draw(self.game_surface)
     
@@ -182,6 +187,7 @@ class Renderer:
         state: GameState,
         state_manager: Any,
         shake: Any,
+        clock: Optional[pygame.time.Clock] = None,
         settings_menu: Any = None,
         stats_manager: Any = None,
         tournament: Any = None,
@@ -196,6 +202,7 @@ class Renderer:
             state: Текущее состояние игры
             state_manager: Менеджер состояния
             shake: ScreenShake эффект
+            clock: игровой таймер для FPS
             settings_menu: Меню настроек
             stats_manager: Менеджер статистики
             tournament: Турнирный менеджер
@@ -206,14 +213,14 @@ class Renderer:
             GameState.MENU: lambda: self.render_menu(state_manager),
             GameState.MODE_SELECT: lambda: self.render_mode_select(state_manager),
             GameState.PLAYING: lambda: self.render_game(
-                state_manager, shake, touch_controls, powerup_indicator
+                state_manager, shake, clock, touch_controls, powerup_indicator
             ),
             GameState.PAUSED: lambda: self.render_pause(
-                state_manager, touch_controls, powerup_indicator
+                state_manager, clock, touch_controls, powerup_indicator
             ),
             GameState.GAME_OVER: lambda: self.render_game_over(state_manager),
             GameState.GOAL_CELEBRATION: lambda: self.render_goal_celebration(
-                state_manager, touch_controls, powerup_indicator, goal_anim
+                state_manager, clock, touch_controls, powerup_indicator, goal_anim
             ),
             GameState.STATS: lambda: self.render_stats(state_manager, stats_manager),
             GameState.SETTINGS: lambda: self.render_settings(settings_menu),
@@ -221,13 +228,13 @@ class Renderer:
             GameState.TOURNAMENT_COMPLETE: lambda: self.render_tournament_complete(tournament),
             GameState.CAMPAIGN_SELECT: lambda: self.render_menu(state_manager),
             GameState.CAMPAIGN_PLAYING: lambda: self.render_game(
-                state_manager, shake, touch_controls, powerup_indicator
+                state_manager, shake, clock, touch_controls, powerup_indicator
             ),
             GameState.CAMPAIGN_COMPLETE: lambda: self.render_game_over(state_manager),
             GameState.CHALLENGES: lambda: self.render_menu(state_manager),
             GameState.MINIGAME_SELECT: lambda: self.render_menu(state_manager),
             GameState.MINIGAME_PLAYING: lambda: self.render_game(
-                state_manager, shake, touch_controls, powerup_indicator
+                state_manager, shake, clock, touch_controls, powerup_indicator
             ),
             GameState.MINIGAME_COMPLETE: lambda: self.render_game_over(state_manager),
         }

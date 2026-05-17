@@ -489,6 +489,7 @@ class PongGame:
             state=self.state_manager.state,
             state_manager=self.state_manager,
             shake=self.shake,
+            clock=self.clock,
             settings_menu=self.settings_menu,
             stats_manager=self.stats,
             tournament=self.tournament,
