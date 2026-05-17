@@ -32,21 +32,6 @@ from PyPong.core.logger import logger, log_exception
 from PyPong.ui.localization import init_localization, get_localization
 from PyPong.ui.accessibility import get_accessibility_manager
 
-# pygame constants
-K_ESCAPE = pygame.K_ESCAPE
-K_RETURN = pygame.K_RETURN
-K_s = pygame.K_s
-K_o = pygame.K_o
-K_F1 = pygame.K_F1
-K_1 = pygame.K_1
-K_2 = pygame.K_2
-K_3 = pygame.K_3
-K_4 = pygame.K_4
-K_t = pygame.K_t
-KEYDOWN = pygame.KEYDOWN
-KEYUP = pygame.KEYUP
-QUIT = pygame.QUIT
-
 
 class PongGame:
     """Main game class with modular architecture"""
@@ -317,6 +302,14 @@ class PongGame:
             GameState.SETTINGS: GameState.MENU,
             GameState.HELP: GameState.MENU,
             GameState.MODE_SELECT: GameState.MENU,
+            GameState.GAME_OVER: GameState.MENU,
+            GameState.CAMPAIGN_SELECT: GameState.MENU,
+            GameState.CAMPAIGN_PLAYING: GameState.MENU,
+            GameState.CAMPAIGN_COMPLETE: GameState.MENU,
+            GameState.CHALLENGES: GameState.MENU,
+            GameState.MINIGAME_SELECT: GameState.MENU,
+            GameState.MINIGAME_PLAYING: GameState.MENU,
+            GameState.MINIGAME_COMPLETE: GameState.MENU,
         }
 
         new_state = transitions.get(state)
@@ -325,7 +318,7 @@ class PongGame:
             if new_state == GameState.MENU:
                 self.game_loop.cleanup_game_objects()
         else:
-            raise SystemExit()
+            logger.warning(f"No ESC transition defined for state: {state}")
 
     @log_exception
     def _handle_enter(self) -> None:

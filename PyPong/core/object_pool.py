@@ -119,10 +119,9 @@ class ObjectPool(Generic[T]):
         """Release all active objects back to pool"""
         while self._active:
             obj = self._active.pop()
+            self._released_count += 1
             if len(self._available) < self._max_size:
                 self._available.append(obj)
-        
-        self._released_count += len(self._active)
     
     def clear(self) -> None:
         """Clear all objects from pool"""

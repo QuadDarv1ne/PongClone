@@ -123,6 +123,7 @@ class GameLoop:
         
         self._update_paddles()
         self._update_ball()
+        self._spawn_powerups()
         self._update_effects()
     
     def _update_paddles(self) -> None:
@@ -206,7 +207,7 @@ class GameLoop:
     def _spawn_trail(self) -> None:
         """Создать шлейф мяча"""
         from random import randint
-        if len(self.trails) < MAX_TRAILS:
+        if self.trails and len(self.trails) < MAX_TRAILS:
             if randint(1, TRAIL_SPAWN_CHANCE) == 1:
                 trail_color = self.theme.ball_color
                 self.trails.add_trail(
@@ -215,6 +216,13 @@ class GameLoop:
                     trail_color,
                     size=5,
                 )
+    
+    def _spawn_powerups(self) -> None:
+        """Создать power-up случайно во время игры"""
+        from random import randint
+        if self.powerups and randint(1, POWERUP_SPAWN_CHANCE) == 1 and len(self.powerups) == 0:
+            powerup = PowerUp()
+            self.powerups.add(powerup)
     
     def _handle_paddle_collisions(self) -> None:
         """Обработать коллизии с ракетками"""
