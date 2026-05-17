@@ -1,7 +1,7 @@
 """Enhanced Pong v4 - Main game module with modular architecture"""
 import pygame
 from pygame.locals import *
-from typing import Optional, Dict, Any
+from typing import Optional
 
 from PyPong.core.env_config import init_env_config, get_env_config
 from PyPong.core.config import (
@@ -347,6 +347,12 @@ class PongGame:
 
             elif new_state == GameState.MENU:
                 if state == GameState.GAME_OVER:
+                    # Record game statistics before resetting
+                    self.stats.record_game(
+                        winner=self.state_manager.winner,
+                        player1_score=self.state_manager.player1_score,
+                        player2_score=self.state_manager.player2_score,
+                    )
                     self.game_loop.cleanup_game_objects()
                     self.state_manager.reset_scores()
 

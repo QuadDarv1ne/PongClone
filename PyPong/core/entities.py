@@ -148,8 +148,8 @@ class Ball(pygame.sprite.Sprite):
         self.velocity_y = self.speed * math.sin(current_angle)
 
     def move(self) -> None:
-        self.rect.x += int(self.velocity_x)
-        self.rect.y += int(self.velocity_y)
+        self.rect.x += round(self.velocity_x)
+        self.rect.y += round(self.velocity_y)
 
     def bounce_wall(self) -> None:
         if self.rect.top <= 0 or self.rect.bottom >= WINDOW_HEIGHT:
@@ -157,6 +157,9 @@ class Ball(pygame.sprite.Sprite):
             self.rect.clamp_ip(pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
 
     def bounce_paddle(self, paddle: Paddle) -> None:
+        # Guard against zero division
+        if paddle.height == 0:
+            return
         # Calculate hit position on paddle (-1 to 1)
         hit_pos = (self.rect.centery - paddle.rect.centery) / (paddle.height / 2)
         hit_pos = max(-1, min(1, hit_pos))
@@ -215,6 +218,7 @@ class PowerUp(pygame.sprite.Sprite):
         self.active = False
         self.start_time = 0
         self.affected_paddle: Optional[Paddle] = None
+        self.opponent_paddle: Optional[Paddle] = None  # For shrink_opponent
 
     def activate(self, paddle: Paddle) -> None:
         self.active = True
@@ -234,6 +238,8 @@ class PowerUp(pygame.sprite.Sprite):
                 self.affected_paddle.set_speed(PADDLE_SPEED)
             elif self.type == "large_paddle":
                 self.affected_paddle.reset_size()
+        if self.type == "shrink_opponent" and self.opponent_paddle:
+            self.opponent_paddle.reset_size()
         self.kill()
 
     def update(self) -> None:

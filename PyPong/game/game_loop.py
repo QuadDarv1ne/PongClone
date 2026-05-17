@@ -2,7 +2,7 @@
 Main game loop manager
 """
 import pygame
-from typing import Optional, Any, Tuple, Union
+from typing import Optional, Any, Union
 
 from PyPong.core.game_state import GameState, GameStateManager
 from PyPong.game.input_handler import InputHandler
@@ -294,6 +294,7 @@ class GameLoop:
             self._create_extra_ball()
         elif powerup.type == "shrink_opponent":
             opponent = self.paddle2 if collector == self.paddle1 else self.paddle1
+            powerup.opponent_paddle = opponent
             opponent.resize(50)
     
     def _create_extra_ball(self) -> None:
