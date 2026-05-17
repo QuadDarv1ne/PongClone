@@ -315,6 +315,7 @@ class PongGame:
             GameState.MINIGAME_SELECT: GameState.MENU,
             GameState.MINIGAME_PLAYING: GameState.MENU,
             GameState.MINIGAME_COMPLETE: GameState.MENU,
+            GameState.GOAL_CELEBRATION: GameState.GAME_OVER,
         }
 
         new_state = transitions.get(state)
@@ -365,7 +366,7 @@ class PongGame:
                     p1_score = self.state_manager.player1_score
                     p2_score = self.state_manager.player2_score
                     winner_score = p1_score if winner == 1 else p2_score
-                    perfect = (winner_score >= self.state_manager.player1_score + self.state_manager.player2_score - winner_score + 1) if winner else False
+                    perfect = ((p1_score == 0 or p2_score == 0) and winner is not None) if winner else False
                     self.achievements.check_event(
                         EventType.GAME_END,
                         won=winner is not None,

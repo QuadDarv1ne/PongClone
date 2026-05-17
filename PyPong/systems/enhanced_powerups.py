@@ -6,6 +6,7 @@ from typing import Optional, Tuple, Dict, List
 from random import randint, choice
 from dataclasses import dataclass
 from PyPong.core.constants import PowerUpType, Balance, Colors
+from PyPong.core.config import WINDOW_WIDTH, WINDOW_HEIGHT
 from PyPong.core.logger import logger
 
 
@@ -134,8 +135,8 @@ class EnhancedPowerUp(pygame.sprite.Sprite):
         
         # Position
         self.rect.center = (
-            randint(200, 824),  # WINDOW_WIDTH - 200
-            randint(100, 620)   # WINDOW_HEIGHT - 100
+            randint(200, WINDOW_WIDTH - 200),
+            randint(100, WINDOW_HEIGHT - 100)
         )
         
         # State

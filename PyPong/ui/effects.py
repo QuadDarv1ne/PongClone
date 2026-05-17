@@ -4,7 +4,7 @@ Visual effects: Particles, Trails, Screen Shake
 import math
 import pygame
 from random import randint, uniform
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 from PyPong.core.config import (
     WHITE, YELLOW, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_NAME,
     MAX_PARTICLES, PARTICLES_PER_HIT,
@@ -133,24 +133,25 @@ class Particle(pygame.sprite.Sprite):
 
 
 # Кэш для trail
-_trail_surface: Optional[pygame.Surface] = None
+_trail_surfaces: Dict[tuple, pygame.Surface] = {}
 
-def _get_trail_surface(size: int) -> pygame.Surface:
+def _get_trail_surface(size: int, color: tuple) -> pygame.Surface:
     """Получить закэшированную поверхность для trail"""
-    global _trail_surface
-    if _trail_surface is None or _trail_surface.get_width() != size:
-        _trail_surface = pygame.Surface([size, size])
-        _trail_surface.fill(WHITE)
-        _trail_surface.set_alpha(150)
-    return _trail_surface
+    key = (size, color)
+    if key not in _trail_surfaces:
+        surface = pygame.Surface([size, size])
+        surface.fill(color)
+        surface.set_alpha(150)
+        _trail_surfaces[key] = surface
+    return _trail_surfaces[key]
 
 
 class Trail(pygame.sprite.Sprite):
     """Эффект шлейфа для мяча"""
     
-    def __init__(self, x: int, y: int, size: int = 8):
+    def __init__(self, x: int, y: int, size: int = 8, color: tuple = WHITE):
         super().__init__()
-        self.image = _get_trail_surface(size)
+        self.image = _get_trail_surface(size, color)
         self.rect = self.image.get_rect(center=(x, y))
         self.lifetime = 10
         self.age = 0

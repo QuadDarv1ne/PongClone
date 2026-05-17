@@ -88,7 +88,8 @@ class GameLoop:
         # Set AI difficulty
         if is_ai:
             difficulty = self.state_manager.difficulty
-            self.paddle2.set_speed(DIFFICULTY_LEVELS[difficulty]["ai_speed"])
+            difficulty_config = DIFFICULTY_LEVELS.get(difficulty, DIFFICULTY_LEVELS["Hard"])
+            self.paddle2.set_speed(difficulty_config["ai_speed"])
         
         # Reset input state
         self.input_handler.reset_input()
