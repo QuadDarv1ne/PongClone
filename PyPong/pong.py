@@ -236,6 +236,7 @@ class PongGame:
         try:
             self._apply_settings()
             self._apply_theme()
+            self._apply_accessibility_settings()
         except Exception as e:
             logger.error(f"Failed to apply settings: {e}")
 
@@ -290,6 +291,44 @@ class PongGame:
         """Применить тему"""
         if hasattr(self, 'game_loop'):
             self.game_loop.theme = self.theme
+
+    @log_exception
+    def _apply_accessibility_settings(self) -> None:
+        """Применить настройки доступности"""
+        from PyPong.ui.accessibility import get_accessibility_manager, ColorBlindMode
+
+        mgr = get_accessibility_manager()
+        cb_mode = self.settings.get("colorblind_mode", "normal")
+        mode_map = {
+            "normal": ColorBlindMode.NORMAL,
+            "protanopia": ColorBlindMode.PROTANOPIA,
+            "deuteranopia": ColorBlindMode.DEUTERANOPIA,
+            "tritanopia": ColorBlindMode.TRITANOPIA,
+            "monochromacy": ColorBlindMode.MONOCHROMACY,
+        }
+        mgr.set_color_blind_mode(mode_map.get(cb_mode, ColorBlindMode.NORMAL))
+
+        if self.settings.get("high_contrast", False):
+            mgr.enable_high_contrast()
+        else:
+            mgr.disable_high_contrast()
+
+        if self.settings.get("reduce_motion", False):
+            mgr.enable_reduce_motion()
+        else:
+            mgr.disable_reduce_motion()
+
+        if self.settings.get("audio_cues", True):
+            mgr.enable_audio_cues()
+        else:
+            mgr.disable_audio_cues()
+
+        if self.settings.get("large_ui", False):
+            mgr.enable_large_ui()
+        else:
+            mgr.disable_large_ui()
+
+        logger.info("Accessibility settings applied")
 
     @log_exception
     def handle_events(self) -> bool:

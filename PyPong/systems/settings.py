@@ -55,6 +55,23 @@ class Settings:
             "target_fps": 60,
             "enable_shake": True,
             "enable_effects": True,
+            # Sound theme
+            "sound_theme": "classic",
+            # Accessibility
+            "colorblind_mode": "normal",
+            "high_contrast": False,
+            "reduce_motion": False,
+            "audio_cues": True,
+            "large_ui": False,
+            # Window mode
+            "window_mode": "windowed",
+            # Ball and paddle
+            "ball_speed": 4,
+            "paddle_size": 100,
+            # Display
+            "vsync": False,
+            # Gameplay
+            "powerup_spawn_chance": 500,
         }
 
     def is_first_launch(self) -> bool:
