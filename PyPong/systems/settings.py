@@ -44,7 +44,21 @@ class Settings:
             "theme": "dark",
             "touch_controls": False,
             "has_seen_onboarding": False,
+            # Auto-detect placeholders (filled on first launch)
+            "auto_detected": False,
+            "window_width": None,
+            "window_height": None,
+            "performance_profile": "medium",
+            "max_particles": 50,
+            "max_trails": 20,
+            "target_fps": 60,
+            "enable_shake": True,
+            "enable_effects": True,
         }
+
+    def is_first_launch(self) -> bool:
+        """Проверить, первый ли это запуск (файл настроек не существует)"""
+        return not self.filename.exists()
     
     @log_exception
     def save_settings(self) -> None:

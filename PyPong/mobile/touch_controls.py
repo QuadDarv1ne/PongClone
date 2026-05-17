@@ -81,15 +81,17 @@ class TouchControls:
 class AdaptiveScreen:
     """Adaptive screen scaling for different resolutions and devices"""
 
-    def __init__(self) -> None:
-        self.base_width = WINDOW_WIDTH
-        self.base_height = WINDOW_HEIGHT
-        self.current_width = WINDOW_WIDTH
-        self.current_height = WINDOW_HEIGHT
+    def __init__(
+        self, base_width: int = None, base_height: int = None
+    ) -> None:
+        self.base_width = base_width or WINDOW_WIDTH
+        self.base_height = base_height or WINDOW_HEIGHT
+        self.current_width = self.base_width
+        self.current_height = self.base_height
         self.scale_x = 1.0
         self.scale_y = 1.0
         self._needs_resize = False
-        self.aspect_ratio = WINDOW_WIDTH / WINDOW_HEIGHT
+        self.aspect_ratio = self.base_width / self.base_height
         self.maintain_aspect_ratio = True
 
     def update_resolution(self, width: int, height: int) -> None:

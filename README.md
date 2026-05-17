@@ -289,7 +289,12 @@ python tests/test_all_features.py
 
 ## 📄 Лицензия
 
-См. файл [LICENCE](LICENCE)
+Проект распространяется на условиях открытой лицензии. См.:
+
+- [LICENSE](LICENSE) — лицензия на английском языке
+- [LICENSE_RU](LICENSE_RU) — лицензионный договор на русском языке (ГК РФ)
+- [Пользовательское соглашение (EULA)](docs/LICENCE_AGREEMENT_RU.md)
+- [Политика конфиденциальности](docs/PRIVACY_POLICY_RU.md)
 
 ## 👨‍🏫 Авторы
 

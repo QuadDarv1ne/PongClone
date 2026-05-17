@@ -15,6 +15,7 @@ from PyPong.core.config import (
     DIFFICULTY_LEVELS,
 )
 from PyPong.ui.effects import Trail, Particle, ParticlePool
+from PyPong.ui.effects_optimized import OptimizedParticlePool
 from PyPong.core.logger import logger, log_exception
 
 
@@ -101,7 +102,7 @@ class GameLoop:
         if self.powerups:
             self.powerups.empty()
         if self.particles:
-            if isinstance(self.particles, ParticlePool):
+            if isinstance(self.particles, (ParticlePool, OptimizedParticlePool)):
                 self.particles.clear()
         if self.trails:
             self.trails.empty()
@@ -314,8 +315,8 @@ class GameLoop:
         """Создать частицы с использованием ParticlePool"""
         if self.particles is None:
             return
-        
-        if isinstance(self.particles, ParticlePool):
+
+        if isinstance(self.particles, (ParticlePool, OptimizedParticlePool)):
             # Используем оптимизированный пул
             self.particles.emit(x, y, color, PARTICLES_PER_HIT)
         else:

@@ -64,6 +64,7 @@ class PongGame:
         init_localization(language)
 
         self._init_settings()
+        self._auto_detect_and_apply()
         self._init_display()
         self._init_managers()
         self._init_modules()
@@ -76,9 +77,66 @@ class PongGame:
         self.settings = Settings()
         self.is_mobile = self._detect_mobile()
 
+    @log_exception
+    def _auto_detect_and_apply(self) -> None:
+        """Автоматическое определение настроек оборудования при каждом запуске.
+        Обновляет настройки только если обнаружены изменения в оборудовании."""
+        from PyPong.core.auto_detect import get_recommended_settings
+
+        recommended = get_recommended_settings()
+
+        # Check if anything changed
+        current_profile = self.settings.get("performance_profile")
+        new_profile = recommended.get("profile")
+        current_width = self.settings.get("window_width")
+        current_height = self.settings.get("window_height")
+
+        changed = False
+
+        if recommended.get("width") and recommended.get("height"):
+            if current_width != recommended["width"] or current_height != recommended["height"]:
+                logger.info(
+                    f"Auto-detect: resolution changed from "
+                    f"{current_width}x{current_height} to "
+                    f"{recommended['width']}x{recommended['height']}"
+                )
+                self.settings.set("window_width", recommended["width"])
+                self.settings.set("window_height", recommended["height"])
+                changed = True
+
+        if new_profile and current_profile != new_profile:
+            logger.info(
+                f"Auto-detect: performance profile changed from "
+                f"{current_profile} to {new_profile}"
+            )
+            self.settings.set("performance_profile", new_profile)
+            self._apply_performance_profile(new_profile)
+            changed = True
+
+        if not changed:
+            logger.info("Auto-detect: no hardware changes detected")
+
+        self.settings.set("auto_detected", True)
+
+    @log_exception
+    def _apply_performance_profile(self, profile_name: str) -> None:
+        """Применить профиль производительности к настройкам"""
+        from PyPong.core.config import PERFORMANCE_PROFILES
+
+        profile = PERFORMANCE_PROFILES.get(profile_name, PERFORMANCE_PROFILES["medium"])
+
+        self.settings.set("max_particles", profile["max_particles"])
+        self.settings.set("max_trails", profile["max_trails"])
+        self.settings.set("target_fps", profile["target_fps"])
+        self.settings.set("enable_shake", profile["enable_shake"])
+        self.settings.set("enable_effects", profile["enable_effects"])
+
     def _init_display(self) -> None:
         """Инициализация дисплея"""
         try:
+            width = self.settings.get("window_width", WINDOW_WIDTH) or WINDOW_WIDTH
+            height = self.settings.get("window_height", WINDOW_HEIGHT) or WINDOW_HEIGHT
+
             if self.is_mobile:
                 self.settings.set("fullscreen", True)
                 self.settings.set("touch_controls", True)
@@ -86,11 +144,11 @@ class PongGame:
             else:
                 flags = pygame.FULLSCREEN if self.settings.get("fullscreen", False) else pygame.RESIZABLE
 
-            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), flags)
+            self.screen = pygame.display.set_mode((width, height), flags)
             self.game_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
             pygame.display.set_caption("Enhanced Pong")
             self.clock = pygame.time.Clock()
-            self.adaptive_screen = mobile_module.AdaptiveScreen()
+            self.adaptive_screen = mobile_module.AdaptiveScreen(WINDOW_WIDTH, WINDOW_HEIGHT)
             self.theme = get_theme(self.settings.get("theme", "classic"))
         except pygame.error as e:
             logger.error(f"Failed to initialize display: {e}")
@@ -146,10 +204,9 @@ class PongGame:
         from PyPong.ui.effects_optimized import OptimizedParticlePool, TrailPool
         from PyPong.ui.effects import ScreenShake, GoalAnimation
 
-        # Используем оптимизированный пул частиц
-        max_particles = config.get('max_particles', 50)
+        max_particles = self.settings.get("max_particles", config.get('max_particles', 50))
+        max_trails = self.settings.get("max_trails", config.get('max_trails', 20))
         self.particle_pool = OptimizedParticlePool(max_size=max_particles)
-        max_trails = config.get('max_trails', 20)
         self.trails = TrailPool(max_size=max_trails)
         self.shake = ScreenShake()
         self.goal_anim = GoalAnimation()
@@ -242,6 +299,7 @@ class PongGame:
                     self.adaptive_screen.update_resolution(event.w, event.h)
                     self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
                     self.renderer.screen = self.screen
+                    self.state_manager.on_resize(event.w, event.h)
 
                     # Update touch controls for new screen size
                     if self.settings.get("touch_controls", False):
@@ -532,7 +590,7 @@ class PongGame:
                 self.update_game()
                 self.settings.update()
                 self.draw()
-                self.clock.tick(FPS)
+                self.clock.tick(self.settings.get("target_fps", FPS))
                 frame_count += 1
 
                 # Логирование каждые 100 кадров

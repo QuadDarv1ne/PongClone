@@ -68,6 +68,17 @@ class GameStateManager:
         # Пре-рендер сетки для производительности
         self._net_surface = self._create_net_surface()
 
+    def on_resize(self, screen_width: int, screen_height: int) -> None:
+        """Regenerate fonts and net surface proportionally after window resize."""
+        scale_x = screen_width / WINDOW_WIDTH
+        scale_y = screen_height / WINDOW_HEIGHT
+        scale = min(scale_x, scale_y)
+        self.title_font = pygame.font.SysFont(FONT_NAME, int(72 * scale))
+        self.menu_font = pygame.font.SysFont(FONT_NAME, int(40 * scale))
+        self.score_font = pygame.font.SysFont(FONT_NAME, int(120 * scale))
+        self.small_font = pygame.font.SysFont(FONT_NAME, int(30 * scale))
+        self._net_surface = self._create_net_surface()
+
     def reset_scores(self) -> None:
         """Сбросить очки"""
         self.player1_score = 0
